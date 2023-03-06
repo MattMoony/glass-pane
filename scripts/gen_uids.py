@@ -2,6 +2,7 @@
 
 import uuid
 import neo4j
+import funcs
 from neo4j import GraphDatabase
 from dotenv import dotenv_values
 from argparse import ArgumentParser
@@ -9,11 +10,11 @@ from typing import Dict, Any, List, Tuple
 
 config: Dict[str, Any] = dotenv_values('../core/.env')
 
-def get_people(tx: neo4j.ManagedTransaction) -> List[neo4j.Record]:
-    res = tx.run('MATCH (p:Person) RETURN p.name as name, p.birthdate as birthdate, p.uid as uid')
-    return list(res)
-
 def uid_unique(tx: neo4j.ManagedTransaction, uid: str) -> List[neo4j.Record]:
+    """
+    Return a list of all records of people
+    with the given uid.
+    """
     res = tx.run('MATCH (p:Person{ uid: $uid }) RETURN p', uid=uid)
     return list(res)
 
@@ -39,8 +40,9 @@ def main() -> None:
     print(f'[*] {"Adding" if not args.overwrite else "Re-generating"} unique ids for people ... ')
 
     with driver.session(database='neo4j') as sess:
-        records = sess.execute_read(get_people)
+        records = sess.execute_read(funcs.get_people)
     for r in records:
+        r = r.value()
         if r['uid'] and not args.overwrite:
             continue
         with driver.session(database='neo4j') as sess:
