@@ -1,7 +1,16 @@
+<script setup lang="ts">
+defineProps<{
+  person: {
+    uid: string
+    name: string
+  }
+}>()
+</script>
+
 <template>
   <div class="banner">
     <div class="facts">
-      <h1>Firstname Lastname</h1>
+      <h1>{{ $props.person.name }}</h1>
       <p>Some short description / introduction, idk</p>
     </div>
     <img src="/john-doe.png" alt="Person's face." />
@@ -27,5 +36,9 @@
 
 h1 {
   font-size: 2em;
+}
+
+img {
+  margin-left: 1em;
 }
 </style>

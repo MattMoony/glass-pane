@@ -1,12 +1,37 @@
 <script setup lang="ts">
+import { useQuery } from '@vue/apollo-composable'
+import { gql } from 'graphql-tag'
+import { watch } from 'vue'
+import { useRoute } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
 import PersonDescription from '../components/PersonDescription.vue'
 import PersonNetwork from '../components/PersonNetwork.vue'
+
+const route = useRoute()
+const { result } = useQuery(gql`
+  query getUserByUid ($uid: String!) {
+    people (where: { uid: $uid }) {
+      uid
+      name
+
+      familyMembers {
+        uid
+        name
+      }
+      acquaintances {
+        uid
+        name
+      }
+    }
+  }
+  `, {
+    uid: route.params.id,
+})
 </script>
 
 <template>
-  <article>
-    <NavBar :qry="this.$route.params.id" />
+  <article v-if="result">
+    <NavBar :qry="result.people[0].name" />
     <div class="person-container">
       <div class="part-headings">
         <div>
@@ -24,10 +49,10 @@ import PersonNetwork from '../components/PersonNetwork.vue'
       </div>
       <div class="details">
         <div class="person-desc">
-          <PersonDescription />
+          <PersonDescription :person="result.people[0]" />
         </div>
         <div class="person-netw">
-          <PersonNetwork />
+          <PersonNetwork :person="result.people[0]" />
         </div>
       </div>
     </div>

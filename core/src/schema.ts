@@ -13,6 +13,9 @@ export const typeDefs: string = `#graphql
     link2: String
     link3: String
     link4: String
+
+    familyMembers: [Person!]! @relationship (type: "Family", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
+    acquaintances: [Person!]! @relationship (type: "Relation", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
   }
 
   type Group {
