@@ -17,13 +17,26 @@ const { result } = useQuery(gql`
     people (where: { uid: $uid }) {
       uid
       name
-      familyMembers {
-        uid
-        name
+      familyMembersConnection {
+        edges {
+          type
+          source
+          node {
+            uid
+            name
+          }
+        }
       }
-      acquaintances {
-        uid
-        name
+      acquaintancesConnection {
+        edges {
+          type
+          notes
+          source
+          node {
+            uid
+            name
+          }
+        }
       }
     }
   }
