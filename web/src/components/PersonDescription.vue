@@ -10,7 +10,7 @@ defineProps<{
 <template>
   <div class="banner">
     <div class="facts">
-      <h1>{{ $props.person.name }}</h1>
+      <h1>{{ $props.person?.name }}</h1>
       <p>Some short description / introduction, idk</p>
     </div>
     <img src="/john-doe.png" alt="Person's face." />

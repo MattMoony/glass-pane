@@ -10,10 +10,9 @@ const props = defineProps<{
     uid: string
     name: string
 
-    familyMembersConnection: {
+    familyConnection: {
       edges: {
         type: string
-        source: string
         node: {
           uid: string
           name: string
@@ -23,8 +22,6 @@ const props = defineProps<{
     acquaintancesConnection: {
       edges: {
         type: string
-        notes: string
-        source: string
         node: {
           uid: string
           name: string
@@ -34,12 +31,12 @@ const props = defineProps<{
   }
 }>()
 
-const nodes = computed(() => ({
+const nodes = computed(() => (props.person ? {
   [props.person.uid]: {
     name: props.person.name,
     color: 'rgba(255, 86, 86, .8)',
   },
-  ...Object.fromEntries(props.person.familyMembersConnection.edges.map(p => [p.node.uid, {
+  ...Object.fromEntries(props.person.familyConnection.edges.map(p => [p.node.uid, {
     name: p.node.name,
     color: 'rgba(255, 86, 86, .4)',
   }])),
@@ -47,15 +44,15 @@ const nodes = computed(() => ({
     name: p.node.name,
     color: getComputedStyle(document.body).getPropertyValue('--color-text'),
   }])),
-}))
+} : {}))
 
-const edges = computed(() => [
-  ...props.person.familyMembersConnection.edges.concat(props.person.acquaintancesConnection.edges).map(fam => ({ 
+const edges = computed(() => props.person ? [
+  ...props.person.familyConnection.edges.concat(props.person.acquaintancesConnection.edges).map(fam => ({ 
     source: props.person.uid, 
     target: fam.node.uid, 
     label: fam.type,
   })),
-])
+] : [])
 
 const eventHandlers: vNG.EventHandlers = {
   'node:click': ({ node }) => {

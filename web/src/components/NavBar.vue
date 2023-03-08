@@ -3,9 +3,8 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const props = defineProps<{
-  qry?: string
+  qry: string
 }>()
-const qry = ref(props.qry || '')
 
 </script>
 
@@ -15,7 +14,7 @@ const qry = ref(props.qry || '')
       <img class="myimg" src="/pane.png" alt="Glass Pane Logo" />
     </RouterLink>
     <form>
-      <input v-model="qry" type="search" placeholder="..." />
+      <input v-model="$props.qry" type="search" placeholder="..." />
       <button type="submit">
         <font-awesome-icon icon="fa-solid fa-magnifying-glass" />
       </button>

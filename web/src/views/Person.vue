@@ -17,10 +17,9 @@ const { result } = useQuery(gql`
     people (where: { uid: $uid }) {
       uid
       name
-      familyMembersConnection {
+      familyConnection {
         edges {
           type
-          source
           node {
             uid
             name
@@ -30,8 +29,6 @@ const { result } = useQuery(gql`
       acquaintancesConnection {
         edges {
           type
-          notes
-          source
           node {
             uid
             name
@@ -42,12 +39,12 @@ const { result } = useQuery(gql`
   }
 `, vars)
 
-const person = computed(() => result.value?.people[0] ?? {})
+const person = computed(() => result.value?.people[0] ?? undefined)
 </script>
 
 <template>
-  <article v-if="person">
-    <NavBar :qry="person.name" />
+  <article>
+    <NavBar :qry="person?.name" />
     <div class="person-container">
       <div class="part-headings">
         <div>
