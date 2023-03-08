@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { useQuery } from '@vue/apollo-composable'
 import { gql } from 'graphql-tag'
-import { watch } from 'vue'
+import { reactive, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
 import PersonDescription from '../components/PersonDescription.vue'
 import PersonNetwork from '../components/PersonNetwork.vue'
 
 const route = useRoute()
+const vars = reactive({
+  uid: computed(() => route.params.uid)
+})
+
 const { result } = useQuery(gql`
   query getUserByUid ($uid: String!) {
     people (where: { uid: $uid }) {
       uid
       name
-
       familyMembers {
         uid
         name
@@ -24,14 +27,14 @@ const { result } = useQuery(gql`
       }
     }
   }
-  `, {
-    uid: route.params.id,
-})
+`, vars)
+
+const person = computed(() => result.value?.people[0] ?? {})
 </script>
 
 <template>
-  <article v-if="result">
-    <NavBar :qry="result.people[0].name" />
+  <article v-if="person">
+    <NavBar :qry="person.name" />
     <div class="person-container">
       <div class="part-headings">
         <div>
@@ -49,10 +52,10 @@ const { result } = useQuery(gql`
       </div>
       <div class="details">
         <div class="person-desc">
-          <PersonDescription :person="result.people[0]" />
+          <PersonDescription :person="person" />
         </div>
         <div class="person-netw">
-          <PersonNetwork :person="result.people[0]" />
+          <PersonNetwork :person="person" />
         </div>
       </div>
     </div>

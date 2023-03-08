@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import * as vNG from 'v-network-graph'
 import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import { useRouter } from 'vue-router';
@@ -21,7 +21,7 @@ const props = defineProps<{
   }
 }>()
 
-const nodes = {
+const nodes = computed(() => ({
   [props.person.uid]: {
     name: props.person.name,
   },
@@ -32,12 +32,12 @@ const nodes = {
   ...Object.fromEntries(props.person.acquaintances.map(p => [p.uid, {
     name: p.name,
   }])),
-}
+}))
 
-const edges = [...props.person.familyMembers, ...props.person.acquaintances,].map((person) => ({
+const edges = computed(() => [...props.person.familyMembers, ...props.person.acquaintances,].map((person) => ({
   source: props.person.uid,
   target: person.uid,
-}))
+})))
 
 const eventHandlers: vNG.EventHandlers = {
   'node:click': ({ node }) => {
