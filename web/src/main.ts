@@ -4,7 +4,7 @@ import { createPinia } from 'pinia'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { faMagnifyingGlass, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile } from '@fortawesome/free-solid-svg-icons'
 
 import { DefaultApolloClient } from '@vue/apollo-composable'
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core'
@@ -34,7 +34,7 @@ app.use(createPinia())
 app.use(router)
 app.use(VNetworkGraph)
 
-library.add(faGithub, faMagnifyingGlass, faEyeSlash)
+library.add(faGithub, faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile)
 app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.mount('#app')

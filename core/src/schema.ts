@@ -10,7 +10,8 @@ export const typeDefs: string = `#graphql
     death_place: String
     sources: [String]!
 
-    family: [Person!]! @relationship (type: "Family", direction: OUT, properties: "Family", queryDirection: DEFAULT_UNDIRECTED)
+    familyIn: [Person!]! @relationship (type: "Family", direction: IN, properties: "Family", queryDirection: DEFAULT_DIRECTED)
+    familyOut: [Person!]! @relationship (type: "Family", direction: OUT, properties: "Family", queryDirection: DEFAULT_DIRECTED)
 
     acquaintances: [Person!]! @relationship (type: "Relation", direction: OUT, properties: "Relation", queryDirection: DEFAULT_UNDIRECTED)
     politicalOffices: [Position!]! @relationship (type: "Politics", direction: OUT, properties: "Politics", queryDirection: DEFAULT_UNDIRECTED)

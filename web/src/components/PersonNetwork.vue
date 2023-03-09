@@ -3,51 +3,65 @@ import { ref, reactive, computed } from 'vue'
 import * as vNG from 'v-network-graph'
 import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import { useRouter } from 'vue-router';
+import type { Edge } from 'v-network-graph';
+
+interface Connection {
+  edges: {
+    type: string
+    node: {
+      uid: string
+      name: string
+      birthdate: string
+    }
+  }[]
+}
 
 const router = useRouter()
 const props = defineProps<{
   person: {
     uid: string
     name: string
+    birthdate: string
 
-    familyConnection: {
-      edges: {
-        type: string
-        node: {
-          uid: string
-          name: string
-        }
-      }[]
-    }
-    acquaintancesConnection: {
-      edges: {
-        type: string
-        node: {
-          uid: string
-          name: string
-        }
-      }[]
-    }
+    familyInConnection: Connection
+    familyOutConnection: Connection
+    acquaintancesConnection: Connection
   }
 }>()
 
 const nodes = computed(() => (props.person ? {
   [props.person.uid]: {
-    name: props.person.name,
+    name: `${props.person.name}\n* ${new Date(props.person.birthdate).getFullYear()}`,
     color: 'rgba(255, 86, 86, .8)',
   },
-  ...Object.fromEntries(props.person.familyConnection.edges.map(p => [p.node.uid, {
-    name: p.node.name,
+  ...Object.fromEntries(props.person.familyInConnection.edges.map(p => [p.node.uid, {
+    name: `${p.node.name}\n* ${new Date(p.node.birthdate).getFullYear()}`,
+    color: 'rgba(255, 200, 86, .4)',
+  }])),
+  ...Object.fromEntries(props.person.familyOutConnection.edges.map(p => [p.node.uid, {
+    name: `${p.node.name}\n* ${new Date(p.node.birthdate).getFullYear()}`,
     color: 'rgba(255, 86, 86, .4)',
   }])),
   ...Object.fromEntries(props.person.acquaintancesConnection.edges.map(p => [p.node.uid, {
-    name: p.node.name,
+    name: `${p.node.name}\n* ${new Date(p.node.birthdate).getFullYear()}`,
     color: getComputedStyle(document.body).getPropertyValue('--color-text'),
   }])),
 } : {}))
 
 const edges = computed(() => props.person ? [
-  ...props.person.familyConnection.edges.concat(props.person.acquaintancesConnection.edges).map(fam => ({ 
+  ...props.person.familyInConnection.edges.map(fam => ({ 
+    source: props.person.uid, 
+    target: fam.node.uid, 
+    label: fam.type,
+    direction: 'in',
+  })),
+  ...props.person.familyOutConnection.edges.map(fam => ({ 
+    source: props.person.uid, 
+    target: fam.node.uid, 
+    label: fam.type,
+    direction: 'out',
+  })),
+  ...props.person.acquaintancesConnection.edges.map(fam => ({ 
     source: props.person.uid, 
     target: fam.node.uid, 
     label: fam.type,
@@ -80,7 +94,25 @@ const configs = ref(
       },
       label: {
         color: getComputedStyle(document.body).getPropertyValue('--color-text'),
-      }
+      },
+      marker: {
+        source: {
+          type: e => e[0].direction === 'in' ? 'arrow' : 'none',
+          width: 8,
+          height: 8,
+          margin: -1,
+          units: 'strokeWidth',
+          color: null,
+        },
+        target: {
+          type: e => e[0].direction === 'out' ? 'arrow' : 'none',
+          width: 8,
+          height: 8,
+          margin: -1,
+          units: 'strokeWidth',
+          color: null,
+        },
+      },
     },
   })
 )

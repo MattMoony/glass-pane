@@ -17,12 +17,24 @@ const { result } = useQuery(gql`
     people (where: { uid: $uid }) {
       uid
       name
-      familyConnection {
+      birthdate
+      familyInConnection {
         edges {
           type
           node {
             uid
             name
+            birthdate
+          }
+        }
+      }
+      familyOutConnection {
+        edges {
+          type
+          node {
+            uid
+            name
+            birthdate
           }
         }
       }
@@ -32,6 +44,7 @@ const { result } = useQuery(gql`
           node {
             uid
             name
+            birthdate
           }
         }
       }
@@ -49,13 +62,13 @@ const person = computed(() => result.value?.people[0] ?? undefined)
       <div class="part-headings">
         <div>
           <span>
-            <font-awesome-icon icon="fa-solid fa-eye-slash" />
+            <font-awesome-icon icon="fa-solid fa-file" />
             Description
           </span>
         </div>
         <div>
           <span>
-            <font-awesome-icon icon="fa-solid fa-eye-slash" />
+            <font-awesome-icon icon="fa-solid fa-circle-nodes" />
             Network
           </span>
         </div>
@@ -100,7 +113,7 @@ article {
 .part-headings div span {
   display: inline-block;
   cursor: pointer;
-  padding: .2em;
+  padding: .3em .4em;
   font-weight: bold;
 }
 
