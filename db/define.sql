@@ -55,6 +55,7 @@ CREATE TABLE person (
     firstname       VARCHAR(128)        NOT NULL,
     lastname        VARCHAR(128)        NOT NULL,
     birthdate       DATE,
+    deathdate       DATE,
     birthplace      BIGINT              REFERENCES location(lid),
     birthnation     BIGINT              REFERENCES nation(nid),
 
