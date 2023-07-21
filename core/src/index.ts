@@ -1,50 +1,17 @@
-import * as neo4j from './neo4j'
-import express from 'express'
-import http from 'http'
-import * as config from './config'
-import { ApolloServer } from '@apollo/server'
-import { expressMiddleware } from '@apollo/server/express4'
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
-import cors from 'cors'
-import bodyParser from 'body-parser'
-import { typeDefs, resolvers } from './schema'
-import { Neo4jGraphQL } from '@neo4j/graphql'
+import express, { Express, Request, Response } from 'express';
+import dotenv from 'dotenv';
 
-async function main (): Promise<void> {
-  await neo4j.connect()
+import personRouter from './routes/person';
 
-  const app: express.Application = express()
-  const httpServer: http.Server = http.createServer(app)
+dotenv.config();
 
-  if (config.NODE_ENV === 'production') {
-    // do some production stuff perhaps
-  }
+const app: Express = express();
 
-  const neoSchema: Neo4jGraphQL = new Neo4jGraphQL({
-    typeDefs,
-    resolvers,
-    driver: neo4j.driver,
-  })
+app.use('/person/', personRouter);
 
-  const server: ApolloServer = new ApolloServer({
-    schema: await neoSchema.getSchema(),
-    plugins: [ ApolloServerPluginDrainHttpServer({ httpServer, }) ]
-  })
+app.use('*', (req: Request, res: Response) => {
+  res.status(404);
+  res.send({ 'success': false, 'msg': 'not found', });
+});
 
-  await server.start()
-
-  app.use(
-    '/graphql',
-    cors<cors.CorsRequest>(),
-    bodyParser.json(),
-    expressMiddleware(server)
-  )
-  
-  await new Promise<void>(resolve => httpServer.listen({ 
-    host: config.HTTP_HOST, 
-    port: config.HTTP_PORT, 
-  }, resolve))
-  console.log(`[core] 🚀 Listening on http://${config.HTTP_HOST}:${config.HTTP_PORT}`)
-}
-
-main()
+app.listen(parseInt(process.env.PORT!), process.env.HOST!, () => console.log(`[*] API listening on http://${process.env.HOST}:${process.env.PORT} ... `));
