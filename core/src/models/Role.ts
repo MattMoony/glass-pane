@@ -10,14 +10,16 @@ class Role {
     this.name = name;
   }
 
-  public json = (): Object => ({
-    id: this.id,
-    name: this.name,
-  });
+  public json (): Object {
+    return {
+      id: this.id,
+      name: this.name,
+    };
+  }
 
-  public toString = (): string => {
+  public toString (): string {
     return `"${this.name}" (Role#${this.id})`;
-  };
+  }
 }
 
 export default Role;

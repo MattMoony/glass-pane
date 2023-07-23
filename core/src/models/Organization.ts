@@ -1,4 +1,4 @@
-import Organ from './organ';
+import Organ from './Organ';
 
 /**
  * Represents an organization - i.e. a grouping of several
@@ -17,16 +17,18 @@ class Organization extends Organ {
     this.dissolved = dissolved;
   }
 
-  public json = (): Object => ({
-    ...super.json(),
-    name: this.name,
-    established: this.established?.toISOString(),
-    dissolved: this.dissolved?.toISOString(),
-  });
+  public json (): Object {
+    return {
+      ...super.json(),
+      name: this.name,
+      established: this.established?.toISOString(),
+      dissolved: this.dissolved?.toISOString(),
+    };
+  }
 
-  public toString = (): string => {
+  public toString (): string {
     return `"${this.name}" (Organization#${this.id})`;
-  };
+  }
 }
 
 export default Organization;

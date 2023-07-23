@@ -1,4 +1,4 @@
-import Organ from './organ';
+import Organ from './Organ';
 import { pool } from '../db';
 
 /**
@@ -18,17 +18,29 @@ class Person extends Organ {
     this.deathdate = deathdate;
   }
   
-  public json = (): Object => ({
-    ...super.json(),
-    firstname: this.firstname,
-    lastname: this.lastname,
-    birthdate: this.birthdate?.toISOString(),
-    deathdate: this.deathdate?.toISOString(),
-  });
+  public json (): Object {
+    return {
+      ...super.json(),
+      firstname: this.firstname,
+      lastname: this.lastname,
+      birthdate: this.birthdate?.toISOString(),
+      deathdate: this.deathdate?.toISOString(),
+    };
+  }
 
-  public toString = (): string => {
+  public toString (): string {
     return `"${this.firstname} ${this.lastname}" (Person#${this.id})`;
-  };
+  }
+
+  public static dummy (id?: number): Person {
+    return new Person(
+      id !== undefined ? id : 1234,
+      'Max', 
+      'Mustermann', 
+      new Date(1930, 0, 1),
+      new Date(2010, 0, 2),
+    );
+  }
 }
 
 export default Person;

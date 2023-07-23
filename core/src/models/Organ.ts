@@ -10,13 +10,15 @@ class Organ {
     this.id = id;
   }
 
-  public json = (): Object => ({
-    id: this.id,
-  });
+  public json (): Object {
+    return {
+      id: this.id,
+    };
+  }
 
-  public toString = (): string => {
+  public toString (): string {
     return `Organ#${this.id}`;
-  };
+  }
 }
 
 export default Organ;

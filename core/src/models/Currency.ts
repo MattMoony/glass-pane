@@ -12,15 +12,17 @@ class Currency {
     this.symbol = symbol;
   }
 
-  public json = (): Object => ({
-    id: this.id,
-    name: this.name,
-    symbol: this.symbol,
-  });
+  public json (): Object {
+    return {
+      id: this.id,
+      name: this.name,
+      symbol: this.symbol,
+    };
+  }
 
-  public toString = (): string => {
+  public toString (): string {
     return `${this.symbol} (${this.name})`;
-  };
+  }
 }
 
 export default Currency;
