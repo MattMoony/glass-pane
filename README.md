@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="d4v1d" src="images/logo.png" width="125" height="125" />
+  <img alt="glass-pane" src="images/logo.png" width="125" height="125" />
 </p>
 <div align="center">
   <h1>Glass Pane</h1>
