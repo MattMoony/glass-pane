@@ -1,8 +1,11 @@
 <script setup lang="ts">
 defineProps<{
   person: {
-    uid: string
-    name: string
+    id: string
+    firstname: string
+    lastname: string
+    birthdate?: Date
+    deathdate?: Date
   }
 }>()
 </script>
@@ -10,7 +13,7 @@ defineProps<{
 <template>
   <div class="banner">
     <div class="facts">
-      <h1>{{ $props.person?.name }}</h1>
+      <h1>{{ $props.person?.firstname }} {{ $props.person?.lastname }}</h1>
       <p>Some short description / introduction, idk</p>
     </div>
     <img src="/john-doe.png" alt="Person's face." />
