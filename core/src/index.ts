@@ -7,9 +7,9 @@ dotenv.config();
 
 const app: Express = express();
 
-app.use('/person/', personRouter);
+app.use('/api/person/', personRouter);
 
-app.use('*', (req: Request, res: Response) => {
+app.use('/api/*', (req: Request, res: Response) => {
   res.status(404);
   res.send({ 'success': false, 'msg': 'not found', });
 });
