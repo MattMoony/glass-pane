@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useQuery } from '@vue/apollo-composable'
 import { gql } from 'graphql-tag'
-import { reactive, computed } from 'vue'
+import { reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import NavBar from '../components/NavBar.vue'
 import PersonDescription from '../components/PersonDescription.vue'
@@ -10,6 +10,46 @@ import PersonNetwork from '../components/PersonNetwork.vue'
 const route = useRoute()
 const vars = reactive({
   uid: computed(() => route.params.uid)
+})
+
+const MOBILE_WIDTH = 600
+const details = { 'person-desc': true, 'person-netw': true, }
+const mobileControls = () => {
+  if (window.innerWidth <= MOBILE_WIDTH) {
+    let shown = false;
+    Object.keys(details).forEach(k => {
+      if (shown && details[k]) doHide(k);
+      shown = true;
+    })
+  }
+}
+
+const hideAll = () => {
+  Object.keys(details).forEach(c => {
+    document.querySelector(`div.${c}`)!.style.display = 'none';
+    document.querySelector(`.${c}.control`)!.parentElement.classList.add('inactive');
+  })
+}
+
+const hide = c => {
+  if (details[c]) {
+    if (Object.values(details).filter(s=>s).length === 1) return;
+    document.querySelector(`div.${c}`)!.style.display = 'none';
+    document.querySelector(`.${c}.control`)!.parentElement.classList.add('inactive');
+  } else {
+    if (window.innerWidth <= MOBILE_WIDTH) hideAll();
+    document.querySelector(`div.${c}`)!.style.display = 'block';
+    document.querySelector(`.${c}.control`)!.parentElement.classList.remove('inactive');
+  }
+  details[c] = !details[c];
+}
+
+onMounted(() => {
+  window.addEventListener('resize', mobileControls)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', mobileControls)
 })
 
 const { result } = useQuery(gql`
@@ -61,13 +101,13 @@ const person = computed(() => result.value?.people[0] ?? undefined)
     <div class="person-container">
       <div class="part-headings">
         <div>
-          <span>
+          <span class="person-desc control" @click.stop="hide('person-desc')">
             <font-awesome-icon icon="fa-solid fa-file" />
             Description
           </span>
         </div>
         <div>
-          <span>
+          <span class="person-netw control" @click.stop="hide('person-netw')">
             <font-awesome-icon icon="fa-solid fa-circle-nodes" />
             Network
           </span>
@@ -103,31 +143,49 @@ article {
 }
 
 .part-headings {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
   border-bottom: 2px solid var(--color-border);
   user-select: none;
 }
 
 .part-headings div span {
   display: inline-block;
-  cursor: pointer;
-  padding: .3em .4em;
+  margin: .4em 0;
+  padding: 0 .6em;
   font-weight: bold;
+  transition: .2s ease;
+}
+
+.part-headings div:not(:first-child) span {
+  border-left: 2px solid var(--color-border);
+}
+
+.part-headings div:not(.inactive) span:hover,
+.part-headings .inactive span {
+  cursor: pointer;
+  opacity: .6;
+}
+
+.part-headings .inactive span:hover {
+  opacity: 1;
 }
 
 .details {
   flex: 1;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
 }
 
-.person-desc {
+.details .person-desc {
+  flex: 1;
   padding: 2em;
 }
 
-.person-netw {
+.details .person-netw {
+  flex: 1;
   overflow: hidden;
   border-left: 2px solid var(--color-border);
 }
