@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { useQuery } from '@vue/apollo-composable'
-import { gql } from 'graphql-tag'
-import { reactive, computed, onMounted, onUnmounted } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useFetch } from '@vueuse/core'
 import NavBar from '../components/NavBar.vue'
 import PersonDescription from '../components/PersonDescription.vue'
 import PersonNetwork from '../components/PersonNetwork.vue'
 
 const route = useRoute()
-const vars = reactive({
-  uid: computed(() => route.params.uid)
-})
+const uid = ref(route.params.uid)
 
 const MOBILE_WIDTH = 600
 const details = { 'person-desc': true, 'person-netw': true, }
@@ -26,20 +23,20 @@ const mobileControls = () => {
 
 const hideAll = () => {
   Object.keys(details).forEach(c => {
-    document.querySelector(`div.${c}`)!.style.display = 'none';
-    document.querySelector(`.${c}.control`)!.parentElement.classList.add('inactive');
+    document.querySelector(`div.${c}`).style.display = 'none';
+    document.querySelector(`.${c}.control`).parentElement.classList.add('inactive');
   })
 }
 
 const hide = c => {
   if (details[c]) {
     if (Object.values(details).filter(s=>s).length === 1) return;
-    document.querySelector(`div.${c}`)!.style.display = 'none';
-    document.querySelector(`.${c}.control`)!.parentElement.classList.add('inactive');
+    document.querySelector(`div.${c}`).style.display = 'none';
+    document.querySelector(`.${c}.control`).parentElement.classList.add('inactive');
   } else {
     if (window.innerWidth <= MOBILE_WIDTH) hideAll();
-    document.querySelector(`div.${c}`)!.style.display = 'block';
-    document.querySelector(`.${c}.control`)!.parentElement.classList.remove('inactive');
+    document.querySelector(`div.${c}`).style.display = 'block';
+    document.querySelector(`.${c}.control`).parentElement.classList.remove('inactive');
   }
   details[c] = !details[c];
 }
@@ -52,47 +49,16 @@ onUnmounted(() => {
   window.removeEventListener('resize', mobileControls)
 })
 
-const { result } = useQuery(gql`
-  query getUserByUid ($uid: String!) {
-    people (where: { uid: $uid }) {
-      uid
-      name
-      birthdate
-      familyInConnection {
-        edges {
-          type
-          node {
-            uid
-            name
-            birthdate
-          }
-        }
-      }
-      familyOutConnection {
-        edges {
-          type
-          node {
-            uid
-            name
-            birthdate
-          }
-        }
-      }
-      acquaintancesConnection {
-        edges {
-          type
-          node {
-            uid
-            name
-            birthdate
-          }
-        }
-      }
-    }
+const descUrl = computed(() => `http://localhost:8888/api/person/${uid.value}`)
+const { data } = useFetch(descUrl, { refetch: true, })
+const person = computed(() => {
+  const p = JSON.parse(data.value as string);
+  if (!p) return null
+  return {
+    ...p,
+    name: `${p.firstname} ${p.lastname}`,
   }
-`, vars)
-
-const person = computed(() => result.value?.people[0] ?? undefined)
+})
 </script>
 
 <template>
