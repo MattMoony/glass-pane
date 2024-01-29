@@ -14,7 +14,16 @@ const props = defineProps<{
   <div class="banner">
     <div class="facts">
       <h1>{{ $props.person?.firstname }} {{ $props.person?.lastname }}</h1>
-      <p>Some short description / introduction, idk</p>
+      <div class="birth-death">
+        <span v-if="$props.person?.birthdate">
+          <font-awesome-icon icon="fa-solid fa-baby" />
+          {{ new Date($props.person?.birthdate).toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+        </span>
+        <span v-if="$props.person?.deathdate">
+          <font-awesome-icon icon="fa-solid fa-skull" />
+          {{ new Date($props.person?.deathdate).toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+        </span>
+      </div>
     </div>
     <img src="/john-doe.png" alt="Person's face." />
   </div>
@@ -39,6 +48,16 @@ const props = defineProps<{
 
 h1 {
   font-size: 2em;
+}
+
+.birth-death {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.birth-death span {
+  margin-right: 1em;
 }
 
 img {
