@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { reactive, computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useFetch } from '@vueuse/core'
 import NavBar from '../components/NavBar.vue'
 import PersonDescription from '../components/PersonDescription.vue'
 import PersonNetwork from '../components/PersonNetwork.vue'
 
+const router = useRouter()
 const route = useRoute()
 const uid = ref(route.params.uid)
 const editPerson = computed(() => Object.keys(route.query).includes('edit'))
@@ -40,6 +41,16 @@ const hide = c => {
     document.querySelector(`.${c}.control`).parentElement.classList.remove('inactive');
   }
   details[c] = !details[c];
+}
+
+const remove = async () => {
+  const res = await fetch(`http://localhost:8888/api/person/${uid.value}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  if (res.ok) {
+    router.push('/')
+  }
 }
 
 onMounted(() => {
@@ -81,18 +92,24 @@ const person = computed(() => {
             </span>
           </div>
         </div>
-        <router-link v-if="!editPerson" :to="`/p/${uid}/?edit`">
-          <span>
-            <font-awesome-icon icon="fa-solid fa-edit" />
-            Edit
+        <div class="edit-tools">
+          <router-link v-if="!editPerson" :to="`/p/${uid}/?edit`">
+            <span>
+              <font-awesome-icon icon="fa-solid fa-edit" />
+              Edit
+            </span>
+          </router-link>
+          <router-link v-if="editPerson" :to="`/p/${uid}`">
+            <span>
+              <font-awesome-icon icon="fa-solid fa-close" />
+              View
+            </span>
+          </router-link>
+          <span @click.stop="remove()">
+            <font-awesome-icon icon="fa-solid fa-trash" />
+            Delete
           </span>
-        </router-link>
-        <router-link v-if="editPerson" :to="`/p/${uid}`">
-          <span>
-            <font-awesome-icon icon="fa-solid fa-close" />
-            View
-          </span>
-        </router-link>
+        </div>
       </div>
       <div class="details">
         <div class="person-desc">
@@ -131,13 +148,18 @@ article {
   user-select: none;
 }
 
-.heading-wrapper span {
+.edit-tools span {
   display: inline-block;
   margin: .4em 0;
   padding: 0 .6em;
   font-weight: bold;
   transition: .2s ease;
   color: var(--color-text);
+}
+
+.edit-tools span:hover {
+  cursor: pointer;
+  opacity: .6;
 }
 
 .part-headings {

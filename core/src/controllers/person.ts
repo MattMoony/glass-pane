@@ -37,3 +37,14 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   await person.update();
   res.send({ 'success': true, 'person': person.json() });
 }
+
+export const remove = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  await person.remove();
+  res.send({ 'success': true });
+}

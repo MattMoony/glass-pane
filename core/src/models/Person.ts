@@ -41,6 +41,15 @@ class Person extends Organ {
     client.release();
   }
 
+  public async remove (): Promise<void> {
+    const client = await pool.connect();
+    await client.query(
+      'DELETE FROM person WHERE pid = $1',
+      [this.id],
+    );
+    client.release();
+  }
+
   public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date): Promise<Person> {
     const id = await Organ.create();
     const client = await pool.connect();
