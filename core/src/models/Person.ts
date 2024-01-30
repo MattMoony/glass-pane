@@ -41,6 +41,34 @@ class Person extends Organ {
       new Date(2010, 0, 2),
     );
   }
+
+  public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date): Promise<Person> {
+    const id = await Organ.create();
+    const client = await pool.connect();
+    await client.query(
+      'INSERT INTO person (pid, firstname, lastname, birthdate, deathdate) VALUES ($1, $2, $3, $4, $5)',
+      [id, firstname, lastname, birthdate, deathdate,],
+    );
+    client.release();
+    return new Person(id, firstname, lastname, birthdate, deathdate);
+  }
+
+  public static async get (id: number): Promise<Person|null> {
+    const client = await pool.connect();
+    const res = await client.query(
+      'SELECT * FROM person WHERE pid = $1',
+      [id],
+    );
+    client.release();
+    if (res.rows.length === 0) return null;
+    return new Person(
+      res.rows[0].pid,
+      res.rows[0].firstname,
+      res.rows[0].lastname,
+      res.rows[0].birthdate,
+      res.rows[0].deathdate,
+    );
+  }
 }
 
 export default Person;

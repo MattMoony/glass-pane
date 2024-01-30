@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import bodyParser from 'body-parser';
 
 import organRouter from './routes/organ';
 import personRouter from './routes/person';
@@ -9,7 +10,9 @@ dotenv.config();
 
 const app: Express = express();
 
-app.use(cors())
+app.use(bodyParser.json());
+app.use(cors());
+
 app.use('/api/organ/', organRouter);
 app.use('/api/person/', personRouter);
 
