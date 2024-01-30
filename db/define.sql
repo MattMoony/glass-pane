@@ -1,7 +1,15 @@
 -- ====================================================================================================================================================== --
 
+GRANT               CONNECT
+ON                  DATABASE glasspane
+TO                  glasspane;
+
 GRANT               SELECT, INSERT, UPDATE, DELETE 
 ON                  ALL TABLES IN SCHEMA public
+TO                  glasspane;
+
+GRANT               USAGE, SELECT
+ON                  ALL SEQUENCES IN SCHEMA public
 TO                  glasspane;
 
 -- ====================================================================================================================================================== --
