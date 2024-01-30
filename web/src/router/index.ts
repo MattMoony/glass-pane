@@ -10,10 +10,10 @@ const router = createRouter({
       component: Landing
     },
     {
-      path: '/person/:uid',
+      path: '/p/:uid',
       name: 'person',
       component: () => import('../views/Person.vue'),
-    }
+    },
   ]
 })
 

@@ -8,6 +8,7 @@ import PersonNetwork from '../components/PersonNetwork.vue'
 
 const route = useRoute()
 const uid = ref(route.params.uid)
+const editPerson = computed(() => Object.keys(route.query).includes('edit'))
 
 const MOBILE_WIDTH = 600
 const details = { 'person-desc': true, 'person-netw': true, }
@@ -65,19 +66,33 @@ const person = computed(() => {
   <article>
     <NavBar :qry="person?.name" />
     <div class="person-container">
-      <div class="part-headings">
-        <div>
-          <span class="person-desc control" @click.stop="hide('person-desc')">
-            <font-awesome-icon icon="fa-solid fa-file" />
-            Description
-          </span>
+      <div class="heading-wrapper">
+        <div class="part-headings">
+          <div>
+            <span class="person-desc control" @click.stop="hide('person-desc')">
+              <font-awesome-icon icon="fa-solid fa-file" />
+              Description
+            </span>
+          </div>
+          <div>
+            <span class="person-netw control" @click.stop="hide('person-netw')">
+              <font-awesome-icon icon="fa-solid fa-circle-nodes" />
+              Network
+            </span>
+          </div>
         </div>
-        <div>
-          <span class="person-netw control" @click.stop="hide('person-netw')">
-            <font-awesome-icon icon="fa-solid fa-circle-nodes" />
-            Network
+        <router-link v-if="!editPerson" :to="`/p/${uid}/?edit`">
+          <span>
+            <font-awesome-icon icon="fa-solid fa-edit" />
+            Edit
           </span>
-        </div>
+        </router-link>
+        <router-link v-if="editPerson" :to="`/p/${uid}`">
+          <span>
+            <font-awesome-icon icon="fa-solid fa-close" />
+            View
+          </span>
+        </router-link>
       </div>
       <div class="details">
         <div class="person-desc">
@@ -108,12 +123,27 @@ article {
   align-items: stretch
 }
 
+.heading-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--color-border);
+  user-select: none;
+}
+
+.heading-wrapper span {
+  display: inline-block;
+  margin: .4em 0;
+  padding: 0 .6em;
+  font-weight: bold;
+  transition: .2s ease;
+  color: var(--color-text);
+}
+
 .part-headings {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
-  border-bottom: 2px solid var(--color-border);
-  user-select: none;
 }
 
 .part-headings div span {
