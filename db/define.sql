@@ -12,6 +12,14 @@ CREATE TABLE organ (
     PRIMARY KEY     (oid)
 );
 
+CREATE TABLE organ_source (
+    sid             BIGSERIAL,
+    organ           BIGINT              REFERENCES organ(oid),
+    url             TEXT                NOT NULL,
+
+    PRIMARY KEY     (sid)
+);
+
 CREATE TABLE organization (
     oid             BIGINT              REFERENCES organ(oid),
     name            VARCHAR(128)        NOT NULL,
@@ -87,6 +95,18 @@ CREATE TABLE membership (
     PRIMARY KEY     (organ, organization, role, since)
 );
 
+CREATE TABLE membership_source (
+    sid             BIGSERIAL,
+    organ           BIGINT,
+    organization    BIGINT,
+    role            BIGINT,
+    since           DATE,
+    url             TEXT                NOT NULL,
+
+    FOREIGN KEY     (organ, organization, role, since) REFERENCES membership(organ, organization, role, since),
+    PRIMARY KEY     (sid)
+);
+
 CREATE TABLE relation (
     person          BIGINT              REFERENCES person(pid),
     relative        BIGINT              REFERENCES person(pid),
@@ -97,6 +117,17 @@ CREATE TABLE relation (
     PRIMARY KEY     (person, relative, since)
 );
 
+CREATE TABLE relation_source (
+    sid             BIGSERIAL,
+    person          BIGINT,
+    relative        BIGINT,
+    since           DATE,
+    url             TEXT                NOT NULL,
+
+    FOREIGN KEY     (person, relative, since) REFERENCES relation(person, relative, since),
+    PRIMARY KEY     (sid)
+);
+
 CREATE TABLE business_turnover (
     business        BIGINT              REFERENCES business(bid),
     byear           INTEGER,
@@ -104,6 +135,16 @@ CREATE TABLE business_turnover (
     currency    	BIGINT              REFERENCES currency(cid) NOT NULL,
 
     PRIMARY KEY     (business, byear)
+);
+
+CREATE TABLE business_turnover_source (
+    sid             BIGSERIAL,
+    business        BIGINT,
+    byear           INTEGER,
+    url             TEXT                NOT NULL,
+
+    FOREIGN KEY     (business, byear) REFERENCES business_turnover(business, byear),
+    PRIMARY KEY     (sid)
 );
 
 -- ====================================================================================================================================================== --
