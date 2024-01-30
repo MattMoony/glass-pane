@@ -46,7 +46,6 @@ const hide = c => {
 const remove = async () => {
   const res = await fetch(`http://localhost:8888/api/person/${uid.value}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
   })
   if (res.ok) {
     router.push('/')
@@ -93,6 +92,10 @@ const person = computed(() => {
           </div>
         </div>
         <div class="edit-tools">
+          <span v-if="editPerson" @click.stop="remove()">
+            <font-awesome-icon icon="fa-solid fa-trash" />
+            Delete
+          </span>
           <router-link v-if="!editPerson" :to="`/p/${uid}/?edit`">
             <span>
               <font-awesome-icon icon="fa-solid fa-edit" />
@@ -105,10 +108,6 @@ const person = computed(() => {
               View
             </span>
           </router-link>
-          <span @click.stop="remove()">
-            <font-awesome-icon icon="fa-solid fa-trash" />
-            Delete
-          </span>
         </div>
       </div>
       <div class="details">
