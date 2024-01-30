@@ -32,14 +32,13 @@ class Person extends Organ {
     return `"${this.firstname} ${this.lastname}" (Person#${this.id})`;
   }
 
-  public static dummy (id?: number): Person {
-    return new Person(
-      id !== undefined ? id : 1234,
-      'Max', 
-      'Mustermann', 
-      new Date(1930, 0, 1),
-      new Date(2010, 0, 2),
+  public async update (): Promise<void> {
+    const client = await pool.connect();
+    await client.query(
+      'UPDATE person SET firstname = $1, lastname = $2, birthdate = $3, deathdate = $4 WHERE pid = $5',
+      [this.firstname, this.lastname, this.birthdate, this.deathdate, this.id],
     );
+    client.release();
   }
 
   public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date): Promise<Person> {
