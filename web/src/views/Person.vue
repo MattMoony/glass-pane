@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, computed, onMounted, onUnmounted, ref } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useFetch } from '@vueuse/core'
 import NavBar from '../components/NavBar.vue'
@@ -62,10 +62,11 @@ onUnmounted(() => {
 
 const descUrl = computed(() => `http://localhost:8888/api/person/${uid.value}`)
 const { data } = useFetch(descUrl, { refetch: true, })
-const person = computed(() => {
+const person = ref(null);
+watch(data, () => {
   const d = JSON.parse(data.value as string);
   if (!d || !d.success) return null
-  return {
+  person.value = {
     id: d.person.id,
     firstname: d.person.firstname,
     lastname: d.person.lastname,
@@ -73,8 +74,28 @@ const person = computed(() => {
     ...(d.person.deathdate ? { deathdate: new Date(d.person.deathdate) } : {}),
     name: `${d.person.firstname} ${d.person.lastname}`,
     type: 'person',
-  }
+  };
 })
+
+const updatePerson = async (p) => {
+  const res = await fetch(`http://localhost:8888/api/person/${uid.value}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(p),
+  })
+  if (res.ok) {
+    person.value = {
+      ...(person ? person.value : {}),
+      firstname: p.firstname,
+      lastname: p.lastname,
+      ...(p.birthdate ? { birthdate: new Date(p.birthdate) } : {}),
+      ...(p.deathdate ? { deathdate: new Date(p.deathdate) } : {}),
+      name: `${p.firstname} ${p.lastname}`,
+    }
+  }
+}
 
 </script>
 
@@ -118,10 +139,17 @@ const person = computed(() => {
       </div>
       <div class="details">
         <div class="person-desc">
-          <PersonDescription :person="person" :edit-person="editPerson" />
+          <PersonDescription 
+            :person="person"
+            :edit-person="editPerson"
+            @save="updatePerson"
+          />
         </div>
         <div class="person-netw">
-          <PersonNetwork :person="person" :edit-person="editPerson" />
+          <PersonNetwork 
+            :person="person"
+            :edit-person="editPerson" 
+          />
         </div>
       </div>
     </div>

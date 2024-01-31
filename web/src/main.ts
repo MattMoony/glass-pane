@@ -4,7 +4,7 @@ import { createPinia } from 'pinia'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake } from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave } from '@fortawesome/free-solid-svg-icons'
 
 import VNetworkGraph from 'v-network-graph'
 import 'v-network-graph/lib/style.css'
@@ -20,7 +20,7 @@ app.use(createPinia())
 app.use(router)
 app.use(VNetworkGraph)
 
-library.add(faGithub, faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake)
+library.add(faGithub, faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave)
 app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.mount('#app')
