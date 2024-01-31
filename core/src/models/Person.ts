@@ -77,6 +77,25 @@ class Person extends Organ {
       res.rows[0].deathdate,
     );
   }
+
+  public static async find (query: string): Promise<Person[]> {
+    const client = await pool.connect();
+    const res = await client.query(
+      `SELECT   *
+      FROM      person
+      WHERE     LOWER(firstname)||' '||LOWER(lastname) LIKE $1
+                OR LOWER(lastname)||' '||LOWER(firstname) LIKE $1`,
+      [`%${query}%`],
+    );
+    client.release();
+    return res.rows.map((row) => new Person(
+      row.pid,
+      row.firstname,
+      row.lastname,
+      row.birthdate,
+      row.deathdate,
+    ));
+  }
 }
 
 export default Person;

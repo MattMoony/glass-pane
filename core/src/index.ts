@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
+import searchRouter from './routes/search';
 import organRouter from './routes/organ';
 import personRouter from './routes/person';
 
@@ -13,6 +14,7 @@ const app: Express = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+app.use('/api/search/', searchRouter);
 app.use('/api/organ/', organRouter);
 app.use('/api/person/', personRouter);
 
