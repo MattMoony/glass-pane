@@ -7,29 +7,26 @@ import type { Edge } from 'v-network-graph';
 import FullScreenModal from './FullScreenModal.vue'
 import SelectSearch from './SelectSearch.vue'
 
-interface Connection {
-  edges: {
-    type: string
-    node: {
-      id: number
-      firstname: string
-      lastname: string
-      birthdate?: Date
-      deathdate?: Date
-    }
-  }[]
+interface Relation {
+  to: {
+    id: number,
+    firstname: string,
+    lastname: string,
+    birthdate?: Date,
+    deathdate?: Date,
+  },
+  since: string,
+  until?: string,
 }
 
 const router = useRouter()
 const props = defineProps<{
   person: {
-    uid: string
-    name: string
-    birthdate: string
-
-    familyInConnection: Connection
-    familyOutConnection: Connection
-    acquaintancesConnection: Connection
+    id: number,
+    firstname: string,
+    lastname: string,
+    birthdate?: Date,
+    deathdate?: Date,
   },
   editPerson: boolean,
 }>()
@@ -40,10 +37,10 @@ const edges = ref([]);
 const refreshNetwork = async () => {
   if (!props.person) return;
 
-  const parents = (await fetch(`http://localhost:8888/api/person/${props.person.id}/parents`).then(r => r.json())).parents;
-  const children = (await fetch(`http://localhost:8888/api/person/${props.person.id}/children`).then(r => r.json())).children;
-  const romantic = (await fetch(`http://localhost:8888/api/person/${props.person.id}/romantic`).then(r => r.json())).romantic;
-  const friends = (await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends;
+  const parents: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/parents`).then(r => r.json())).parents;
+  const children: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/children`).then(r => r.json())).children;
+  const romantic: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/romantic`).then(r => r.json())).romantic;
+  const friends: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends;
 
   nodes.value = {
     [props.person.id]: {
@@ -51,8 +48,8 @@ const refreshNetwork = async () => {
       color: getComputedStyle(document.body).getPropertyValue('--color-text'),
     },
     ...[...parents, ...children, ...romantic, ...friends].map(f => ({
-      [f.id]: {
-        name: `${f.firstname} ${f.lastname}${f.birthdate ? '\n* ' + f.birthdate.getFullYear() : ''}`,
+      [f.to.id]: {
+        name: `${f.to.firstname} ${f.to.lastname}${f.to.birthdate ? '\n* ' + f.to.birthdate.getFullYear() : ''}`,
         color: '#237AFF',
       },
     })).reduce((a, b) => ({ ...a, ...b }), {}),
@@ -60,31 +57,39 @@ const refreshNetwork = async () => {
 
   edges.value = [
     ...parents.map(p => ({ 
-      source: p.id, 
+      source: p.to.id, 
       target: props.person.id, 
       label: 'parent',
       direction: 'in',
       color: '#23FF2D',
+      since: p.since,
+      until: p.until,
     })),
-    ...children.map(c => ({ 
+    ...children.map(p => ({ 
       source: props.person.id, 
-      target: c.id, 
+      target: p.to.id, 
       label: 'parent',
       direction: 'out',
       color: '#23FF2D',
+      since: p.since,
+      until: p.until,
     })),
-    ...romantic.map(r => ({ 
+    ...romantic.map(p => ({ 
       source: props.person.id, 
-      target: r.id, 
+      target: p.to.id, 
       label: 'romantic',
       direction: 'out',
       color: '#FF3423',
+      since: p.since,
+      until: p.until,
     })),
-    ...friends.map(f => ({ 
+    ...friends.map(p => ({ 
       source: props.person.id, 
-      target: f.id, 
+      target: p.to.id, 
       label: 'friend',
       direction: 'out',
+      since: p.since,
+      until: p.until,
     })),
   ];
 };
@@ -94,6 +99,14 @@ watch(() => props.person, refreshNetwork);
 const eventHandlers: vNG.EventHandlers = {
   'node:click': ({ node }) => {
     router.push(`/p/${node}`)
+  },
+  'edge:click': async ({ edge }) => {
+    const e = edges.value[edge];
+    const r = await fetch(`http://localhost:8888/api/person/relation/source?from=${e.source}&to=${e.target}&since=${e.since}`).then(r => r.json());
+    sourceFrom.value = e.source;
+    sourceTo.value = e.target;
+    sourceLink.value = r.source;
+    showSource.value = true;
   },
 }
 
@@ -147,6 +160,11 @@ const selectedPerson = ref(null);
 const relationSource = ref(null);
 const relSince = ref(null);
 const relTil = ref(null);
+
+const sourceFrom = ref('');
+const sourceTo = ref('');
+const sourceLink = ref('');
+const showSource = ref(false);
 
 const createRelation = () => {
   if (!selectedPerson.value || !relationSource.value.value.trim() || !relSince.value.value) return;
@@ -228,6 +246,10 @@ const createRelation = () => {
       </div>
       <input type="submit" value="Add" @click="createRelation()" />
     </div>
+  </FullScreenModal>
+  <FullScreenModal :show="showSource" @close="showSource = false">
+    <h1>Source: {{ sourceFrom }} - {{ sourceTo }}</h1>
+    <a href="{{ sourceLink }}" target="_blank">{{ sourceLink }}</a>
   </FullScreenModal>
 </template>
 

@@ -1,7 +1,7 @@
 import 'process';
 import { Request, Response } from 'express';
 
-import Person from '../models/Person';
+import Person, { Relation } from '../models/Person';
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   if (!req.body.firstname || !req.body.lastname) {
@@ -79,7 +79,7 @@ export const getParents = async (req: Request, res: Response): Promise<void> => 
   }
 
   const parents = await person.getParents();
-  res.send({ 'success': true, 'parents': parents.map((p) => p.json()) });
+  res.send({ 'success': true, 'parents': parents.map((p) => p.json(true)) });
 };
 
 export const getChildren = async (req: Request, res: Response): Promise<void> => {
@@ -90,7 +90,7 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
   }
 
   const children = await person.getChildren();
-  res.send({ 'success': true, 'children': children.map((p) => p.json()) });
+  res.send({ 'success': true, 'children': children.map((p) => p.json(true)) });
 };
 
 export const getRomantic = async (req: Request, res: Response): Promise<void> => {
@@ -101,7 +101,7 @@ export const getRomantic = async (req: Request, res: Response): Promise<void> =>
   }
 
   const romantic = await person.getRomantic();
-  res.send({ 'success': true, 'romantic': romantic.map((p) => p.json()) });
+  res.send({ 'success': true, 'romantic': romantic.map((p) => p.json(true)) });
 };
 
 export const getFriends = async (req: Request, res: Response): Promise<void> => {
@@ -112,5 +112,27 @@ export const getFriends = async (req: Request, res: Response): Promise<void> => 
   }
 
   const friends = await person.getFriends();
-  res.send({ 'success': true, 'friends': friends.map((p) => p.json()) });
+  res.send({ 'success': true, 'friends': friends.map((p) => p.json(true)) });
 };
+
+export const getRelationSource = async (req: Request, res: Response): Promise<void> => {
+  if (!req.query.from || !req.query.to || !req.query.since) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+
+  const person = await Person.get(parseInt(req.query.from));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const relative = await Person.get(parseInt(req.query.to));
+  if (relative === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const source = await Relation.getSource(person, relative, new Date(req.query.since));
+  res.send({ 'success': true, 'source': source });
+}

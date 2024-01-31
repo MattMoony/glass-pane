@@ -4,6 +4,7 @@ import * as controller from '../controllers/person';
 const router: Router = Router();
 
 router.post('/new', controller.create);
+router.get('/relation/source', controller.getRelationSource);
 router.get('/:userId', controller.get);
 router.patch('/:userId', controller.update);
 router.delete('/:userId', controller.remove);
