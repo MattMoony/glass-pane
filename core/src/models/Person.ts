@@ -94,6 +94,26 @@ class Person extends Organ {
     ));
   }
 
+  public async getChildren (): Promise<Person[]> {
+    const client = await pool.connect();
+    const res = await client.query(
+      `SELECT   person.*
+      FROM      relation
+                INNER JOIN person ON person.pid = relation.person
+      WHERE     relation.relative = $1
+                AND relation.relation = $2`,
+      [this.id, RELATION_TYPES['parent']],
+    );
+    client.release();
+    return res.rows.map((row) => new Person(
+      row.pid,
+      row.firstname,
+      row.lastname,
+      row.birthdate,
+      row.deathdate,
+    ));
+  }
+
   public async getRomantic (): Promise<Person[]> {
     const client = await pool.connect();
     const res = await client.query(

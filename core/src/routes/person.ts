@@ -9,6 +9,7 @@ router.patch('/:userId', controller.update);
 router.delete('/:userId', controller.remove);
 router.post('/:userId/relation', controller.addRelation);
 router.get('/:userId/parents', controller.getParents);
+router.get('/:userId/children', controller.getChildren);
 router.get('/:userId/romantic', controller.getRomantic);
 router.get('/:userId/friends', controller.getFriends);
 

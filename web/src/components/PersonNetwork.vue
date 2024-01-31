@@ -40,6 +40,9 @@ const edges = ref([]);
 const refreshNetwork = async () => {
   if (!props.person) return;
 
+  const parents = (await fetch(`http://localhost:8888/api/person/${props.person.id}/parents`).then(r => r.json())).parents;
+  const children = (await fetch(`http://localhost:8888/api/person/${props.person.id}/children`).then(r => r.json())).children;
+  const romantic = (await fetch(`http://localhost:8888/api/person/${props.person.id}/romantic`).then(r => r.json())).romantic;
   const friends = (await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends;
 
   nodes.value = {
@@ -47,7 +50,7 @@ const refreshNetwork = async () => {
       name: `${props.person.name}${props.person.birthdate ? '\n* ' + props.person.birthdate.getFullYear() : ''}`,
       color: getComputedStyle(document.body).getPropertyValue('--color-text'),
     },
-    ...friends.map(f => ({
+    ...[...parents, ...children, ...romantic, ...friends].map(f => ({
       [f.id]: {
         name: `${f.firstname} ${f.lastname}${f.birthdate ? '\n* ' + f.birthdate.getFullYear() : ''}`,
         color: '#237AFF',
@@ -56,6 +59,27 @@ const refreshNetwork = async () => {
   };
 
   edges.value = [
+    ...parents.map(p => ({ 
+      source: p.id, 
+      target: props.person.id, 
+      label: 'parent',
+      direction: 'in',
+      color: '#23FF2D',
+    })),
+    ...children.map(c => ({ 
+      source: props.person.id, 
+      target: c.id, 
+      label: 'parent',
+      direction: 'out',
+      color: '#23FF2D',
+    })),
+    ...romantic.map(r => ({ 
+      source: props.person.id, 
+      target: r.id, 
+      label: 'romantic',
+      direction: 'out',
+      color: '#FF3423',
+    })),
     ...friends.map(f => ({ 
       source: props.person.id, 
       target: f.id, 
@@ -89,7 +113,7 @@ const configs = ref(
     },
     edge: {
       normal: {
-        color: getComputedStyle(document.body).getPropertyValue('--color-border'),
+        color: edge => edge.color || getComputedStyle(document.body).getPropertyValue('--color-border'),
       },
       label: {
         color: getComputedStyle(document.body).getPropertyValue('--color-text'),

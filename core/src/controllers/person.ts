@@ -82,6 +82,17 @@ export const getParents = async (req: Request, res: Response): Promise<void> => 
   res.send({ 'success': true, 'parents': parents.map((p) => p.json()) });
 };
 
+export const getChildren = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const children = await person.getChildren();
+  res.send({ 'success': true, 'children': children.map((p) => p.json()) });
+};
+
 export const getRomantic = async (req: Request, res: Response): Promise<void> => {
   const person = await Person.get(parseInt(req.params.userId));
   if (person === null) {
