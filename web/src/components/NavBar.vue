@@ -21,9 +21,6 @@ const props = defineProps<{
     </RouterLink>
     <form>
       <SearchBar :qry="props.qry" :result="props.result" />
-      <button type="submit">
-        <font-awesome-icon icon="fa-solid fa-magnifying-glass" />
-      </button>
     </form>
     <div class="social">
       <a href="//github.com/MattMoony/glass-pane">
