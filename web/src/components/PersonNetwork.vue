@@ -134,10 +134,33 @@ const selectPerson = ref(false);
 const adding = ref('parent');
 const selectedPerson = ref(null);
 const relationSource = ref(null);
+const relSince = ref(null);
+const relTil = ref(null);
 
 const createRelation = () => {
-  if (!selectedPerson.value || !relationSource.value.value.trim()) return;
-  console.log(selectedPerson.value, relationSource.value.value.trim());
+  if (!selectedPerson.value || !relationSource.value.value.trim() || !relSince.value.value) return;
+  fetch(`http://localhost:8888/api/person/${props.person.id}/relation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      type: adding.value === 'parent'
+            ? 'parent'
+            : adding.value === 'partner'
+            ? 'romantic'
+            : 'friend',
+      personId: selectedPerson.value.id,
+      source: relationSource.value.value,
+      since: relSince.value.value,
+      til: relTil.value.value,
+    }),
+  }).then(r => r.json()).then(r => {
+    relationSource.value.value = '';
+    relSince.value.value = '';
+    relTil.value.value = '';
+    addRelation.value = false;
+  })
 }
 
 </script>
@@ -181,6 +204,16 @@ const createRelation = () => {
       <h1 class="add-a-title">Add a {{ adding }}</h1>
       <SelectSearch @select="r => selectedPerson = r" />
       <input type="text" ref="relationSource" placeholder="Source ... " />
+      <div class="relation-time">
+        <span>
+          Since
+          <input type="date" ref="relSince" />
+        </span>
+        <span>
+          Until
+          <input type="date" ref="relTil" />
+        </span>
+      </div>
       <input type="submit" value="Add" @click="createRelation()" />
     </div>
   </FullScreenModal>
@@ -291,5 +324,12 @@ const createRelation = () => {
   background-color: var(--color-border);
   color: var(--color-bg);
   cursor: pointer;
+}
+
+.relation-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .5em;
 }
 </style>

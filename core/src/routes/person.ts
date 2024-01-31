@@ -6,6 +6,7 @@ const router: Router = Router();
 router.post('/new', controller.create);
 router.get('/:userId', controller.get);
 router.patch('/:userId', controller.update);
-router.delete('/:userId', controller.remove)
+router.delete('/:userId', controller.remove);
+router.post('/:userId/relation', controller.addRelation);
 
 export default router;

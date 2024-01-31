@@ -50,6 +50,28 @@ class Person extends Organ {
     client.release();
   }
 
+  public async addRelation (relationType: string, person: Person, source: string, since: Date, until?: Date): Promise<void> {
+    const client = await pool.connect();
+
+    const relType = await client.query(
+      'SELECT * FROM relation_type WHERE name = $1',
+      [relationType],
+    );
+    if (!relType.rows.length) return;
+
+    await client.query(
+      'INSERT INTO relation (person, relative, relation, since, until) VALUES ($1, $2, $3, $4, $5)',
+      [this.id, person.id, relType.rows[0].rtid, since, until],
+    );
+
+    await client.query(
+      'INSERT INTO relation_source (person, relative, since, url) VALUES ($1, $2, $3, $4)',
+      [this.id, person.id, since, source,],
+    );
+
+    client.release();
+  }
+
   public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date): Promise<Person> {
     const id = await Organ.create();
     const client = await pool.connect();
