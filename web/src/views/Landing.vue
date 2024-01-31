@@ -1,17 +1,44 @@
 <script setup lang="ts">
+import SearchBar from '@/components/SearchBar.vue';
+
 </script>
 
 <template>
-  <div>
-    <img src="/pane.png" alt="pane" />
-    <h1>Glass Pane</h1>
+  <div class="container">
+    <h1>
+      Gl<img class="logo" src="/pane.png" alt="pane" />ss
+      P<img class="logo" src="/pane.png" alt="pane" />ne
+    </h1>
+    <div class="bar-container">
+      <SearchBar />
+    </div>
   </div>
 </template>
 
 <style scoped>
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 h1 {
   user-select: none;
   font-family: 'Comfortaa', sans-serif;
   font-size: 3rem;
+}
+
+.logo {
+  height: 3rem;
+}
+
+.bar-container {
+  width: 80vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
