@@ -213,6 +213,7 @@ class Person extends Organ {
                 AND relation.relation = $2`,
       [this.id, RELATION_TYPES['romantic']],
     );
+    client.release();
     return ret.concat(res2.rows.map((row) => new Relation(this, new Person(
       row.pid,
       row.firstname,
@@ -247,6 +248,7 @@ class Person extends Organ {
                 AND relation.relation = $2`,
       [this.id, RELATION_TYPES['friend']],
     );
+    client.release();
     return ret.concat(res2.rows.map((row) => new Relation(this, new Person(
       row.pid,
       row.firstname,
