@@ -12,5 +12,5 @@ export const search = async (req: Request, res: Response): Promise<void> => {
 
   const query = (req.query.q as string).trim().toLowerCase();
   const results = await Person.find(query);
-  res.send({ 'success': true, 'results': results, });
+  res.send({ 'success': true, 'people': results, });
 };

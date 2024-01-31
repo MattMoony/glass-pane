@@ -1,40 +1,113 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import type { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const props = defineProps<{
-  qry?: string
+  qry?: string,
+  result?: {
+    id: string,
+    firstname: string,
+    lastname: string,
+    type: string,
+  }
 }>()
 
 const input = ref(null)
 const text = ref(props.qry || '')
+const results = ref([])
+const cuResult  = ref(true)
+const hideRes = ref(true)
+const resShown = computed(() => !hideRes.value && results.value.length > 0)
+
 var timeout = null
 const search = t => {
   clearTimeout(timeout)
   timeout = setTimeout(() => {
-    if(!t.trim()) return
-    console.log(t)
+    if(!t.trim()) {
+      results.value = [];
+      return
+    }
+
+    fetch(`http://localhost:8888/api/search?q=${t}`)
+      .then(r => r.json())
+      .then(r => {
+        if (!r.success) {
+          results.value = [];
+          return
+        }
+        results.value = r.people.map(p => ({ ...p, type: 'person', }));
+      })
   }, 500)
+}
+
+const startSearch = () => {
+  console.log(cuResult.value);
+  input.value.focus();
+  cuResult.value = false;
+}
+
+const loseFocus = () => {
+  setTimeout(() => {
+    hideRes.value = true
+  }, 100)
 }
 
 </script>
 
 <template>
-  <div class="bar" @click.stop="input.focus()">
-    <input v-model="text" @keyup="search(text)" ref="input" type="text" placeholder="Search..." />
+  <div 
+    tabindex="-1"
+    class="search-container"
+  >
+    <div class="bar" @click.stop="startSearch()">
+      <div v-if="$props.result && cuResult" :class="['result', $props.result ? $props.result.type : '', ]">
+        <font-awesome-icon icon="fa-solid fa-user" />
+        {{ ($props.result ? $props.result.firstname : '') + " " + ($props.result ? $props.result.lastname : '') }}
+      </div>
+      <input 
+        v-model="text"
+        @keyup="search(text)"
+        ref="input"
+        type="text"
+        placeholder="Search..."
+        @focus="hideRes = false"
+        @blur="loseFocus()"
+      />
+    </div>
+    <div class="results" v-if="resShown">
+      <div v-for="r in results" :key="r.id">
+        <RouterLink :to="`/p/${r.id}`">
+          <div :class="['result', r.type, ]">
+            <font-awesome-icon icon="fa-solid fa-user" />
+            {{ r.firstname + " " + r.lastname }}
+          </div>
+        </RouterLink>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.search-container {
+  width: 100%;
+}
+
 .bar {
   width: 100%;
   height: 3rem;
   background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   display: flex;
   justify-content: stretch;
   align-items: stretch;
-  border-radius: 0.5rem;
+  position: relative;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.bar > .result {
+  margin-right: 0.5rem;
 }
 
 input {
@@ -42,8 +115,48 @@ input {
   border: none;
   background-color: transparent;
   font-size: 1rem;
-  padding: 0 1rem;
   outline: none;
   color: var(--color-text);
+}
+
+.results {
+  width: 100%;
+  background-color: var(--color-background-soft);
+  border: 1.5px solid var(--color-border);
+  border-top: none;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  max-height: 30vh;
+  overflow-y: auto;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  position: absolute;
+  top: 3rem;
+  z-index: 99;
+}
+
+.results a {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.result {
+  background-color: var(--color-background-mute);
+  padding: 0.5rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.result svg {
+  margin-right: 0.5rem;
+}
+
+.result.person {
+  background-color: #237AFF;
 }
 </style>

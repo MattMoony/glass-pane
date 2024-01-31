@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import SearchBar from '@/components/SearchBar.vue'
 
 const props = defineProps<{
-  qry: string
+  qry?: string,
+  result?: {
+    id: string,
+    firstname: string,
+    lastname: string,
+    type: string,
+  }
 }>()
 </script>
 
@@ -13,7 +20,7 @@ const props = defineProps<{
       <img class="myimg" src="/pane.png" alt="Glass Pane Logo" />
     </RouterLink>
     <form>
-      <input v-model="$props.qry" type="search" placeholder="..." />
+      <SearchBar :qry="props.qry" :result="props.result" />
       <button type="submit">
         <font-awesome-icon icon="fa-solid fa-magnifying-glass" />
       </button>

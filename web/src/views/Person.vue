@@ -62,19 +62,22 @@ onUnmounted(() => {
 
 const descUrl = computed(() => `http://localhost:8888/api/person/${uid.value}`)
 const { data } = useFetch(descUrl, { refetch: true, })
+
 const person = computed(() => {
   const d = JSON.parse(data.value as string);
   if (!d || !d.success) return null
   return {
     ...d.person,
     name: `${d.person.firstname} ${d.person.lastname}`,
+    type: 'person',
   }
 })
+
 </script>
 
 <template>
   <article>
-    <NavBar :qry="person?.name" />
+    <NavBar :result="person" />
     <div class="person-container">
       <div class="heading-wrapper">
         <div class="part-headings">
