@@ -66,7 +66,11 @@ const person = computed(() => {
   const d = JSON.parse(data.value as string);
   if (!d || !d.success) return null
   return {
-    ...d.person,
+    id: d.person.id,
+    firstname: d.person.firstname,
+    lastname: d.person.lastname,
+    ...(d.person.birthdate ? { birthdate: new Date(d.person.birthdate) } : {}),
+    ...(d.person.deathdate ? { deathdate: new Date(d.person.deathdate) } : {}),
     name: `${d.person.firstname} ${d.person.lastname}`,
     type: 'person',
   }
@@ -114,7 +118,7 @@ const person = computed(() => {
       </div>
       <div class="details">
         <div class="person-desc">
-          <PersonDescription :person="person" />
+          <PersonDescription :person="person" :edit-person="editPerson" />
         </div>
         <div class="person-netw">
           <PersonNetwork :person="person" :edit-person="editPerson" />

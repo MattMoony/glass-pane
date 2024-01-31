@@ -35,7 +35,8 @@ const nodes = ref({});
 const edges = ref([]);
 
 const refreshNetwork = async () => {
-  if (!props.person) return;
+  console.log(props.person);
+  if (!props.person || !props.person.id) return;
 
   const parents: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/parents`).then(r => r.json())).parents;
   const children: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/children`).then(r => r.json())).children;
