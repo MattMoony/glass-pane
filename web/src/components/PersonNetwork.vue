@@ -4,6 +4,8 @@ import * as vNG from 'v-network-graph'
 import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import { useRouter } from 'vue-router';
 import type { Edge } from 'v-network-graph';
+import FullScreenModal from './FullScreenModal.vue'
+import SelectSearch from './SelectSearch.vue'
 
 interface Connection {
   edges: {
@@ -128,6 +130,16 @@ const configs = ref(
 )
 
 const addRelation = ref(false);
+const selectPerson = ref(false);
+const adding = ref('parent');
+const selectedPerson = ref(null);
+const relationSource = ref(null);
+
+const createRelation = () => {
+  if (!selectedPerson.value || !relationSource.value.value.trim()) return;
+  console.log(selectedPerson.value, relationSource.value.value.trim());
+}
+
 </script>
 
 <template>
@@ -146,15 +158,15 @@ const addRelation = ref(false);
     </v-network-graph>
     <div :class="['netw-edit-overlay', $props.editPerson ? 'show' : '',]">
       <div v-if="addRelation" class="netw-new-options">
-        <div>
+        <div @click="selectPerson = true; adding = 'parent'">
           <font-awesome-icon icon="fa-solid fa-baby" />
           Parent
         </div>
-        <div>
+        <div @click="selectPerson = true; adding = 'partner'">
           <font-awesome-icon icon="fa-solid fa-face-kiss" />
           Partner
         </div>
-        <div>
+        <div @click="selectPerson = true; adding = 'friend'">
           <font-awesome-icon icon="fa-solid fa-handshake" />
           Friend
         </div>
@@ -164,6 +176,14 @@ const addRelation = ref(false);
       </button>
     </div>
   </div>
+  <FullScreenModal :show="selectPerson" @close="selectPerson = false">
+    <div class="relation-modal">
+      <h1 class="add-a-title">Add a {{ adding }}</h1>
+      <SelectSearch @select="r => selectedPerson = r" />
+      <input type="text" ref="relationSource" placeholder="Source ... " />
+      <input type="submit" value="Add" @click="createRelation()" />
+    </div>
+  </FullScreenModal>
 </template>
 
 <style scoped>
@@ -227,6 +247,49 @@ const addRelation = ref(false);
 
 .netw-new-options > div:hover {
   background-color: var(--color-background);
+  cursor: pointer;
+}
+
+.add-a-title {
+  margin-bottom: .2em;
+}
+
+.relation-modal {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: .5em;
+  padding: 1em;
+  box-sizing: border-box;
+}
+
+.relation-modal input {
+  background-color: var(--color-background-soft);
+  border: 1.5px solid var(--color-border);
+  padding: 0.5rem;
+  box-sizing: border-box;
+  color: var(--color-text);
+  font-size: 1em;
+  transition: .2s ease;
+}
+
+.relation-modal input:focus {
+  outline: none;
+  border-color: var(--color-border-hover);
+}
+
+.relation-modal input[type="submit"] {
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 1em;
+  transition: .2s ease;
+}
+
+.relation-modal input[type="submit"]:hover {
+  background-color: var(--color-border);
+  color: var(--color-bg);
   cursor: pointer;
 }
 </style>
