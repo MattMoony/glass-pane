@@ -2,6 +2,7 @@
 import type { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { onClickOutside } from '@vueuse/core';
 
 const props = defineProps<{
   qry?: string,
@@ -13,6 +14,7 @@ const props = defineProps<{
   }
 }>()
 
+const container = ref(null)
 const input = ref(null)
 const text = ref(props.qry || '')
 const results = ref([])
@@ -42,15 +44,8 @@ const search = t => {
 }
 
 const startSearch = () => {
-  console.log(cuResult.value);
   input.value.focus();
   cuResult.value = false;
-}
-
-const loseFocus = () => {
-  setTimeout(() => {
-    hideRes.value = true
-  }, 100)
 }
 
 const doSearch = () => {
@@ -60,12 +55,17 @@ const doSearch = () => {
   results.value = []
 }
 
+onClickOutside(container, () => {
+  hideRes.value = true
+})
+
 </script>
 
 <template>
   <div 
     tabindex="-1"
     class="search-container"
+    ref="container"
   >
     <div class="bar" @click.stop="startSearch()">
       <div v-if="$props.result && cuResult" :class="['result', $props.result ? $props.result.type : '', ]">
@@ -79,7 +79,6 @@ const doSearch = () => {
         type="text"
         placeholder="Search..."
         @focus="hideRes = false"
-        @blur="loseFocus()"
       />
     </div>
     <div class="results" v-if="resShown">
@@ -98,6 +97,7 @@ const doSearch = () => {
 <style scoped>
 .search-container {
   width: 100%;
+  user-select: none;
 }
 
 .bar {
@@ -161,14 +161,6 @@ input {
 
 .results::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-border-hover);
-}
-
-.results::-webkit-scrollbar-thumb:active {
-  background-color: var(--color-border-active);
-}
-
-.results::-webkit-scrollbar-thumb:window-inactive {
-  background-color: var(--color-border-inactive);
 }
 
 .results::-webkit-scrollbar-corner {
