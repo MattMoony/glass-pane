@@ -8,7 +8,7 @@ import PersonNetwork from '../components/PersonNetwork.vue'
 
 const router = useRouter()
 const route = useRoute()
-const uid = ref(route.params.uid)
+const uid = computed(() => route.params.uid)
 const editPerson = computed(() => Object.keys(route.query).includes('edit'))
 
 const MOBILE_WIDTH = 600
