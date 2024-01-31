@@ -50,7 +50,7 @@ const refreshNetwork = async () => {
     },
     ...[...parents, ...children, ...romantic, ...friends].map(f => ({
       [f.to.id]: {
-        name: `${f.to.firstname} ${f.to.lastname}${f.to.birthdate ? '\n* ' + f.to.birthdate.getFullYear() : ''}`,
+        name: `${f.to.firstname} ${f.to.lastname}${f.to.birthdate ? '\n* ' + new Date(f.to.birthdate).getFullYear() : ''}`,
         color: '#237AFF',
       },
     })).reduce((a, b) => ({ ...a, ...b }), {}),

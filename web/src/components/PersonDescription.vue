@@ -118,6 +118,7 @@ input {
   text-align: center;
   border-bottom: 2px solid var(--color-border);
   transition: .2s ease;
+  margin-right: .5em;
 }
 
 input:focus {
