@@ -157,7 +157,7 @@ CREATE TABLE business_turnover_source (
 
 -- ====================================================================================================================================================== --
 
-INSERT INTO     relation_type (name)
-VALUES          ('parent'),
-                ('romantic'),
-                ('friend');
+INSERT INTO     relation_type (rtid, name)
+VALUES          (1, 'parent'),
+                (2, 'romantic'),
+                (3, 'friend');

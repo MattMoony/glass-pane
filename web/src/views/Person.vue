@@ -62,7 +62,6 @@ onUnmounted(() => {
 
 const descUrl = computed(() => `http://localhost:8888/api/person/${uid.value}`)
 const { data } = useFetch(descUrl, { refetch: true, })
-
 const person = computed(() => {
   const d = JSON.parse(data.value as string);
   if (!d || !d.success) return null

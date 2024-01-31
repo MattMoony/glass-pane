@@ -70,3 +70,36 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
   await person.addRelation(req.body.type, relative, req.body.source, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
   res.send({ 'success': true });
 };
+
+export const getParents = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const parents = await person.getParents();
+  res.send({ 'success': true, 'parents': parents.map((p) => p.json()) });
+};
+
+export const getRomantic = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const romantic = await person.getRomantic();
+  res.send({ 'success': true, 'romantic': romantic.map((p) => p.json()) });
+};
+
+export const getFriends = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const friends = await person.getFriends();
+  res.send({ 'success': true, 'friends': friends.map((p) => p.json()) });
+};

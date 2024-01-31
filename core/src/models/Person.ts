@@ -1,6 +1,12 @@
 import Organ from './Organ';
 import { pool } from '../db';
 
+const RELATION_TYPES: { [name: string]: number, } = {
+  'parent': 1,
+  'romantic': 2,
+  'friend': 3,
+};
+
 /**
  * Represents a natural person.
  */
@@ -53,15 +59,11 @@ class Person extends Organ {
   public async addRelation (relationType: string, person: Person, source: string, since: Date, until?: Date): Promise<void> {
     const client = await pool.connect();
 
-    const relType = await client.query(
-      'SELECT * FROM relation_type WHERE name = $1',
-      [relationType],
-    );
-    if (!relType.rows.length) return;
+    if (!(relationType in RELATION_TYPES)) return;
 
     await client.query(
       'INSERT INTO relation (person, relative, relation, since, until) VALUES ($1, $2, $3, $4, $5)',
-      [this.id, person.id, relType.rows[0].rtid, since, until],
+      [this.id, person.id, RELATION_TYPES[relationType], since, until],
     );
 
     await client.query(
@@ -70,6 +72,94 @@ class Person extends Organ {
     );
 
     client.release();
+  }
+
+  public async getParents (): Promise<Person[]> {
+    const client = await pool.connect();
+    const res = await client.query(
+      `SELECT   person.*
+      FROM      relation
+                INNER JOIN person ON person.pid = relation.relative
+      WHERE     relation.person = $1
+                AND relation.relation = $2`,
+      [this.id, RELATION_TYPES['parent']],
+    );
+    client.release();
+    return res.rows.map((row) => new Person(
+      row.pid,
+      row.firstname,
+      row.lastname,
+      row.birthdate,
+      row.deathdate,
+    ));
+  }
+
+  public async getRomantic (): Promise<Person[]> {
+    const client = await pool.connect();
+    const res = await client.query(
+      `SELECT   person.*
+      FROM      relation
+                INNER JOIN person ON person.pid = relation.relative
+      WHERE     relation.person = $1
+                AND relation.relation = $2`,
+      [this.id, RELATION_TYPES['romantic']],
+    );
+    const ret = res.rows.map((row) => new Person(
+      row.pid,
+      row.firstname,
+      row.lastname,
+      row.birthdate,
+      row.deathdate,
+    ));
+    const res2 = await client.query(
+      `SELECT   person.*
+      FROM      relation
+                INNER JOIN person ON person.pid = relation.person
+      WHERE     relation.relative = $1
+                AND relation.relation = $2`,
+      [this.id, RELATION_TYPES['romantic']],
+    );
+    return ret.concat(res2.rows.map((row) => new Person(
+      row.pid,
+      row.firstname,
+      row.lastname,
+      row.birthdate,
+      row.deathdate,
+    )));
+  }
+
+  public async getFriends (): Promise<Person[]> {
+    const client = await pool.connect();
+    const res = await client.query(
+      `SELECT   person.*
+      FROM      relation
+                INNER JOIN person ON person.pid = relation.relative
+      WHERE     relation.person = $1
+                AND relation.relation = $2`,
+      [this.id, RELATION_TYPES['friend']],
+    );
+    const ret = res.rows.map((row) => new Person(
+      row.pid,
+      row.firstname,
+      row.lastname,
+      row.birthdate,
+      row.deathdate,
+    ));
+    const res2 = await client.query(
+      `SELECT   person.*
+      FROM      relation
+                INNER JOIN person ON person.pid = relation.person
+      WHERE     relation.relative = $1
+                AND relation.relation = $2`,
+      [this.id, RELATION_TYPES['friend']],
+    );
+    return ret.concat(res2.rows.map((row) => new Person(
+      row.pid,
+      row.firstname,
+      row.lastname,
+      row.birthdate,
+      row.deathdate,
+    )));
   }
 
   public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date): Promise<Person> {

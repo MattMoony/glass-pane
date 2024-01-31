@@ -34,51 +34,38 @@ const props = defineProps<{
   editPerson: boolean,
 }>()
 
-/*const nodes = computed(() => (props.person ? {
-  [props.person.uid]: {
-    name: `${props.person.name}\n* ${new Date(props.person.birthdate).getFullYear()}`,
-    color: 'rgba(255, 86, 86, .8)',
-  },
-  ...Object.fromEntries(props.person.familyInConnection.edges.map(p => [p.node.uid, {
-    name: `${p.node.name}\n* ${new Date(p.node.birthdate).getFullYear()}`,
-    color: 'rgba(255, 200, 86, .4)',
-  }])),
-  ...Object.fromEntries(props.person.familyOutConnection.edges.map(p => [p.node.uid, {
-    name: `${p.node.name}\n* ${new Date(p.node.birthdate).getFullYear()}`,
-    color: 'rgba(255, 86, 86, .4)',
-  }])),
-  ...Object.fromEntries(props.person.acquaintancesConnection.edges.map(p => [p.node.uid, {
-    name: `${p.node.name}\n* ${new Date(p.node.birthdate).getFullYear()}`,
-    color: getComputedStyle(document.body).getPropertyValue('--color-text'),
-  }])),
-} : {}))*/
-const nodes = computed(() => (props.person ? {
-  [props.person.id]: {
-    name: `${props.person.name}${props.person.birthdate ? '\n* ' + props.person.birthdate.getFullYear() : ''}`,
-    color: getComputedStyle(document.body).getPropertyValue('--color-text'),
-  },
-} : {}));
+const nodes = ref({});
+const edges = ref([]);
 
-/*const edges = computed(() => props.person ? [
-  ...props.person.familyInConnection.edges.map(fam => ({ 
-    source: props.person.uid, 
-    target: fam.node.uid, 
-    label: fam.type,
-    direction: 'in',
-  })),
-  ...props.person.familyOutConnection.edges.map(fam => ({ 
-    source: props.person.uid, 
-    target: fam.node.uid, 
-    label: fam.type,
-    direction: 'out',
-  })),
-  ...props.person.acquaintancesConnection.edges.map(fam => ({ 
-    source: props.person.uid, 
-    target: fam.node.uid, 
-    label: fam.type,
-  })),
-] : [])*/
-const edges = computed(() => [])
+const refreshNetwork = async () => {
+  if (!props.person) return;
+
+  const friends = (await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends;
+
+  nodes.value = {
+    [props.person.id]: {
+      name: `${props.person.name}${props.person.birthdate ? '\n* ' + props.person.birthdate.getFullYear() : ''}`,
+      color: getComputedStyle(document.body).getPropertyValue('--color-text'),
+    },
+    ...friends.map(f => ({
+      [f.id]: {
+        name: `${f.firstname} ${f.lastname}${f.birthdate ? '\n* ' + f.birthdate.getFullYear() : ''}`,
+        color: '#237AFF',
+      },
+    })).reduce((a, b) => ({ ...a, ...b }), {}),
+  };
+
+  edges.value = [
+    ...friends.map(f => ({ 
+      source: props.person.id, 
+      target: f.id, 
+      label: 'friend',
+      direction: 'out',
+    })),
+  ];
+};
+
+watch(() => props.person, refreshNetwork);
 
 const eventHandlers: vNG.EventHandlers = {
   'node:click': ({ node }) => {
@@ -159,7 +146,8 @@ const createRelation = () => {
     relationSource.value.value = '';
     relSince.value.value = '';
     relTil.value.value = '';
-    addRelation.value = false;
+    selectPerson.value = false;
+    refreshNetwork();
   })
 }
 
