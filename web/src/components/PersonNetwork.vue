@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import * as vNG from 'v-network-graph'
 import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import { useRouter } from 'vue-router';
@@ -9,9 +9,11 @@ interface Connection {
   edges: {
     type: string
     node: {
-      uid: string
-      name: string
-      birthdate: string
+      id: number
+      firstname: string
+      lastname: string
+      birthdate?: Date
+      deathdate?: Date
     }
   }[]
 }
@@ -26,10 +28,11 @@ const props = defineProps<{
     familyInConnection: Connection
     familyOutConnection: Connection
     acquaintancesConnection: Connection
-  }
+  },
+  editPerson: boolean,
 }>()
 
-const nodes = computed(() => (props.person ? {
+/*const nodes = computed(() => (props.person ? {
   [props.person.uid]: {
     name: `${props.person.name}\n* ${new Date(props.person.birthdate).getFullYear()}`,
     color: 'rgba(255, 86, 86, .8)',
@@ -46,9 +49,15 @@ const nodes = computed(() => (props.person ? {
     name: `${p.node.name}\n* ${new Date(p.node.birthdate).getFullYear()}`,
     color: getComputedStyle(document.body).getPropertyValue('--color-text'),
   }])),
-} : {}))
+} : {}))*/
+const nodes = computed(() => (props.person ? {
+  [props.person.id]: {
+    name: `${props.person.name}${props.person.birthdate ? '\n* ' + props.person.birthdate.getFullYear() : ''}`,
+    color: getComputedStyle(document.body).getPropertyValue('--color-text'),
+  },
+} : {}));
 
-const edges = computed(() => props.person ? [
+/*const edges = computed(() => props.person ? [
   ...props.person.familyInConnection.edges.map(fam => ({ 
     source: props.person.uid, 
     target: fam.node.uid, 
@@ -66,11 +75,12 @@ const edges = computed(() => props.person ? [
     target: fam.node.uid, 
     label: fam.type,
   })),
-] : [])
+] : [])*/
+const edges = computed(() => [])
 
 const eventHandlers: vNG.EventHandlers = {
   'node:click': ({ node }) => {
-    router.push(`/person/${node}`)
+    router.push(`/p/${node}`)
   },
 }
 
@@ -116,19 +126,107 @@ const configs = ref(
     },
   })
 )
+
+const addRelation = ref(false);
 </script>
 
 <template>
-  <v-network-graph 
-    class="graph" 
-    zoom-level="2" 
-    :nodes="nodes" 
-    :edges="edges" 
-    :configs="configs"
-    :event-handlers="eventHandlers"
-  >
-    <template #edge-label="{ edge, ...slotProps }">
-      <v-edge-label :text="edge.label ?? '-'" align="center" vertical-align="above" v-bind="slotProps" />
-    </template>
-  </v-network-graph>
+  <div class="network-wrapper">
+    <v-network-graph 
+      class="graph" 
+      zoom-level="2" 
+      :nodes="nodes" 
+      :edges="edges" 
+      :configs="configs"
+      :event-handlers="eventHandlers"
+    >
+      <template #edge-label="{ edge, ...slotProps }">
+        <v-edge-label :text="edge.label ?? '-'" align="center" vertical-align="above" v-bind="slotProps" />
+      </template>
+    </v-network-graph>
+    <div :class="['netw-edit-overlay', $props.editPerson ? 'show' : '',]">
+      <div v-if="addRelation" class="netw-new-options">
+        <div>
+          <font-awesome-icon icon="fa-solid fa-baby" />
+          Parent
+        </div>
+        <div>
+          <font-awesome-icon icon="fa-solid fa-face-kiss" />
+          Partner
+        </div>
+        <div>
+          <font-awesome-icon icon="fa-solid fa-handshake" />
+          Friend
+        </div>
+      </div>
+      <button @click.stop="addRelation = !addRelation">
+        <font-awesome-icon :icon="['fa-solid', !addRelation ? 'fa-plus' : 'fa-close',]" />
+      </button>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.network-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.netw-edit-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  user-select: none;
+  display: none;
+  padding: 1em;
+}
+
+.netw-edit-overlay.show {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.netw-edit-overlay button {
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  color: var(--color-text);
+  font-size: 1.2em;
+  transition: .2s ease;
+  margin-top: .5em;
+}
+
+.netw-edit-overlay button:hover {
+  background: var(--color-border);
+  color: var(--color-bg);
+  cursor: pointer;
+}
+
+.netw-new-options {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.netw-new-options > div {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .5em;
+  padding: .2em .5em;
+  box-sizing: border-box;
+  margin: .1em 0;
+  background-color: var(--color-background-soft);
+  transition: .2s ease;
+}
+
+.netw-new-options > div:hover {
+  background-color: var(--color-background);
+  cursor: pointer;
+}
+</style>

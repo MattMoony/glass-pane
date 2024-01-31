@@ -118,7 +118,7 @@ const person = computed(() => {
           <PersonDescription :person="person" />
         </div>
         <div class="person-netw">
-          <PersonNetwork :person="person" />
+          <PersonNetwork :person="person" :edit-person="editPerson" />
         </div>
       </div>
     </div>
@@ -208,5 +208,8 @@ article {
   flex: 1;
   overflow: hidden;
   border-left: 2px solid var(--color-border);
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch
 }
 </style>
