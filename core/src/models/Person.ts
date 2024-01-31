@@ -41,14 +41,43 @@ export class Relation {
     const res = await client.query(
       `SELECT   url
       FROM      relation_source
-      WHERE     person = $1
+      WHERE     (person = $1
                 AND relative = $2
-                AND since = $3`,
+                AND since = $3)
+                OR
+                (person = $2
+                AND relative = $1
+                AND since = $3)`,
       [person.id, relative.id, since],
     );
     client.release();
     if (res.rows.length === 0) return null;
     return res.rows[0].url;
+  }
+
+  public static async remove (person: Person, relative: Person, since: Date): Promise<void> {
+    const client = await pool.connect();
+
+    await client.query(
+      `DELETE FROM relation_source
+      WHERE       (person = $1
+                  AND relative = $2
+                  AND since = $3)
+                  OR
+                  (person = $2
+                  AND relative = $1
+                  AND since = $3)`,
+      [person.id, relative.id, since],
+    );
+
+    await client.query(
+      `DELETE FROM relation
+      WHERE       person = $1
+                  AND relative = $2
+                  AND since = $3`,
+      [person.id, relative.id, since],
+    );
+    client.release();
   }
 }
 
