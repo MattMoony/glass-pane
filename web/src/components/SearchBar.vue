@@ -24,7 +24,7 @@ var timeout = null
 const search = t => {
   clearTimeout(timeout)
   timeout = setTimeout(() => {
-    if(!t.trim()) {
+    if(t.trim().length <= 3) {
       results.value = [];
       return
     }
@@ -53,6 +53,13 @@ const loseFocus = () => {
   }, 100)
 }
 
+const doSearch = () => {
+  hideRes.value = true
+  cuResult.value = true
+  text.value = ''
+  results.value = []
+}
+
 </script>
 
 <template>
@@ -76,7 +83,7 @@ const loseFocus = () => {
       />
     </div>
     <div class="results" v-if="resShown">
-      <div v-for="r in results" :key="r.id">
+      <div v-for="r in results" :key="r.id" @click.stop="doSearch()">
         <RouterLink :to="`/p/${r.id}`">
           <div :class="['result', r.type, ]">
             <font-awesome-icon icon="fa-solid fa-user" />
@@ -139,6 +146,39 @@ input {
   z-index: 99;
 }
 
+.results::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.results::-webkit-scrollbar-track {
+  background-color: var(--color-background-soft);
+}
+
+.results::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 0.5rem;
+}
+
+.results::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-hover);
+}
+
+.results::-webkit-scrollbar-thumb:active {
+  background-color: var(--color-border-active);
+}
+
+.results::-webkit-scrollbar-thumb:window-inactive {
+  background-color: var(--color-border-inactive);
+}
+
+.results::-webkit-scrollbar-corner {
+  background-color: var(--color-background-soft);
+}
+
+.results::-webkit-scrollbar-button {
+  display: none;
+}
+
 .results a {
   text-decoration: none;
   color: var(--color-text);
@@ -150,6 +190,10 @@ input {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+}
+
+.results .result {
+  margin: 0.2rem 0;
 }
 
 .result svg {
