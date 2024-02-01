@@ -104,10 +104,12 @@ const eventHandlers: vNG.EventHandlers = {
   'edge:click': async ({ edge }) => {
     const e = edges.value[edge];
     const r = await fetch(`http://localhost:8888/api/person/relation/source?from=${e.source}&to=${e.target}&since=${e.since}`).then(r => r.json());
-    sourceFrom.value = e.source;
-    sourceTo.value = e.target;
-    sourceLink.value = r.source;
-    showSource.value = true;
+    if (!props.editPerson) {
+      sourceFrom.value = e.source;
+      sourceTo.value = e.target;
+      sourceLink.value = r.source;
+      showSource.value = true;
+    }
   },
 }
 
@@ -206,6 +208,49 @@ const createRelation = () => {
       :configs="configs"
       :event-handlers="eventHandlers"
     >
+      <defs>
+        <!--
+          Define the path for clipping the face image.
+          To change the size of the applied node as it changes,
+          add the `clipPathUnits="objectBoundingBox"` attribute
+          and specify the relative size (0.0~1.0).
+        -->
+        <clipPath id="faceCircle" clipPathUnits="objectBoundingBox">
+          <circle cx="0.5" cy="0.5" r="0.5" />
+        </clipPath>
+      </defs>
+      <!-- Replace the node component -->
+      <template #override-node="{ nodeId, scale, config, ...slotProps }">
+        <!-- circle for filling background -->
+        <circle
+          class="face-circle"
+          :r="config.radius * scale"
+          fill="#ffffff"
+          v-bind="slotProps"
+        />
+        <!--
+          The base position of the <image /> is top left. The node's
+          center should be (0,0), so slide it by specifying x and y.
+        -->
+        <image
+          class="face-picture"
+          :x="-config.radius * scale"
+          :y="-config.radius * scale"
+          :width="config.radius * scale * 2"
+          :height="config.radius * scale * 2"
+          :xlink:href="`http://localhost:8888/api/person/${nodeId}/pic`"
+          clip-path="url(#faceCircle)"
+        />
+        <!-- circle for drawing stroke -->
+        <circle
+          class="face-circle"
+          :r="config.radius * scale"
+          fill="none"
+          stroke="#808080"
+          :stroke-width="1 * scale"
+          v-bind="slotProps"
+        />
+      </template>
       <template #edge-label="{ edge, ...slotProps }">
         <v-edge-label :text="edge.label ?? '-'" align="center" vertical-align="above" v-bind="slotProps" />
       </template>
@@ -366,5 +411,14 @@ const createRelation = () => {
   justify-content: space-between;
   align-items: center;
   gap: .5em;
+}
+
+.face-circle,
+.face-picture {
+  transition: all 0.1s linear;
+}
+
+.face-picture {
+  pointer-events: none;
 }
 </style>
