@@ -83,7 +83,7 @@ onClickOutside(container, () => {
     <div class="results" v-if="resShown">
       <div v-for="r in results" :key="r.id" @click.stop="doSearch()">
         <div :class="['result', r.type, ]" @click="cuResult = r; $emit('select', r)">
-          <font-awesome-icon icon="fa-solid fa-user" />
+          <img :src="`http://localhost:8888/api/person/${r.id}/pic`" />
           {{ r.firstname + " " + r.lastname }}
         </div>
       </div>
@@ -191,8 +191,9 @@ input {
   cursor: pointer;
 }
 
-.result svg {
+.result img {
   margin-right: 0.5rem;
+  height: 2em;
 }
 
 .result.person {
