@@ -69,7 +69,7 @@ const refreshNetwork = async () => {
       source: props.person.id, 
       target: p.to.id, 
       label: 'parent',
-      direction: 'out',
+      direction: 'in',
       color: '#23FF2D',
       since: p.since,
       until: p.until,
@@ -295,7 +295,7 @@ const createRelation = () => {
   </FullScreenModal>
   <FullScreenModal :show="showSource" @close="showSource = false">
     <h1>Source: {{ sourceFrom }} - {{ sourceTo }}</h1>
-    <a href="{{ sourceLink }}" target="_blank">{{ sourceLink }}</a>
+    <a :href="sourceLink" target="_blank">{{ sourceLink }}</a>
   </FullScreenModal>
 </template>
 
