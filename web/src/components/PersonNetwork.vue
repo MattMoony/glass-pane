@@ -88,6 +88,7 @@ const refreshNetwork = async () => {
       target: p.to.id, 
       label: 'friend',
       direction: 'out',
+      color: '#FFD023',
       since: p.since,
       until: p.until,
     })),

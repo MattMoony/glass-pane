@@ -82,7 +82,7 @@ const saveChanges = () => {
           </div>
         </div>
       </div>
-      <img src="/john-doe.png" alt="Person's face." />
+      <img :src="`http://localhost:8888/api/person/${$props.person?.id}/pic`" alt="Person's face." />
     </div>
   </div>
 </template>

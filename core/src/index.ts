@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import fs from 'fs';
 
 import searchRouter from './routes/search';
 import organRouter from './routes/organ';
@@ -10,6 +11,8 @@ import personRouter from './routes/person';
 dotenv.config();
 
 const app: Express = express();
+
+if (!fs.existsSync(process.env.DATA_DIR!)) fs.mkdirSync(process.env.DATA_DIR!);
 
 app.use(bodyParser.json());
 app.use(cors());

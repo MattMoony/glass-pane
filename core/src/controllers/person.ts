@@ -1,5 +1,6 @@
 import 'process';
 import { Request, Response } from 'express';
+import fs from 'fs';
 
 import Person, { Relation } from '../models/Person';
 
@@ -29,6 +30,19 @@ export const get = async (req: Request, res: Response): Promise<void> => {
     return;
   }
   res.send({ 'success': true, 'person': person.json() });
+};
+
+export const getPic = async (req: Request, res: Response): Promise<void> => {
+  if (!req.params.userId.match(/^[0-9]+$/)) {
+    res.send({ 'success': false, 'msg': 'bad userid' });
+    return;
+  }
+  if (fs.existsSync(`${process.env.DATA_DIR}/${req.params.userId}.jpg`)) {
+    res.sendFile(`${process.env.DATA_DIR}/${req.params.userId}.jpg`);
+  }
+  else {
+    res.sendFile(`${process.env.DATA_DIR}/default.png`);
+  }
 };
 
 export const update = async (req: Request, res: Response): Promise<void> => {

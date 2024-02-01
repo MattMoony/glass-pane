@@ -6,6 +6,7 @@ const router: Router = Router();
 router.post('/new', controller.create);
 router.get('/relation/source', controller.getRelationSource);
 router.get('/:userId', controller.checkUid, controller.get);
+router.get('/:userId/pic', controller.checkUid, controller.getPic);
 router.patch('/:userId', controller.checkUid, controller.update);
 router.delete('/:userId', controller.checkUid, controller.remove);
 router.post('/:userId/relation', controller.checkUid, controller.addRelation);
