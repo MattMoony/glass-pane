@@ -246,8 +246,8 @@ const createRelation = () => {
           class="face-circle"
           :r="config.radius * scale"
           fill="none"
-          stroke="#808080"
-          :stroke-width="1 * scale"
+          :stroke="`${nodes[nodeId].color}`"
+          :stroke-width="4 * scale"
           v-bind="slotProps"
         />
       </template>
@@ -279,17 +279,17 @@ const createRelation = () => {
     <div class="relation-modal">
       <h1 class="add-a-title">Add a {{ adding }}</h1>
       <SelectSearch @select="r => selectedPerson = r" />
+        <div class="relation-time">
+          <span>
+            Since
+            <input type="date" ref="relSince" />
+          </span>
+          <span>
+            Until
+            <input type="date" ref="relTil" />
+          </span>
+        </div>
       <input type="text" ref="relationSource" placeholder="Source ... " />
-      <div class="relation-time">
-        <span>
-          Since
-          <input type="date" ref="relSince" />
-        </span>
-        <span>
-          Until
-          <input type="date" ref="relTil" />
-        </span>
-      </div>
       <input type="submit" value="Add" @click="createRelation()" />
     </div>
   </FullScreenModal>
@@ -420,5 +420,9 @@ const createRelation = () => {
 
 .face-picture {
   pointer-events: none;
+}
+
+a {
+  color: var(--color-text);
 }
 </style>
