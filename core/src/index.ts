@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import fs from 'fs';
+import fileUpload from 'express-fileupload';
 
 import searchRouter from './routes/search';
 import organRouter from './routes/organ';
@@ -16,6 +17,7 @@ if (!fs.existsSync(process.env.DATA_DIR!)) fs.mkdirSync(process.env.DATA_DIR!);
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use(fileUpload());
 
 app.use('/api/search/', searchRouter);
 app.use('/api/organ/', organRouter);

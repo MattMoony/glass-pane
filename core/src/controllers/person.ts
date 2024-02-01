@@ -1,6 +1,7 @@
 import 'process';
 import { Request, Response } from 'express';
 import fs from 'fs';
+import fileUpload from 'express-fileupload';
 
 import Person, { Relation } from '../models/Person';
 
@@ -43,6 +44,35 @@ export const getPic = async (req: Request, res: Response): Promise<void> => {
   else {
     res.sendFile(`${process.env.DATA_DIR}/default.png`);
   }
+};
+
+export const setPic = async (req: Request, res: Response): Promise<void> => {
+  if (!req.params.userId.match(/^[0-9]+$/)) {
+    res.send({ 'success': false, 'msg': 'bad userid' });
+    return;
+  }
+  if (!req.files || !req.files.pic) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+  const pic = req.files.pic as fileUpload.UploadedFile;
+  if (!['image/jpeg', 'image/png', 'image/gif',].includes(pic.mimetype)) {
+    res.send({ 'success': false, 'msg': 'bad mimetype' });
+    return;
+  }
+  await pic.mv(`${process.env.DATA_DIR}/${req.params.userId}.jpg`);
+  res.send({ 'success': true });
+};
+
+export const removePic = async (req: Request, res: Response): Promise<void> => {
+  if (!req.params.userId.match(/^[0-9]+$/)) {
+    res.send({ 'success': false, 'msg': 'bad userid' });
+    return;
+  }
+  if (fs.existsSync(`${process.env.DATA_DIR}/${req.params.userId}.jpg`)) {
+    fs.unlinkSync(`${process.env.DATA_DIR}/${req.params.userId}.jpg`);
+  }
+  res.send({ 'success': true });
 };
 
 export const update = async (req: Request, res: Response): Promise<void> => {

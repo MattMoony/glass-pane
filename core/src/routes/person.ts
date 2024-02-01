@@ -7,6 +7,8 @@ router.post('/new', controller.create);
 router.get('/relation/source', controller.getRelationSource);
 router.get('/:userId', controller.checkUid, controller.get);
 router.get('/:userId/pic', controller.checkUid, controller.getPic);
+router.post('/:userId/pic', controller.checkUid, controller.setPic);
+router.delete('/:userId/pic', controller.checkUid, controller.removePic);
 router.patch('/:userId', controller.checkUid, controller.update);
 router.delete('/:userId', controller.checkUid, controller.remove);
 router.post('/:userId/relation', controller.checkUid, controller.addRelation);

@@ -40,6 +40,31 @@ const saveChanges = () => {
   });
 };
 
+const picOut = ref(null);
+const picUpload = ref(null);
+
+const uploadImage = async () => {
+  console.log('upload image');
+  const file = picUpload.value.files[0];
+  const formData = new FormData();
+  formData.append('pic', file);
+  console.log(file, formData);
+  await fetch(`http://localhost:8888/api/person/${props.person.id}/pic`, {
+    method: 'POST',
+    body: formData,
+  });
+  picOut.value.src = `http://localhost:8888/api/person/${props.person.id}/pic`;
+  picUpload.value.value = '';
+};
+
+const removeImage = async () => {
+  console.log('remove image');
+  await fetch(`http://localhost:8888/api/person/${props.person.id}/pic`, {
+    method: 'DELETE',
+  });
+  picOut.value.src = `http://localhost:8888/api/person/${props.person.id}/pic`;
+};
+
 </script>
 
 <template>
@@ -82,7 +107,15 @@ const saveChanges = () => {
           </div>
         </div>
       </div>
-      <img :src="`http://localhost:8888/api/person/${$props.person?.id}/pic`" alt="Person's face." />
+      <div class="image-upload">
+        <img ref="picOut" :src="`http://localhost:8888/api/person/${$props.person?.id}/pic`" alt="Person's face." />
+        <div v-if="editPerson">
+          <input ref="picUpload" @change="uploadImage" type="file" accept=".jpg,.png,.gif" />
+          <button @click="removeImage" tooltip="Remove Image">
+            <font-awesome-icon icon="fa-solid fa-trash" />
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -167,5 +200,46 @@ input {
 input:focus {
   outline: none;
   border-bottom: 2px solid var(--color-text);
+}
+
+.image-upload {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 1em;
+  gap: 1em;
+}
+
+.image-upload > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: .5em;
+}
+
+.image-upload button {
+  background: var(--color-border);
+  border: none;
+  border-radius: 5px;
+  padding: .5em 1em;
+  box-sizing: border-box;
+  font-size: 1em;
+  font-weight: bold;
+  color: var(--color-text);
+  width: 100%;
+  transition: .2s ease;
+}
+
+.image-upload button:hover {
+  background: var(--color-background-soft);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.image-upload input {
+  width: 100%;
+  box-sizing: border-box;
 }
 </style>
