@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch } from 'vue'
+import { marked } from 'marked';
 
 const props = defineProps<{
   person: {
     id: string
+    bio: string
     firstname: string
     lastname: string
     birthdate?: Date
@@ -116,6 +118,10 @@ const removeImage = async () => {
           </button>
         </div>
       </div>
+    </div>
+    <div class="bio">
+      <div v-if="!editPerson" v-dompurify-html="$props.person && marked($props.person.bio)"></div>
+      <textarea v-else>{{ $props.person?.bio }}</textarea>
     </div>
   </div>
 </template>
@@ -241,5 +247,37 @@ input:focus {
 .image-upload input {
   width: 100%;
   box-sizing: border-box;
+}
+
+.bio {
+  margin-top: 1.5em;
+  padding: 1.5em;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.bio::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.bio::-webkit-scrollbar-track {
+  background-color: var(--color-background-soft);
+}
+
+.bio::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 0.5rem;
+}
+
+.bio::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-hover);
+}
+
+.bio::-webkit-scrollbar-corner {
+  background-color: var(--color-background-soft);
+}
+
+.bio::-webkit-scrollbar-button {
+  display: none;
 }
 </style>

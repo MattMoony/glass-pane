@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import VueDOMPurifyHTML from 'vue-dompurify-html'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -19,6 +20,7 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(VNetworkGraph)
+app.use(VueDOMPurifyHTML)
 
 library.add(faGithub, faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave)
 app.component('font-awesome-icon', FontAwesomeIcon)

@@ -10,6 +10,7 @@ import SelectSearch from './SelectSearch.vue'
 interface Relation {
   to: {
     id: number,
+    bio: string,
     firstname: string,
     lastname: string,
     birthdate?: Date,
@@ -23,6 +24,7 @@ const router = useRouter()
 const props = defineProps<{
   person: {
     id: number,
+    bio: string,
     firstname: string,
     lastname: string,
     birthdate?: Date,

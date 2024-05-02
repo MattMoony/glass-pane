@@ -10,8 +10,8 @@ class Organization extends Organ {
   public established?: Date;
   public dissolved?: Date;
 
-  public constructor (id: number, name: string, established?: Date, dissolved?: Date) {
-    super(id);
+  public constructor (id: number, bio: string, name: string, established?: Date, dissolved?: Date) {
+    super(id, bio);
     this.name = name;
     this.established = established;
     this.dissolved = dissolved;

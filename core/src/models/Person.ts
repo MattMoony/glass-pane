@@ -90,8 +90,8 @@ class Person extends Organ {
   public birthdate?: Date;
   public deathdate?: Date;
 
-  public constructor (id: number, firstname: string, lastname: string, birthdate?: Date, deathdate?: Date) {
-    super(id);
+  public constructor (id: number, bio: string, firstname: string, lastname: string, birthdate?: Date, deathdate?: Date) {
+    super(id, bio);
     this.firstname = firstname;
     this.lastname = lastname;
     this.birthdate = birthdate;
@@ -159,13 +159,14 @@ class Person extends Organ {
       [this.id, RELATION_TYPES['parent']],
     );
     client.release();
-    return res.rows.map((row) => new Relation(this, new Person(
+    return Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
       row.pid,
+      (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
       row.deathdate,
-    ), row.since, row.until));
+    ), row.since, row.until)));
   }
 
   public async getChildren (): Promise<Relation[]> {
@@ -179,13 +180,14 @@ class Person extends Organ {
       [this.id, RELATION_TYPES['parent']],
     );
     client.release();
-    return res.rows.map((row) => new Relation(this, new Person(
+    return Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
       row.pid,
+      (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
       row.deathdate,
-    ), row.since, row.until));
+    ), row.since, row.until)));
   }
 
   public async getRomantic (): Promise<Relation[]> {
@@ -198,13 +200,14 @@ class Person extends Organ {
                 AND relation.relation = $2`,
       [this.id, RELATION_TYPES['romantic']],
     );
-    const ret = res.rows.map((row) => new Relation(this, new Person(
+    const ret = await Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
       row.pid,
+      (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
       row.deathdate,
-    ), row.since, row.until));
+    ), row.since, row.until)));
     const res2 = await client.query(
       `SELECT   person.*, relation.since, relation.until
       FROM      relation
@@ -214,13 +217,14 @@ class Person extends Organ {
       [this.id, RELATION_TYPES['romantic']],
     );
     client.release();
-    return ret.concat(res2.rows.map((row) => new Relation(this, new Person(
+    return ret.concat(await Promise.all(res2.rows.map(async (row) => new Relation(this, new Person(
       row.pid,
+      (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
       row.deathdate,
-    ), row.since, row.until)));
+    ), row.since, row.until))));
   }
 
   public async getFriends (): Promise<Relation[]> {
@@ -233,13 +237,14 @@ class Person extends Organ {
                 AND relation.relation = $2`,
       [this.id, RELATION_TYPES['friend']],
     );
-    const ret = res.rows.map((row) => new Relation(this, new Person(
+    const ret = await Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
       row.pid,
+      (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
       row.deathdate,
-    ), row.since, row.until));
+    ), row.since, row.until)));
     const res2 = await client.query(
       `SELECT   person.*, relation.since, relation.until
       FROM      relation
@@ -249,16 +254,17 @@ class Person extends Organ {
       [this.id, RELATION_TYPES['friend']],
     );
     client.release();
-    return ret.concat(res2.rows.map((row) => new Relation(this, new Person(
+    return ret.concat(await Promise.all(res2.rows.map(async (row) => new Relation(this, new Person(
       row.pid,
+      (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
       row.deathdate,
-    ), row.since, row.until)));
+    ), row.since, row.until))));
   }
 
-  public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date): Promise<Person> {
+  public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date, bio?: string): Promise<Person> {
     const id = await Organ.create();
     const client = await pool.connect();
     await client.query(
@@ -266,10 +272,12 @@ class Person extends Organ {
       [id, firstname, lastname, birthdate, deathdate,],
     );
     client.release();
-    return new Person(id, firstname, lastname, birthdate, deathdate);
+    return new Person(id, bio||'', firstname, lastname, birthdate, deathdate);
   }
 
   public static async get (id: number): Promise<Person|null> {
+    const organ = await super.get(id);
+    if (!organ) return null;
     const client = await pool.connect();
     const res = await client.query(
       'SELECT * FROM person WHERE pid = $1',
@@ -278,7 +286,8 @@ class Person extends Organ {
     client.release();
     if (res.rows.length === 0) return null;
     return new Person(
-      res.rows[0].pid,
+      organ.id,
+      organ.bio,
       res.rows[0].firstname,
       res.rows[0].lastname,
       res.rows[0].birthdate,
@@ -296,13 +305,14 @@ class Person extends Organ {
       [`%${query}%`],
     );
     client.release();
-    return res.rows.map((row) => new Person(
+    return Promise.all(res.rows.map(async (row) => new Person(
       row.pid,
+      (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
       row.deathdate,
-    ));
+    )));
   }
 }
 

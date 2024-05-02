@@ -68,6 +68,7 @@ watch(data, () => {
   if (!d || !d.success) return null
   person.value = {
     id: d.person.id,
+    bio: d.person.bio,
     firstname: d.person.firstname,
     lastname: d.person.lastname,
     ...(d.person.birthdate ? { birthdate: new Date(d.person.birthdate) } : {}),

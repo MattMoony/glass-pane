@@ -1,4 +1,5 @@
 import { pool } from '../db';
+import fs from 'fs';
 
 /**
  * Represents a member of an organization. That member
@@ -7,14 +8,17 @@ import { pool } from '../db';
  */
 class Organ {
   public id: number;
+  public bio: string;
 
-  public constructor (id: number) {
+  public constructor (id: number, bio: string) {
     this.id = id;
+    this.bio = bio;
   }
 
   public json (): Object {
     return {
       id: this.id,
+      bio: this.bio,
     };
   }
 
@@ -26,7 +30,18 @@ class Organ {
     const client = await pool.connect();
     const result = await client.query('INSERT INTO organ DEFAULT VALUES RETURNING oid');
     client.release();
-    return +result.rows[0].oid;
+    const oid = +result.rows[0].oid;
+    fs.writeFileSync(`${process.env.DATA_DIR}/${oid}.md`, '');
+    return oid;
+  }
+
+  public static async get (id: number): Promise<Organ|null> {
+    const client = await pool.connect();
+    const res = await client.query('SELECT * FROM organ WHERE oid = $1', [id]);
+    client.release();
+    if (res.rows.length === 0) return null;
+    if (!fs.existsSync(`${process.env.DATA_DIR}/${id}.md`)) fs.writeFileSync(`${process.env.DATA_DIR}/${id}.md`, '');
+    return new Organ(res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${id}.md`, 'utf8'));
   }
 }
 
