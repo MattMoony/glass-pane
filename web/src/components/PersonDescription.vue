@@ -4,6 +4,11 @@ import { marked } from 'marked';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 
+interface OrganSource {
+  sid: number;
+  url: string;
+}
+
 const props = defineProps<{
   person: {
     id: string
@@ -24,7 +29,10 @@ const lastname = ref('')
 const birthdate = ref('')
 const deathdate = ref('')
 
-const watchPerson = () => {
+const sources = ref<OrganSource[]>([])
+const newSource = ref('')
+
+const watchPerson = async () => {
   const person = props.person;
   if (!person) return;
   bio.value = person.bio ?? '';
@@ -32,6 +40,7 @@ const watchPerson = () => {
   lastname.value = person.lastname ?? '';
   birthdate.value = person.birthdate ? `${person.birthdate.getFullYear()}-${("0"+(person.birthdate.getMonth()+1)).slice(-2)}-${("0"+(person.birthdate.getDate())).slice(-2)}` : '';
   deathdate.value = person.deathdate ? `${person.deathdate.getFullYear()}-${("0"+(person.deathdate.getMonth()+1)).slice(-2)}-${("0"+(person.deathdate.getDate())).slice(-2)}` : '';
+  sources.value = (await fetch(`http://localhost:8888/api/organ/${person.id}/sources`).then(r => r.json())).sources ?? [];
 };
 
 watch(() => props.person, watchPerson);
@@ -71,6 +80,40 @@ const removeImage = async () => {
     method: 'DELETE',
   });
   picOut.value.src = `http://localhost:8888/api/person/${props.person.id}/pic`;
+};
+
+const updateSource = async (sid: number) => {
+  const source = sources.value.find(s => s.sid === sid);
+  if (!source || !source.url) return;
+  await fetch(`http://localhost:8888/api/organ/${props.person.id}/sources/${sid}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(source),
+  });
+};
+
+const addSource = async () => {
+  if (!newSource.value) return;
+  const res = await fetch(`http://localhost:8888/api/organ/${props.person.id}/sources`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url: newSource.value }),
+  });
+  if (res.ok) {
+    sources.value = [...sources.value, { sid: (await res.json()).sid, url: newSource.value }];
+    newSource.value = '';
+  }
+};
+
+const removeSource = async (sid: number) => {
+  await fetch(`http://localhost:8888/api/organ/${props.person.id}/sources/${sid}`, {
+    method: 'DELETE',
+  });
+  sources.value = sources.value.filter(s => s.sid !== sid);
 };
 
 </script>
@@ -127,17 +170,48 @@ const removeImage = async () => {
     </div>
     <div :class="[ 'bio', $props.fullPage ? 'full-bio' : '', ]">
       <h2>Bio</h2>
-      <div class="bio-content">
-        <div 
-          v-if="!editPerson" 
-          v-dompurify-html="$props.person && marked($props.person.bio)"
-        ></div>
+      <div 
+        class="bio-content md-bio-content" 
+        v-if="!editPerson" 
+        v-dompurify-html="$props.person && marked($props.person.bio)"
+      ></div>
+      <div
+        class="bio-content"
+        v-else>
         <codemirror 
           :style="{height: '30vh', width: '100%',}" 
           v-if="editPerson" 
           v-model="bio"
           :extensions="[markdown(), oneDark,]"
         />
+      </div>
+      <h2>Sources</h2>
+      <div v-if="!editPerson" class="sources">
+        <ol v-if="sources.length">
+          <li v-for="source in sources" :key="source.sid">
+            <a :href="source.url" target="_blank">{{ source.url }}</a>
+          </li>
+        </ol>
+        <i v-else>No sources yet ...</i>
+      </div>
+      <div class="sources edit-sources" v-else>
+        <ol>
+          <li v-for="source in sources" :key="source.sid">
+            <input type="text" v-model="source.url" @keyup="e => e.key === 'Enter' ? updateSource(source.sid) : null" />
+            <button class="save-button" @click="() => updateSource(source.sid)">
+              <font-awesome-icon icon="fa-solid fa-save" />
+            </button>
+            <button class="save-button" @click="() => removeSource(source.sid)">
+              <font-awesome-icon icon="fa-solid fa-trash" />
+            </button>
+          </li>
+          <li>
+            <input type="text" v-model="newSource" @keyup="e => e.key === 'Enter' ? addSource() : null" />
+            <button class="save-button" @click="addSource">
+              <font-awesome-icon icon="fa-solid fa-plus" />
+            </button>
+          </li>
+        </ol>
       </div>
     </div>
   </div>
@@ -312,13 +386,66 @@ input:focus {
   display: none;
 }
 
-.bio-content {
+.bio-content, .sources {
   padding: 1em;
+  border-left: 2px dashed var(--color-border);
+  margin: 1em 0;
 }
 
-.bio-content > textarea {
-  width: 100%;
-  resize: none;
+.sources ol {
+  list-style-type: decimal;
+  padding: 0 1em;
+}
+
+.sources li {
+  margin: .5em 0;
+}
+
+.sources a {
+  color: var(--color-text);
+}
+
+.sources input {
+  text-align: left;
+  padding: .5em;
+  font-weight: normal;
+}
+
+.sources button {
+  display: inline-block;
+  width: auto;
+  padding: .5em;
+  font-size: 1em;
+  margin-right: .2em;
+}
+</style>
+
+
+<style>
+/* 
+for markdown bio 
+*/
+
+.md-bio-content img {
+  max-width: 100%;
   height: auto;
+}
+
+.md-bio-content table {
+  border-collapse: collapse;
+}
+
+.md-bio-content table td, .md-bio-content table th {
+  border: 2px solid var(--color-border);
+  padding: .2em 1em;
+}
+
+.md-bio-content table th {
+  background: var(--color-background-soft);
+  font-weight: bold;
+}
+
+.md-bio-content a {
+  color: var(--color-highlight);
 }
 </style>

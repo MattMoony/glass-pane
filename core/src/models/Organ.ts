@@ -2,6 +2,11 @@ import { pool } from '../db';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 
+export interface OrganSource {
+  sid: number;
+  url: string;
+}
+
 /**
  * Represents a member of an organization. That member
  * doesn't have to be a natural person - they could themselves
@@ -48,6 +53,31 @@ class Organ {
     if (!fs.existsSync(`${process.env.DATA_DIR}/${id}.md`)) fs.writeFileSync(`${process.env.DATA_DIR}/${id}.md`, '');
     return new Organ(res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${id}.md`, 'utf8'));
   }
+
+  public async getSources (): Promise<OrganSource[]> {
+    const client = await pool.connect();
+    const res = await client.query('SELECT sid, url FROM organ_source WHERE organ = $1', [this.id]);
+    client.release();
+    return res.rows;
+  }
+
+  public async addSource (url: string): Promise<void> {
+    const client = await pool.connect();
+    await client.query('INSERT INTO organ_source (organ, url) VALUES ($1, $2)', [this.id, url]);
+    client.release();
+  };
+
+  public async removeSource (sid: number): Promise<void> {
+    const client = await pool.connect();
+    await client.query('DELETE FROM organ_source WHERE sid = $1', [sid]);
+    client.release();
+  };
+
+  public async updateSource (sid: number, url: string): Promise<void> {
+    const client = await pool.connect();
+    await client.query('UPDATE organ_source SET url = $1 WHERE sid = $2', [url, sid]);
+    client.release();
+  };
 }
 
 export default Organ;
