@@ -258,7 +258,7 @@ article {
   flex-basis: 0;
   padding: 2em;
   height: 100%;
-  max-width: 50vw;
+  max-width: 60vw;
 }
 
 .details .person-netw {
