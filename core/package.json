@@ -16,7 +16,8 @@
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.3",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "pg-types": "^4.0.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

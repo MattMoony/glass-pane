@@ -149,6 +149,49 @@ class Person extends Organ {
     client.release();
   }
 
+  public async updateRelation (relationType: string, person: Person, source: string, since: Date, until?: Date): Promise<void> {
+    const client = await pool.connect();
+
+    if (!(relationType in RELATION_TYPES)) return;
+
+    await client.query(
+      'UPDATE relation SET until = $1 WHERE person = $2 AND relative = $3 AND relation = $4 AND since = $5',
+      [until, this.id, person.id, RELATION_TYPES[relationType], since],
+    );
+
+    console.log(source, this.id, person.id, since, typeof since)
+    const res = await client.query(
+      'UPDATE relation_source SET url = $1 WHERE person = $2 AND relative = $3 AND since = $4',
+      [source, this.id, person.id, since],
+    );
+    console.log(res.rowCount)
+    const res2 = await client.query(
+      'SELECT * FROM relation_source WHERE person = $1 AND relative = $2 AND since = $3',
+      [this.id, person.id, since.toISOString().split('T')[0]],
+    );
+    console.log(res2.rows)
+
+    client.release();
+  }
+
+  public async removeRelation (relationType: string, person: Person, since: Date): Promise<void> {
+    const client = await pool.connect();
+
+    if (!(relationType in RELATION_TYPES)) return;
+
+    await client.query(
+      'DELETE FROM relation WHERE person = $1 AND relative = $2 AND relation = $3 AND since = $4',
+      [this.id, person.id, RELATION_TYPES[relationType], since],
+    );
+
+    await client.query(
+      'DELETE FROM relation_source WHERE person = $1 AND relative = $2 AND since = $3',
+      [this.id, person.id, since],
+    );
+
+    client.release();
+  }
+
   public async getParents (): Promise<Relation[]> {
     const client = await pool.connect();
     const res = await client.query(

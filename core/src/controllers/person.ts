@@ -33,6 +33,15 @@ export const get = async (req: Request, res: Response): Promise<void> => {
   res.send({ 'success': true, 'person': person.json() });
 };
 
+export const getName = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+  res.send({ 'success': true, 'firstname': person.firstname, 'lastname': person.lastname, });
+};
+
 export const getPic = async (req: Request, res: Response): Promise<void> => {
   if (!req.params.userId.match(/^[0-9]+$/)) {
     res.send({ 'success': false, 'msg': 'bad userid' });
@@ -124,6 +133,50 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
   await person.addRelation(req.body.type, relative, req.body.source, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
   res.send({ 'success': true });
 };
+
+export const updateRelation = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  if (!req.body.personId || !req.body.type || !req.body.since) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+
+  const relative = await Person.get(parseInt(req.body.personId));
+  if (relative === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  await person.updateRelation(req.body.type, relative, req.body.source, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
+  res.send({ 'success': true });
+}
+
+export const removeRelation = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  if (!req.body.personId || !req.body.type || !req.body.since) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+
+  const relative = await Person.get(parseInt(req.body.personId));
+  if (relative === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  await person.removeRelation(req.body.type, relative, new Date(req.body.since));
+  res.send({ 'success': true });
+}
 
 export const getParents = async (req: Request, res: Response): Promise<void> => {
   const person = await Person.get(parseInt(req.params.userId));

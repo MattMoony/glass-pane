@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
+import type { Ref } from 'vue'
 import * as vNG from 'v-network-graph'
 import { ForceLayout } from 'v-network-graph/lib/force-layout'
 import { useRouter } from 'vue-router';
 import type { Edge } from 'v-network-graph';
 import FullScreenModal from './FullScreenModal.vue'
 import SelectSearch from './SelectSearch.vue'
+import { RouterLink } from 'vue-router'
 
 interface Relation {
   to: {
@@ -16,8 +18,25 @@ interface Relation {
     birthdate?: Date,
     deathdate?: Date,
   },
-  since: string,
-  until?: string,
+  since: Date,
+  until?: Date,
+}
+
+interface ShownSource {
+  from: {
+    id: number,
+    firstname: string,
+    lastname: string,
+  },
+  to: {
+    id: number,
+    firstname: string,
+    lastname: string,
+  },
+  source: string,
+  since: Date,
+  until?: Date,
+  type: string,
 }
 
 const router = useRouter()
@@ -31,27 +50,41 @@ const props = defineProps<{
     deathdate?: Date,
   },
   editPerson: boolean,
-}>()
+}>();
+const emit = defineEmits(['save-relation']);
 
-const nodes = ref({});
-const edges = ref([]);
+const nodes: Ref<{ [id: number]: any }> = ref({});
+const edges: Ref<any[]> = ref([]);
 
 const refreshNetwork = async () => {
   if (!props.person || !props.person.id) return;
 
-  const parents: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/parents`).then(r => r.json())).parents;
-  const children: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/children`).then(r => r.json())).children;
-  const romantic: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/romantic`).then(r => r.json())).romantic;
-  const friends: Relation[] = (await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends;
+  const _2dates = (rs: any[]) => rs.map(r => ({
+    to: {
+      ...r.to,
+      birthdate: r.to.birthdate ? new Date(r.to.birthdate) : null,
+      deathdate: r.to.deathdate ? new Date(r.to.deathdate) : null,
+    },
+    since: new Date(r.since),
+    until: r.until ? new Date(r.until) : null,
+  }));
+  const parents: Relation[] = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/parents`).then(r => r.json())).parents);
+  const children: Relation[] = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/children`).then(r => r.json())).children);
+  const romantic: Relation[] = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/romantic`).then(r => r.json())).romantic);
+  const friends: Relation[] = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends);
 
   nodes.value = {
     [props.person.id]: {
       name: `${props.person.name}${props.person.birthdate ? '\n* ' + props.person.birthdate.getFullYear() : ''}`,
+      firstname: props.person.firstname,
+      lastname: props.person.lastname,
       color: getComputedStyle(document.body).getPropertyValue('--color-text'),
     },
     ...[...parents, ...children, ...romantic, ...friends].map(f => ({
       [f.to.id]: {
-        name: `${f.to.firstname} ${f.to.lastname}${f.to.birthdate ? '\n* ' + new Date(f.to.birthdate).getFullYear() : ''}`,
+        name: `${f.to.firstname} ${f.to.lastname}${f.to.birthdate ? '\n* ' + f.to.birthdate.getFullYear() : ''}`,
+        firstname: f.to.firstname,
+        lastname: f.to.lastname,
         color: '#237AFF',
       },
     })).reduce((a, b) => ({ ...a, ...b }), {}),
@@ -61,38 +94,42 @@ const refreshNetwork = async () => {
     ...parents.map(p => ({ 
       source: p.to.id, 
       target: props.person.id, 
-      label: 'parent',
+      label: `parent (${p.since.getFullYear()})`,
       direction: 'in',
       color: '#23FF2D',
       since: p.since,
       until: p.until,
+      type: 'parent',
     })),
     ...children.map(p => ({ 
       source: props.person.id, 
       target: p.to.id, 
-      label: 'parent',
+      label: `parent (${p.since.getFullYear()})`,
       direction: 'in',
       color: '#23FF2D',
       since: p.since,
       until: p.until,
+      type: 'parent',
     })),
     ...romantic.map(p => ({ 
       source: props.person.id, 
       target: p.to.id, 
-      label: 'romantic',
+      label: `romantic (${p.since.getFullYear()}${p.until ? ' - ' + p.until.getFullYear() : ''})`,
       direction: 'out',
       color: '#FF3423',
       since: p.since,
       until: p.until,
+      type: 'romantic',
     })),
     ...friends.map(p => ({ 
       source: props.person.id, 
       target: p.to.id, 
-      label: 'friend',
+      label: `friends (${p.since.getFullYear()}${p.until ? ' - ' + p.until.getFullYear() : ''})`,
       direction: 'out',
       color: '#FFD023',
       since: p.since,
       until: p.until,
+      type: 'friend',
     })),
   ];
 };
@@ -106,12 +143,24 @@ const eventHandlers: vNG.EventHandlers = {
   'edge:click': async ({ edge }) => {
     const e = edges.value[edge];
     const r = await fetch(`http://localhost:8888/api/person/relation/source?from=${e.source}&to=${e.target}&since=${e.since}`).then(r => r.json());
-    if (!props.editPerson) {
-      sourceFrom.value = e.source;
-      sourceTo.value = e.target;
-      sourceLink.value = r.source;
-      showSource.value = true;
-    }
+    const source = {
+      from: {
+        id: +e.source,
+        ...nodes.value[+e.source],
+      },
+      to: {
+        id: +e.target,
+        ...nodes.value[+e.target],
+      },
+      source: r.source,
+      since: e.since,
+      until: e.until,
+      type: e.type,
+    };
+    if (!props.editPerson)
+      shownSource.value = source;
+    else
+      editSource.value = { ...source, since: source.since.toISOString().split('T')[0], until: source.until?.toISOString().split('T')[0], };
   },
 }
 
@@ -166,10 +215,8 @@ const relationSource = ref(null);
 const relSince = ref(null);
 const relTil = ref(null);
 
-const sourceFrom = ref('');
-const sourceTo = ref('');
-const sourceLink = ref('');
-const showSource = ref(false);
+const shownSource: Ref<ShownSource|{}> = ref({})
+const editSource: Ref<ShownSource|{}> = ref({})
 
 const createRelation = () => {
   if (!selectedPerson.value || !relationSource.value.value.trim() || !relSince.value.value) return;
@@ -295,9 +342,40 @@ const createRelation = () => {
       <input type="submit" value="Add" @click="createRelation()" />
     </div>
   </FullScreenModal>
-  <FullScreenModal :show="showSource" @close="showSource = false">
-    <h1>Source: {{ sourceFrom }} - {{ sourceTo }}</h1>
-    <a :href="sourceLink" target="_blank">{{ sourceLink }}</a>
+  <FullScreenModal :show="'from' in shownSource" @close="shownSource = {}">
+    <h1 v-if="'from' in shownSource">
+      {{ shownSource.from.firstname }} {{ shownSource.from.lastname }}
+      &amp; 
+      <RouterLink :to="`/p/${shownSource.to.id}`">
+        {{ shownSource.to.firstname }} {{ shownSource.to.lastname }}
+      </RouterLink>
+      ({{ shownSource.since.getFullYear() }} - {{ shownSource.until ? shownSource.until.getFullYear() : 'present' }})
+    </h1>
+    Source: <a v-if="'source' in shownSource" :href="shownSource.source" target="_blank">{{ shownSource.source }}</a>
+  </FullScreenModal>
+  <FullScreenModal :show="'from' in editSource" @close="editSource = {}">
+    <h1 v-if="'from' in editSource">
+      {{ editSource.from.firstname }} {{ editSource.from.lastname }}
+      &amp; 
+      <RouterLink :to="`/p/${editSource.to.id}`">
+        {{ editSource.to.firstname }} {{ editSource.to.lastname }}
+      </RouterLink>
+    </h1>
+    <div class="relation-modal" v-if="'source' in editSource">
+      <div class="relation-time">
+        <span>
+          Since
+          <input type="date" ref="editRelSince" v-model="editSource.since" />
+        </span>
+        <span>
+          Until
+          <input type="date" ref="editRelTil" v-model="editSource.until" />
+        </span>
+      </div>
+      <label for="edit-source-input">Source: </label>
+      <input type="text" id="edit-source-input" ref="editRelationSource" v-model="editSource.source" />
+      <input type="submit" value="Save" @click="emit('save-relation', editSource)" />
+    </div>
   </FullScreenModal>
 </template>
 
