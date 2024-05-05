@@ -113,6 +113,7 @@ class Person extends Organ {
   }
 
   public async update (): Promise<void> {
+    await super.update();
     const client = await pool.connect();
     await client.query(
       'UPDATE person SET firstname = $1, lastname = $2, birthdate = $3, deathdate = $4 WHERE pid = $5',

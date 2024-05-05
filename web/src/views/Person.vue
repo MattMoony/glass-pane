@@ -89,6 +89,7 @@ const updatePerson = async (p) => {
   if (res.ok) {
     person.value = {
       ...(person ? person.value : {}),
+      bio: p.bio,
       firstname: p.firstname,
       lastname: p.lastname,
       ...(p.birthdate ? { birthdate: new Date(p.birthdate) } : {}),
@@ -143,6 +144,7 @@ const updatePerson = async (p) => {
           <PersonDescription 
             :person="person"
             :edit-person="editPerson"
+            full-page
             @save="updatePerson"
           />
         </div>
@@ -225,19 +227,24 @@ article {
 }
 
 .details {
-  flex: 1;
+  flex-grow: 1;
+  flex-basis: 0;
   display: flex;
   justify-content: stretch;
   align-items: stretch;
 }
 
 .details .person-desc {
-  flex: 1;
+  flex-grow: 1;
+  flex-basis: 0;
   padding: 2em;
+  height: 100%;
+  max-width: 50vw;
 }
 
 .details .person-netw {
-  flex: 1;
+  flex-grow: 1;
+  flex-basis: 0;
   overflow: hidden;
   border-left: 2px solid var(--color-border);
   display: flex;

@@ -82,6 +82,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  if (req.body.bio) person.bio = req.body.bio;
   if (req.body.firstname) person.firstname = req.body.firstname;
   if (req.body.lastname) person.lastname = req.body.lastname;
   if (req.body.birthdate) person.birthdate = new Date(req.body.birthdate);

@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import VueDOMPurifyHTML from 'vue-dompurify-html'
+import { basicSetup } from 'codemirror'
+import VueCodeMirror from 'vue-codemirror'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -21,6 +23,12 @@ app.use(createPinia())
 app.use(router)
 app.use(VNetworkGraph)
 app.use(VueDOMPurifyHTML)
+app.use(VueCodeMirror, {
+  disabled: false,
+  indentWithTab: true,
+  tabSize: 2,
+  lineWrapping: true,
+})
 
 library.add(faGithub, faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave)
 app.component('font-awesome-icon', FontAwesomeIcon)

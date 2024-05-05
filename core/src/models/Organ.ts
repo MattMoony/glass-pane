@@ -1,5 +1,6 @@
 import { pool } from '../db';
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 
 /**
  * Represents a member of an organization. That member
@@ -24,6 +25,10 @@ class Organ {
 
   public toString (): string {
     return `Organ#${this.id}`;
+  }
+
+  public update (): Promise<void> {
+    return fsPromises.writeFile(`${process.env.DATA_DIR}/${this.id}.md`, this.bio);
   }
 
   public static async create (): Promise<number> {

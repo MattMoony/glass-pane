@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch } from 'vue'
 import { marked } from 'marked';
+import { markdown } from '@codemirror/lang-markdown';
+import { oneDark } from '@codemirror/theme-one-dark';
 
 const props = defineProps<{
   person: {
@@ -12,9 +14,11 @@ const props = defineProps<{
     deathdate?: Date
   },
   editPerson: boolean,
+  fullPage: boolean,
 }>()
 const emit = defineEmits(['save'])
 
+const bio = ref('')
 const firstname = ref('')
 const lastname = ref('')
 const birthdate = ref('')
@@ -23,6 +27,7 @@ const deathdate = ref('')
 const watchPerson = () => {
   const person = props.person;
   if (!person) return;
+  bio.value = person.bio ?? '';
   firstname.value = person.firstname ?? '';
   lastname.value = person.lastname ?? '';
   birthdate.value = person.birthdate ? `${person.birthdate.getFullYear()}-${("0"+(person.birthdate.getMonth()+1)).slice(-2)}-${("0"+(person.birthdate.getDate())).slice(-2)}` : '';
@@ -35,6 +40,7 @@ watch(() => props.editPerson, watchPerson);
 const saveChanges = () => {
   console.log('save changes');
   emit('save', {
+    bio: bio.value,
     firstname: firstname.value,
     lastname: lastname.value,
     birthdate: birthdate.value,
@@ -70,12 +76,12 @@ const removeImage = async () => {
 </script>
 
 <template>
-  <div>
+  <div :class="$props.fullPage ? 'full-container' : ''">
     <button @click.stop="saveChanges()" v-if="editPerson" class="save-button">
       <font-awesome-icon icon="fa-solid fa-save" />
       Save
     </button>
-    <div class="banner">
+    <div :class="[ 'banner', $props.fullPage ? 'full-banner' : '', ]">
       <div class="facts">
         <h1>
           <span v-if="!editPerson">
@@ -119,14 +125,33 @@ const removeImage = async () => {
         </div>
       </div>
     </div>
-    <div class="bio">
-      <div v-if="!editPerson" v-dompurify-html="$props.person && marked($props.person.bio)"></div>
-      <textarea v-else>{{ $props.person?.bio }}</textarea>
+    <div :class="[ 'bio', $props.fullPage ? 'full-bio' : '', ]">
+      <h2>Bio</h2>
+      <div class="bio-content">
+        <div 
+          v-if="!editPerson" 
+          v-dompurify-html="$props.person && marked($props.person.bio)"
+        ></div>
+        <codemirror 
+          :style="{height: '30vh', width: '100%',}" 
+          v-if="editPerson" 
+          v-model="bio"
+          :extensions="[markdown(), oneDark,]"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.full-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
 .save-button {
   display: block;
   width: 100%;
@@ -252,7 +277,13 @@ input:focus {
 .bio {
   margin-top: 1.5em;
   padding: 1.5em;
-  max-height: 40vh;
+}
+
+.full-bio {
+  flex-grow: 1;
+  flex-basis: 0;
+  height: 100%;
+  box-sizing: border-box;
   overflow-y: auto;
 }
 
@@ -279,5 +310,15 @@ input:focus {
 
 .bio::-webkit-scrollbar-button {
   display: none;
+}
+
+.bio-content {
+  padding: 1em;
+}
+
+.bio-content > textarea {
+  width: 100%;
+  resize: none;
+  height: auto;
 }
 </style>
