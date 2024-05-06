@@ -22,7 +22,7 @@ const icons: {[name: string]: { icon: string, title: string, }} = {
   youtube: { icon: 'fa-brands fa-youtube', title: 'YouTube', },
   tiktok: { icon: 'fa-brands fa-tiktok', title: 'TikTok', },
   website: { icon: 'fa-solid fa-globe', title: 'Website', },
-  other: { icon: 'fa-solid fa-ellipsis-h', title: 'Other', },
+  other: { icon: 'fa-solid fa-hashtag', title: 'Other', },
 };
 
 const copyLink = (link: string) => {
