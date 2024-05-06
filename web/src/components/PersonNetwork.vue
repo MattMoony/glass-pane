@@ -22,7 +22,12 @@ interface Relation {
   until?: Date,
 }
 
-interface ShownSource {
+interface RelationSource {
+  sid: number,
+  url: string,
+}
+
+interface ShownSources {
   from: {
     id: number,
     firstname: string,
@@ -33,10 +38,10 @@ interface ShownSource {
     firstname: string,
     lastname: string,
   },
-  source: string,
+  type: string,
   since: Date,
   until?: Date,
-  type: string,
+  sources: RelationSource[],
 }
 
 const router = useRouter()
@@ -142,8 +147,8 @@ const eventHandlers: vNG.EventHandlers = {
   },
   'edge:click': async ({ edge }) => {
     const e = edges.value[edge];
-    const r = await fetch(`http://localhost:8888/api/person/relation/source?from=${e.source}&to=${e.target}&since=${e.since}`).then(r => r.json());
-    const source = {
+    const res = await fetch(`http://localhost:8888/api/person/${e.source}/relation/sources?to=${e.target}&since=${e.since}`).then(r => r.json());
+    shownSources.value = {
       from: {
         id: +e.source,
         ...nodes.value[+e.source],
@@ -152,15 +157,12 @@ const eventHandlers: vNG.EventHandlers = {
         id: +e.target,
         ...nodes.value[+e.target],
       },
-      source: r.source,
       since: e.since,
       until: e.until,
       type: e.type,
+      sources: res.sources.map(s => ({ sid: +s.sid, url: s.url })),
     };
-    if (!props.editPerson)
-      shownSource.value = source;
-    else
-      editSource.value = { ...source, since: source.since.toISOString().split('T')[0], until: source.until?.toISOString().split('T')[0], };
+    console.log(shownSources.value);
   },
 }
 
@@ -215,8 +217,8 @@ const relationSource = ref(null);
 const relSince = ref(null);
 const relTil = ref(null);
 
-const shownSource: Ref<ShownSource|{}> = ref({})
-const editSource: Ref<ShownSource|{}> = ref({})
+const shownSources: Ref<ShownSources|{}> = ref({})
+const newSource: Ref<RelationSource|{}> = ref({})
 
 const createRelation = () => {
   if (!selectedPerson.value || !relationSource.value.value.trim() || !relSince.value.value) return;
@@ -342,39 +344,44 @@ const createRelation = () => {
       <input type="submit" value="Add" @click="createRelation()" />
     </div>
   </FullScreenModal>
-  <FullScreenModal :show="'from' in shownSource" @close="shownSource = {}">
-    <h1 v-if="'from' in shownSource">
-      {{ shownSource.from.firstname }} {{ shownSource.from.lastname }}
+  <FullScreenModal :show="'from' in shownSources" @close="shownSources = {}">
+    <h1 v-if="'from' in shownSources">
+      {{ shownSources.from.firstname }} {{ shownSources.from.lastname }}
       &amp; 
-      <RouterLink :to="`/p/${shownSource.to.id}`">
-        {{ shownSource.to.firstname }} {{ shownSource.to.lastname }}
+      <RouterLink :to="`/p/${shownSources.to.id}`">
+        {{ shownSources.to.firstname }} {{ shownSources.to.lastname }}
       </RouterLink>
-      ({{ shownSource.since.getFullYear() }} - {{ shownSource.until ? shownSource.until.getFullYear() : 'present' }})
+      ({{ shownSources.since.getFullYear() }} - {{ shownSources.until ? shownSources.until.getFullYear() : 'present' }})
     </h1>
-    Source: <a v-if="'source' in shownSource" :href="shownSource.source" target="_blank">{{ shownSource.source }}</a>
+    <u>Sources</u>
+    <ol v-if="'sources' in shownSources">
+      <li v-for="s in shownSources.sources" :key="s.sid">
+        <a :href="s.url" target="_blank">{{ s.url }}</a>
+      </li>
+    </ol>
   </FullScreenModal>
-  <FullScreenModal :show="'from' in editSource" @close="editSource = {}">
-    <h1 v-if="'from' in editSource">
-      {{ editSource.from.firstname }} {{ editSource.from.lastname }}
+  <FullScreenModal :show="'from' in newSource" @close="newSource = {}">
+    <h1 v-if="'from' in newSource">
+      {{ newSource.from.firstname }} {{ newSource.from.lastname }}
       &amp; 
-      <RouterLink :to="`/p/${editSource.to.id}`">
-        {{ editSource.to.firstname }} {{ editSource.to.lastname }}
+      <RouterLink :to="`/p/${newSource.to.id}`">
+        {{ newSource.to.firstname }} {{ newSource.to.lastname }}
       </RouterLink>
     </h1>
-    <div class="relation-modal" v-if="'source' in editSource">
+    <div class="relation-modal" v-if="'source' in newSource">
       <div class="relation-time">
         <span>
           Since
-          <input type="date" ref="editRelSince" v-model="editSource.since" />
+          <input type="date" ref="editRelSince" v-model="newSource.since" />
         </span>
         <span>
           Until
-          <input type="date" ref="editRelTil" v-model="editSource.until" />
+          <input type="date" ref="editRelTil" v-model="newSource.until" />
         </span>
       </div>
       <label for="edit-source-input">Source: </label>
-      <input type="text" id="edit-source-input" ref="editRelationSource" v-model="editSource.source" />
-      <input type="submit" value="Save" @click="emit('save-relation', editSource)" />
+      <input type="text" id="edit-source-input" ref="editRelationSource" v-model="newSource.url" />
+      <input type="submit" value="Save" @click="emit('save-relation', newSource)" />
     </div>
   </FullScreenModal>
 </template>

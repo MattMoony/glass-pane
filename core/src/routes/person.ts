@@ -4,7 +4,6 @@ import * as controller from '../controllers/person';
 const router: Router = Router();
 
 router.post('/new', controller.create);
-router.get('/relation/source', controller.getRelationSource);
 router.get('/:userId', controller.checkUid, controller.get);
 router.get('/:userId/name', controller.checkUid, controller.getName);
 router.get('/:userId/pic', controller.checkUid, controller.getPic);
@@ -12,6 +11,7 @@ router.post('/:userId/pic', controller.checkUid, controller.setPic);
 router.delete('/:userId/pic', controller.checkUid, controller.removePic);
 router.patch('/:userId', controller.checkUid, controller.update);
 router.delete('/:userId', controller.checkUid, controller.remove);
+router.get('/:userId/relation/sources', controller.checkUid, controller.getRelationSources);
 router.post('/:userId/relation', controller.checkUid, controller.addRelation);
 router.patch('/:userId/relation', controller.checkUid, controller.updateRelation);
 router.delete('/:userId/relation', controller.checkUid, controller.removeRelation);

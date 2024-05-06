@@ -7,6 +7,11 @@ const RELATION_TYPES: { [name: string]: number, } = {
   'friend': 3,
 };
 
+export interface RelationSource {
+  sid: number;
+  url: string;
+}
+
 /**
  * Represents a relation between two persons.
  */
@@ -36,10 +41,10 @@ export class Relation {
     return `${this.from.toString()} -[${this.since.toISOString()}]-> ${this.to.toString()}`;
   }
 
-  public static async getSource (person: Person, relative: Person, since: Date): Promise<string|null> {
+  public static async getSources (person: Person, relative: Person, since: Date): Promise<RelationSource[]|null> {
     const client = await pool.connect();
     const res = await client.query(
-      `SELECT   url
+      `SELECT   sid, url
       FROM      relation_source
       WHERE     (person = $1
                 AND relative = $2
@@ -51,8 +56,8 @@ export class Relation {
       [person.id, relative.id, since],
     );
     client.release();
-    if (res.rows.length === 0) return null;
-    return res.rows[0].url;
+    if (res.rows.length === 0) return [];
+    return res.rows;
   }
 
   public static async remove (person: Person, relative: Person, since: Date): Promise<void> {

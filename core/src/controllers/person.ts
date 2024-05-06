@@ -222,13 +222,13 @@ export const getFriends = async (req: Request, res: Response): Promise<void> => 
   res.send({ 'success': true, 'friends': friends.map((p) => p.json(true)) });
 };
 
-export const getRelationSource = async (req: Request, res: Response): Promise<void> => {
-  if (!req.query.from || !req.query.to || !req.query.since) {
+export const getRelationSources = async (req: Request, res: Response): Promise<void> => {
+  if (!req.query.to || !req.query.since) {
     res.send({ 'success': false, 'msg': 'missing parameters' });
     return;
   }
 
-  const person = await Person.get(parseInt(req.query.from));
+  const person = await Person.get(parseInt(req.params.userId));
   if (person === null) {
     res.send({ 'success': false, 'msg': 'not found' });
     return;
@@ -240,6 +240,6 @@ export const getRelationSource = async (req: Request, res: Response): Promise<vo
     return;
   }
 
-  const source = await Relation.getSource(person, relative, new Date(req.query.since));
-  res.send({ 'success': true, 'source': source });
-}
+  const sources = await Relation.getSources(person, relative, new Date(req.query.since));
+  res.send({ 'success': true, 'sources': sources });
+};
