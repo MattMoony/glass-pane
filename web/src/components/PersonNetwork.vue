@@ -77,15 +77,17 @@ const refreshNetwork = async () => {
   const romantic: Relation[] = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/romantic`).then(r => r.json())).romantic);
   const friends: Relation[] = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends);
 
+  console.log(parents);
+
   nodes.value = {
-    [props.person.id]: {
+    [props.person.id.toString()]: {
       name: `${props.person.name}${props.person.birthdate ? '\n* ' + props.person.birthdate.getFullYear() : ''}`,
       firstname: props.person.firstname,
       lastname: props.person.lastname,
       color: getComputedStyle(document.body).getPropertyValue('--color-text'),
     },
     ...[...parents, ...children, ...romantic, ...friends].map(f => ({
-      [f.to.id]: {
+      [f.to.id.toString()]: {
         name: `${f.to.firstname} ${f.to.lastname}${f.to.birthdate ? '\n* ' + f.to.birthdate.getFullYear() : ''}`,
         firstname: f.to.firstname,
         lastname: f.to.lastname,
@@ -96,8 +98,8 @@ const refreshNetwork = async () => {
 
   edges.value = [
     ...parents.map(p => ({ 
-      source: props.person.id, 
-      target: p.to.id, 
+      source: props.person.id.toString(), 
+      target: p.to.id.toString(), 
       label: `parent (${p.since.getFullYear()})`,
       direction: 'in',
       color: '#23FF2D',
@@ -106,8 +108,8 @@ const refreshNetwork = async () => {
       type: 'parent',
     })),
     ...children.map(p => ({ 
-      source: p.to.id, 
-      target: props.person.id, 
+      source: p.to.id.toString(), 
+      target: props.person.id.toString(), 
       label: `parent (${p.since.getFullYear()})`,
       direction: 'in',
       color: '#23FF2D',
@@ -116,8 +118,8 @@ const refreshNetwork = async () => {
       type: 'parent',
     })),
     ...romantic.map(p => ({ 
-      source: props.person.id, 
-      target: p.to.id, 
+      source: props.person.id.toString(), 
+      target: p.to.id.toString(), 
       label: `romantic (${p.since.getFullYear()}${p.until ? ' - ' + p.until.getFullYear() : ''})`,
       direction: 'out',
       color: '#FF3423',
@@ -126,8 +128,8 @@ const refreshNetwork = async () => {
       type: 'romantic',
     })),
     ...friends.map(p => ({ 
-      source: props.person.id, 
-      target: p.to.id, 
+      source: props.person.id.toString(), 
+      target: p.to.id.toString(), 
       label: `friends (${p.since.getFullYear()}${p.until ? ' - ' + p.until.getFullYear() : ''})`,
       direction: 'out',
       color: '#FFD023',

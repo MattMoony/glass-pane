@@ -51,20 +51,21 @@ class Organ {
     client.release();
     if (res.rows.length === 0) return null;
     if (!fs.existsSync(`${process.env.DATA_DIR}/${id}.md`)) fs.writeFileSync(`${process.env.DATA_DIR}/${id}.md`, '');
-    return new Organ(res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${id}.md`, 'utf8'));
+    return new Organ(+res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${id}.md`, 'utf8'));
   }
 
   public async getSources (): Promise<OrganSource[]> {
     const client = await pool.connect();
     const res = await client.query('SELECT sid, url FROM organ_source WHERE organ = $1', [this.id]);
     client.release();
-    return res.rows;
+    return res.rows.map(row => ({ sid: +row.sid, url: row.url });
   }
 
-  public async addSource (url: string): Promise<void> {
+  public async addSource (url: string): Promise<number> {
     const client = await pool.connect();
-    await client.query('INSERT INTO organ_source (organ, url) VALUES ($1, $2)', [this.id, url]);
+    const res = await client.query('INSERT INTO organ_source (organ, url) VALUES ($1, $2) RETURNING sid', [this.id, url]);
     client.release();
+    return +res.rows[0].sid;
   };
 
   public async removeSource (sid: number): Promise<void> {

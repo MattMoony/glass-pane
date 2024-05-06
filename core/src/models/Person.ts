@@ -257,7 +257,7 @@ class Person extends Organ {
     );
     client.release();
     return Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
-      row.pid,
+      +row.pid,
       (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
@@ -278,7 +278,7 @@ class Person extends Organ {
     );
     client.release();
     return Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
-      row.pid,
+      +row.pid,
       (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
@@ -298,7 +298,7 @@ class Person extends Organ {
       [this.id, RELATION_TYPES['romantic']],
     );
     const ret = await Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
-      row.pid,
+      +row.pid,
       (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
@@ -315,7 +315,7 @@ class Person extends Organ {
     );
     client.release();
     return ret.concat(await Promise.all(res2.rows.map(async (row) => new Relation(this, new Person(
-      row.pid,
+      +row.pid,
       (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
@@ -335,7 +335,7 @@ class Person extends Organ {
       [this.id, RELATION_TYPES['friend']],
     );
     const ret = await Promise.all(res.rows.map(async (row) => new Relation(this, new Person(
-      row.pid,
+      +row.pid,
       (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
@@ -352,7 +352,7 @@ class Person extends Organ {
     );
     client.release();
     return ret.concat(await Promise.all(res2.rows.map(async (row) => new Relation(this, new Person(
-      row.pid,
+      +row.pid,
       (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
@@ -403,7 +403,7 @@ class Person extends Organ {
     );
     client.release();
     return Promise.all(res.rows.map(async (row) => new Person(
-      row.pid,
+      +row.pid,
       (await Organ.get(row.pid))!.bio,
       row.firstname,
       row.lastname,
