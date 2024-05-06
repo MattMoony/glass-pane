@@ -41,6 +41,36 @@ export class Relation {
     return `${this.from.toString()} -[${this.since.toISOString()}]-> ${this.to.toString()}`;
   }
 
+  public async addSource (url: string): Promise<RelationSource> {
+    const client = await pool.connect();
+    const res = await client.query(
+      'INSERT INTO relation_source (person, relative, since, url) VALUES ($1, $2, $3, $4) RETURNING sid',
+      [this.from.id, this.to.id, this.since, url],
+    );
+    client.release();
+    return { sid: +res.rows[0].sid, url, };
+  }
+
+  public static async get (person: Person, relative: Person, since: Date): Promise<Relation|null> {
+    // TODO: I think I should really work on / update this schema, idk about this... lmao
+    const client = await pool.connect();
+    const res = await client.query(
+      'SELECT * FROM relation WHERE (person = $1 AND relative = $2) AND since = $3',
+      [person.id, relative.id, since],
+    );
+    if (res.rows.length === 1) {
+      client.release();
+      return new Relation(person, relative, since, res.rows[0].until);
+    }
+    const res2 = await client.query(
+      'SELECT * FROM relation WHERE (person = $2 AND relative = $1) AND since = $3',
+      [person.id, relative.id, since],
+    );
+    client.release();
+    if (res2.rows.length === 0) return null;
+    return new Relation(relative, person, since, res2.rows[0].until);
+  }
+
   public static async getSources (person: Person, relative: Person, since: Date): Promise<RelationSource[]|null> {
     const client = await pool.connect();
     const res = await client.query(
@@ -58,6 +88,24 @@ export class Relation {
     client.release();
     if (res.rows.length === 0) return [];
     return res.rows;
+  }
+
+  public static async updateSource (sid: number, url: string): Promise<void> {
+    const client = await pool.connect();
+    await client.query(
+      'UPDATE relation_source SET url = $1 WHERE sid = $2',
+      [url, sid],
+    );
+    client.release();
+  }
+
+  public static async removeSource (sid: number): Promise<void> {
+    const client = await pool.connect();
+    await client.query(
+      'DELETE FROM relation_source WHERE sid = $1',
+      [sid],
+    );
+    client.release();
   }
 
   public static async remove (person: Person, relative: Person, since: Date): Promise<void> {

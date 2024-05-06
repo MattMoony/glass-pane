@@ -243,3 +243,63 @@ export const getRelationSources = async (req: Request, res: Response): Promise<v
   const sources = await Relation.getSources(person, relative, new Date(req.query.since));
   res.send({ 'success': true, 'sources': sources });
 };
+
+export const addRelationSource = async (req: Request, res: Response): Promise<void> => {
+  if (!req.body.to || !req.body.since || !req.body.url) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const relative = await Person.get(parseInt(req.body.to));
+  if (relative === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  const relation = await Relation.get(person, relative, new Date(req.body.since));
+  if (!relation) {
+    res.send({ 'success': false, 'msg': 'no relation' });
+    return;
+  }
+  
+  const source = await relation.addSource(req.body.url);
+  res.send({ 'success': true, source, });
+};
+
+export const updateRelationSource = async (req: Request, res: Response): Promise<void> => {
+  if (!req.params.sourceId || !req.body.url) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  await Relation.updateSource(parseInt(req.params.sourceId), req.body.url);
+  res.send({ 'success': true, });
+};
+
+export const removeRelationSource = async (req: Request, res: Response): Promise<void> => {
+  if (!req.params.sourceId) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+
+  const person = await Person.get(parseInt(req.params.userId));
+  if (person === null) {
+    res.send({ 'success': false, 'msg': 'not found' });
+    return;
+  }
+
+  await Relation.removeSource(parseInt(req.params.sourceId));
+  res.send({ 'success': true });
+};

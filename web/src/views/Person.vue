@@ -98,25 +98,6 @@ const updatePerson = async (p) => {
     }
   }
 }
-
-const updateRelation = async (r) => {
-  const res = await fetch(`http://localhost:8888/api/person/${r.from.id}/relation`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      personId: r.to.id,
-      type: r.type,
-      since: r.since,
-      until: r.until,
-      source: r.source,
-    }),
-  })
-  if (res.ok) {
-  }
-}
-
 </script>
 
 <template>
@@ -170,7 +151,6 @@ const updateRelation = async (r) => {
           <PersonNetwork 
             :person="person"
             :edit-person="editPerson"
-            @save-relation="updateRelation"
           />
         </div>
       </div>

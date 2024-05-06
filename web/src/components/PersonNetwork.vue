@@ -56,7 +56,6 @@ const props = defineProps<{
   },
   editPerson: boolean,
 }>();
-const emit = defineEmits(['save-relation']);
 
 const nodes: Ref<{ [id: number]: any }> = ref({});
 const edges: Ref<any[]> = ref([]);
@@ -97,8 +96,8 @@ const refreshNetwork = async () => {
 
   edges.value = [
     ...parents.map(p => ({ 
-      source: p.to.id, 
-      target: props.person.id, 
+      source: props.person.id, 
+      target: p.to.id, 
       label: `parent (${p.since.getFullYear()})`,
       direction: 'in',
       color: '#23FF2D',
@@ -107,8 +106,8 @@ const refreshNetwork = async () => {
       type: 'parent',
     })),
     ...children.map(p => ({ 
-      source: props.person.id, 
-      target: p.to.id, 
+      source: p.to.id, 
+      target: props.person.id, 
       label: `parent (${p.since.getFullYear()})`,
       direction: 'in',
       color: '#23FF2D',
@@ -162,7 +161,8 @@ const eventHandlers: vNG.EventHandlers = {
       type: e.type,
       sources: res.sources.map(s => ({ sid: +s.sid, url: s.url })),
     };
-    console.log(shownSources.value);
+    editSourceSince.value = e.since.toISOString().split('T')[0];
+    editSourceTil.value = e.until ? e.until.toISOString().split('T')[0] : '';
   },
 }
 
@@ -217,8 +217,11 @@ const relationSource = ref(null);
 const relSince = ref(null);
 const relTil = ref(null);
 
-const shownSources: Ref<ShownSources|{}> = ref({})
-const newSource: Ref<RelationSource|{}> = ref({})
+const shownSources: Ref<ShownSources|{}> = ref({});
+const newSource: Ref<RelationSource> = ref({ sid: 0, url: '', });
+const editSourceSince: Ref<string> = ref('');
+const editSourceTil: Ref<string> = ref('');
+const editedSource = ref(false);
 
 const createRelation = () => {
   if (!selectedPerson.value || !relationSource.value.value.trim() || !relSince.value.value) return;
@@ -245,6 +248,62 @@ const createRelation = () => {
     selectPerson.value = false;
     refreshNetwork();
   })
+}
+
+const addRelationSource = () => {
+  if (!shownSources.value || !('from' in shownSources.value)) return;
+  editedSource.value = true;
+  fetch(`http://localhost:8888/api/person/${shownSources.value.from.id}/relation/sources`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      to: shownSources.value.to.id,
+      since: shownSources.value.since,
+      url: newSource.value.url,
+    }),
+  }).then(r => r.json()).then(r => {
+    newSource.value = { sid: 0, url: '', };
+    shownSources.value.sources.push({ sid: r.source.sid, url: r.source.url });
+  });
+}
+
+const alterRelationTimespan = () => {
+  editedSource.value = true;
+
+}
+
+const updateRelationSource = (s: RelationSource) => {
+  if (!shownSources.value || !('from' in shownSources.value)) return;
+  editedSource.value = true;
+  fetch(`http://localhost:8888/api/person/${shownSources.value.from.id}/relation/sources/${s.sid}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      url: s.url,
+    }),
+  }).then(r => r.json()).then(r => {
+  })
+}
+
+const removeRelationSource = (s: RelationSource) => {
+  if (!shownSources.value || !('from' in shownSources.value)) return;
+  editedSource.value = true;
+  fetch(`http://localhost:8888/api/person/${shownSources.value.from.id}/relation/sources/${s.sid}`, {
+    method: 'DELETE',
+  }).then(r => r.json()).then(r => {
+  })
+}
+
+const finishViewingSources = () => {
+  if (editedSource.value) {
+    refreshNetwork();
+    editedSource.value = false;
+  }
+  shownSources.value = {};
 }
 
 </script>
@@ -344,44 +403,62 @@ const createRelation = () => {
       <input type="submit" value="Add" @click="createRelation()" />
     </div>
   </FullScreenModal>
-  <FullScreenModal :show="'from' in shownSources" @close="shownSources = {}">
-    <h1 v-if="'from' in shownSources">
-      {{ shownSources.from.firstname }} {{ shownSources.from.lastname }}
-      &amp; 
-      <RouterLink :to="`/p/${shownSources.to.id}`">
-        {{ shownSources.to.firstname }} {{ shownSources.to.lastname }}
-      </RouterLink>
-      ({{ shownSources.since.getFullYear() }} - {{ shownSources.until ? shownSources.until.getFullYear() : 'present' }})
-    </h1>
-    <u>Sources</u>
-    <ol v-if="'sources' in shownSources">
-      <li v-for="s in shownSources.sources" :key="s.sid">
-        <a :href="s.url" target="_blank">{{ s.url }}</a>
-      </li>
-    </ol>
-  </FullScreenModal>
-  <FullScreenModal :show="'from' in newSource" @close="newSource = {}">
-    <h1 v-if="'from' in newSource">
-      {{ newSource.from.firstname }} {{ newSource.from.lastname }}
-      &amp; 
-      <RouterLink :to="`/p/${newSource.to.id}`">
-        {{ newSource.to.firstname }} {{ newSource.to.lastname }}
-      </RouterLink>
-    </h1>
-    <div class="relation-modal" v-if="'source' in newSource">
-      <div class="relation-time">
-        <span>
-          Since
-          <input type="date" ref="editRelSince" v-model="newSource.since" />
+  <FullScreenModal :show="'from' in shownSources" @close="finishViewingSources">
+    <div class="relation-modal" v-if="'sources' in shownSources">
+      <h1>
+        {{ shownSources.from.firstname }} {{ shownSources.from.lastname }}
+        &amp; 
+        <RouterLink :to="`/p/${shownSources.to.id}`">
+          {{ shownSources.to.firstname }} {{ shownSources.to.lastname }}
+        </RouterLink>
+        <span v-if="!editPerson">
+          ({{ shownSources.since.getFullYear() }} - {{ shownSources.until ? shownSources.until.getFullYear() : 'present' }})
         </span>
-        <span>
-          Until
-          <input type="date" ref="editRelTil" v-model="newSource.until" />
-        </span>
+      </h1>
+      <ol class="edge-sources">
+        <li v-for="s in shownSources.sources" :key="s.sid">
+          <a v-if="!editPerson" :href="s.url" target="_blank">{{ s.url }}</a>
+          <input 
+            v-if="editPerson" 
+            type="text" 
+            v-model="s.url" 
+            @keyup="e => e.key === 'Enter' ? updateRelationSource(s) : null" 
+          />
+          <button v-if="editPerson" @click="() => updateRelationSource(s)">
+            <font-awesome-icon :icon="['fa-solid', 'fa-save',]" />
+          </button>
+          <button v-if="editPerson" @click="() => removeRelationSource(s)">
+            <font-awesome-icon :icon="['fa-solid', 'fa-trash',]" />
+          </button>
+        </li>
+        <li v-if="editPerson">
+          <input 
+            type="text" 
+            id="edit-source-input" 
+            ref="editRelationSource" 
+            v-model="newSource.url" 
+            @keyup="e => e.key === 'Enter' ? addRelationSource() : null"
+          />
+          <button @click="addRelationSource">
+            <font-awesome-icon :icon="['fa-solid', 'fa-plus',]" />
+          </button>
+        </li>
+      </ol>
+      <div v-if="editPerson">
+        <div class="relation-time">
+          <span>
+            Since
+            <input type="date" ref="editRelSince" v-model="editSourceSince" />
+          </span>
+          <span>
+            Until
+            <input type="date" ref="editRelTil" v-model="editSourceTil" />
+          </span>
+        </div>
+        <button class="save-button" @click="alterRelationTimespan">
+          <font-awesome-icon :icon="['fa-solid', 'fa-save',]" /> Save Timespan
+        </button>
       </div>
-      <label for="edit-source-input">Source: </label>
-      <input type="text" id="edit-source-input" ref="editRelationSource" v-model="newSource.url" />
-      <input type="submit" value="Save" @click="emit('save-relation', newSource)" />
     </div>
   </FullScreenModal>
 </template>
@@ -479,7 +556,8 @@ const createRelation = () => {
   border-color: var(--color-border-hover);
 }
 
-.relation-modal input[type="submit"] {
+.relation-modal input[type="submit"],
+.relation-modal button {
   background-color: var(--color-bg);
   border: 2px solid var(--color-border);
   color: var(--color-text);
@@ -487,10 +565,22 @@ const createRelation = () => {
   transition: .2s ease;
 }
 
-.relation-modal input[type="submit"]:hover {
+.relation-modal input[type="submit"]:hover,
+.relation-modal button:hover {
   background-color: var(--color-border);
   color: var(--color-bg);
   cursor: pointer;
+}
+
+.relation-modal button {
+  padding: .5em .6em;
+  box-sizing: border-box;
+  margin: .2em;
+}
+
+.relation-modal .save-button {
+  width: 100%;
+  margin-top: 1em;
 }
 
 .relation-time {
@@ -511,5 +601,39 @@ const createRelation = () => {
 
 a {
   color: var(--color-text);
+}
+
+.edge-sources {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 1em 1.5em;
+  margin: .6em 0;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.edge-sources::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.edge-sources::-webkit-scrollbar-track {
+  background-color: var(--color-background-soft);
+}
+
+.edge-sources::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 0.5rem;
+}
+
+.edge-sources::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-hover);
+}
+
+.edge-sources::-webkit-scrollbar-corner {
+  background-color: var(--color-background-soft);
+}
+
+.edge-sources::-webkit-scrollbar-button {
+  display: none;
 }
 </style>
