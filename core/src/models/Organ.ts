@@ -58,7 +58,7 @@ class Organ {
     const client = await pool.connect();
     const res = await client.query('SELECT sid, url FROM organ_source WHERE organ = $1', [this.id]);
     client.release();
-    return res.rows.map(row => ({ sid: +row.sid, url: row.url });
+    return res.rows.map(row => ({ sid: +row.sid, url: row.url }));
   }
 
   public async addSource (url: string): Promise<number> {
