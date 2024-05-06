@@ -129,14 +129,21 @@ class Organ {
   }
 
   /**
+   * Removes the organ from the database.
+   * @returns A promise that resolves when the organ has been removed.
+   */
+  public async remove (): Promise<void>;
+  /**
    * Removes a source from the organ.
    * @param source The source to remove.
    * @returns A promise that resolves when the source has been removed.
    */
   public async remove (source: OrganSource): Promise<void>;
-  public remove (v: OrganSource): Promise<void> {
+  public async remove (v?: OrganSource): Promise<void> {
     if (v instanceof OrganSource) return v.remove();
-    throw new Error('Invalid removal type');
+    const client = await pool.connect();
+    await client.query('DELETE FROM organ WHERE oid = $1', [this.id]);
+    client.release();
   }
 
   /**

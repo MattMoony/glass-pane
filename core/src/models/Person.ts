@@ -365,12 +365,19 @@ class Person extends Organ {
    */
   public async remove (): Promise<void>;
   /**
+   * Remove a source for this person.
+   * @param {OrganSource} source The source to remove.
+   * @returns {Promise<void>} A promise that resolves when the source is removed.
+   */
+  public async remove (source: OrganSource): Promise<void>;
+  /**
    * Remove a relation from this person.
    * @param {Relation} relation The relation to remove.
    * @returns {Promise<void>} A promise that resolves when the relation is removed.
    */
   public async remove (relation: Relation): Promise<void>;
-  public async remove (v?: Relation): Promise<void> {
+  public async remove (v?: Relation|OrganSource): Promise<void> {
+    if (v instanceof OrganSource) return await super.remove(v);
     if (v instanceof Relation) return await v.remove();
     const client = await pool.connect();
     await client.query(
@@ -378,6 +385,7 @@ class Person extends Organ {
       [this.id],
     );
     client.release();
+    super.remove();
   }
 
   /**
@@ -588,14 +596,14 @@ class Person extends Organ {
     const res = await client.query(
       `SELECT   *
       FROM      person
-      WHERE     LOWER(firstname)||' '||LOWER(lastname) LIKE $1
-                OR LOWER(lastname)||' '||LOWER(firstname) LIKE $1`,
+      WHERE     firstname||' '||lastname ILIKE $1
+                OR lastname||' '||firstname ILIKE $1`,
       [`%${query}%`],
     );
     client.release();
     return Promise.all(res.rows.map(async (row) => new Person(
       +row.pid,
-      (await Organ.get(row.pid))!.bio,
+      (await Organ.get(+row.pid))!.bio,
       row.firstname,
       row.lastname,
       row.birthdate,
