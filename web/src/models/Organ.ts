@@ -1,4 +1,5 @@
-import * as organ from '../api/organ';
+import * as organ from '@/api/organ';
+import { marked } from 'marked';
 
 /**
  * Represents a member of an organization. That member
@@ -36,6 +37,18 @@ class Organ implements organ.Organ {
         await organ.sources.remove(this.id, sid);
       },
     };
+  }
+
+  /**
+   * **Important**: Note that this doesn't return sanitized
+   * HTML - i.e. vulnerable to XSS and stuff. Make sure to
+   * sanitize it before rendering it in the browser (e.g.
+   * using `DOMPurify` or something similar - i.e. via
+   * using the `v-dompurify-html` attribute of the tag).
+   * @returns The bio of the organ, rendered as HTML.
+   */
+  public async bioHTML (): Promise<string> {
+    return marked(this.bio);
   }
 
   public json (): Object {
