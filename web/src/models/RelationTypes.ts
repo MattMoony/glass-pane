@@ -3,7 +3,7 @@
  * currently representable in the DB.
  */
 enum RelationType {
-  PARENT,
+  PARENT = 1,
   ROMANTIC,
   FRIEND,
   CHILD,
