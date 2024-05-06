@@ -23,3 +23,11 @@ Here are some preview images of what the page will look like eventually - howeve
 
 ![Info Page](images/preview.png)
 ***Image 2:** The info page of a person/business with their relations*
+
+## ERD
+
+Also, here is the *Entity Relationship Diagram* of the database behind this project - as exported using *pgAdmin*. I know the lines are a bit fucked up, but I promise that's not my fault - *pgAdmin* was just really messing with me.
+
+**Also ...** I'll probably still change this in the future, as I'm not really happy about many things here, but... I'll stick with it for now :poop:. I mean, I just want to have something that works for now - I can always fix stuff later... right?!
+
+![ERD](images/erd.png)
