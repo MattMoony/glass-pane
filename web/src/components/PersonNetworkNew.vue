@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import * as vNG from 'v-network-graph';
 import { ForceLayout } from 'v-network-graph/lib/force-layout';
+import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/force-layout';
 
-import Person from '../models/Person';
+import Person, { Relation } from '../models/Person';
+import RelationType, { COLORS } from '../models/RelationTypes';
 
 class PersonNode extends Person {
   public name: string;
   public color: string;
 
-  public constructor(person: Person) {
+  public constructor(person: Person, color?: string) {
     super(
       person.id, 
       person.bio, 
@@ -21,7 +23,35 @@ class PersonNode extends Person {
       person.deathdate,
     );
     this.name = `${person.firstname} ${person.lastname}${person.birthdate ? '\n*' + person.birthdate.getUTCFullYear() : ''}`;
-    this.color = getComputedStyle(document.body).getPropertyValue('--color-primary');
+    this.color = color || getComputedStyle(document.body).getPropertyValue('--color-text');
+  }
+}
+
+class RelationEdge extends Relation {
+  public source: string;
+  public target: string;
+  public label: string;
+  public direction: string;
+  public color: string;
+
+  public constructor(relation: Relation, person: Person) {
+    super(
+      relation.type,
+      relation.other,
+      relation.since,
+      relation.until,
+    );
+
+    if (relation.type === RelationType.CHILD) {
+      this.source = relation.other.id.toString();
+      this.target = person.id.toString();
+    } else {
+      this.source = person.id.toString();
+      this.target = relation.other.id.toString();
+    }
+    this.direction = 'out';
+    this.label = `${RelationType[relation.type].toLowerCase()} (${relation.since.getUTCFullYear()} ~ ${relation.until?.getUTCFullYear() ?? '-'})`;
+    this.color = COLORS[relation.type];
   }
 }
 
@@ -30,18 +60,30 @@ const props = defineProps<{
   person?: Person;
 }>();
 
-const nodes: Ref<{[id: string]: PersonNode}> = computed(() => {
-  const n: {[id: string]: PersonNode} = {};
-  if (props.person) {
-    n[props.person.id.toString()] = new PersonNode(props.person);
-  }
-  return n;
-});
+const nodes: Ref<{[id: string]: PersonNode}> = ref({});
 const edges: Ref<any[]> = ref([]);
 const configs = ref(
   vNG.defineConfigs({
     view: {
-      layoutHandler: new ForceLayout(),
+      autoPanAndZoomOnLoad: 'center-content',
+      layoutHandler: new ForceLayout({
+        positionFixedByDrag: true,
+        positionFixedByClickWithAltKey: false,
+        createSimulation: (d3, nodes, edges) => {
+          const forceLink = d3
+            .forceLink<ForceNodeDatum, ForceEdgeDatum>(edges)
+            .id((d: ForceNodeDatum) => d.id);
+          // Specify your own d3-force parameters
+          return d3
+            .forceSimulation(nodes)
+            .force("edge", forceLink.distance(50).strength(.5))
+            .force("charge", d3.forceManyBody().strength(-8_000))
+            .force("x", d3.forceX())
+            .force("y", d3.forceY())
+            .stop() // tick manually
+            .tick(100);
+        },
+      }),
     },
     node: {
       normal: {
@@ -85,6 +127,30 @@ const eventHandlers: vNG.EventHandlers = {
     router.push(`/p/${node}`);
   },
 }
+
+const refreshNodes = async (
+  person: Person,
+  relations: Relation[]
+) => ({
+  [person.id.toString()]: new PersonNode(person),
+  ...relations.map(r => ({
+    [r.other.id.toString()]: new PersonNode(r.other)
+  })).reduce((a, b) => ({ ...a, ...b }), {}),
+});
+
+const refreshesEdges = async (
+  person: Person,
+  relations: Relation[]
+) => relations.map(r => new RelationEdge(r, person));
+
+const refreshNetwork = async () => {
+  if (!props.person) return;
+  const relations = await props.person.relations.get();
+  nodes.value = await refreshNodes(props.person, relations);
+  edges.value = await refreshesEdges(props.person, relations);
+};
+
+watch(() => props.person, refreshNetwork, { immediate: true });
 </script>
 
 <template>

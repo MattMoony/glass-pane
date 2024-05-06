@@ -21,11 +21,8 @@ const person = ref<Person | null>(null);
         type="text"
         placeholder="person id"
         @keyup="async (e) => {
-          console.log(e.target.value);
           const p = await Person.get(parseInt((e.target! as HTMLInputElement).value));
-          console.log(p);
           person = p;
-          console.log(person);
         }"
         autofocus
       />

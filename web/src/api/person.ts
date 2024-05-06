@@ -17,6 +17,12 @@ export interface Relation {
   until?: Date;
 }
 
+export interface AbbrRelation {
+  to: Person;
+  since: Date;
+  until?: Date;
+}
+
 export interface RelationSource {
   sid: number;
   url: string;
@@ -27,6 +33,22 @@ export interface PersonResponse extends APIResponse {
 }
 
 export interface NewPersonResponse extends PersonResponse {
+}
+
+export interface ParentsResponse extends APIResponse {
+  parents?: AbbrRelation[];
+}
+
+export interface ChildrenResponse extends APIResponse {
+  children?: AbbrRelation[];
+}
+
+export interface RomanticResponse extends APIResponse {
+  romantic?: AbbrRelation[];
+}
+
+export interface FriendsResponse extends APIResponse {
+  friends?: AbbrRelation[];
 }
 
 export const create = async (
@@ -44,7 +66,12 @@ export const create = async (
 }
 
 export const get = async (pid: number): Promise<PersonResponse> => {
-  return await jreq(`${API}/person/${pid}`) as PersonResponse;
+  const res = await jreq(`${API}/person/${pid}`) as PersonResponse;
+  if (res.person) {
+    res.person.birthdate = res.person.birthdate ? new Date(res.person.birthdate) : undefined;
+    res.person.deathdate = res.person.deathdate ? new Date(res.person.deathdate) : undefined;
+  }
+  return res;
 }
 
 export const pic = async (pid: number): Promise<Blob> => {
@@ -64,4 +91,56 @@ pic.remove = async (pid: number): Promise<APIResponse> => {
   return await jreq(`${API}/person/${pid}/pic`, {
     method: 'DELETE',
   });
+}
+
+export const parents = async (pid: number): Promise<ParentsResponse> => {
+  const res = await jreq(`${API}/person/${pid}/parents`) as ParentsResponse;
+  if (res.parents) {
+    res.parents.forEach(p => {
+      p.to.birthdate = p.to.birthdate ? new Date(p.to.birthdate) : undefined;
+      p.to.deathdate = p.to.deathdate ? new Date(p.to.deathdate) : undefined;
+      p.since = new Date(p.since);
+      p.until = p.until ? new Date(p.until) : undefined;
+    });
+  }
+  return res;
+}
+
+export const children = async (pid: number): Promise<ChildrenResponse> => {
+  const res = await jreq(`${API}/person/${pid}/children`) as ChildrenResponse;
+  if (res.children) {
+    res.children.forEach(c => {
+      c.to.birthdate = c.to.birthdate ? new Date(c.to.birthdate) : undefined;
+      c.to.deathdate = c.to.deathdate ? new Date(c.to.deathdate) : undefined;
+      c.since = new Date(c.since);
+      c.until = c.until ? new Date(c.until) : undefined;
+    });
+  }
+  return res;
+}
+
+export const romantic = async (pid: number): Promise<RomanticResponse> => {
+  const res = await jreq(`${API}/person/${pid}/romantic`) as RomanticResponse;
+  if (res.romantic) {
+    res.romantic.forEach(r => {
+      r.to.birthdate = r.to.birthdate ? new Date(r.to.birthdate) : undefined;
+      r.to.deathdate = r.to.deathdate ? new Date(r.to.deathdate) : undefined;
+      r.since = new Date(r.since);
+      r.until = r.until ? new Date(r.until) : undefined;
+    });
+  }
+  return res;
+}
+
+export const friends = async (pid: number): Promise<FriendsResponse> => {
+  const res = await jreq(`${API}/person/${pid}/friends`) as FriendsResponse;
+  if (res.friends) {
+    res.friends.forEach(f => {
+      f.to.birthdate = f.to.birthdate ? new Date(f.to.birthdate) : undefined;
+      f.to.deathdate = f.to.deathdate ? new Date(f.to.deathdate) : undefined;
+      f.since = new Date(f.since);
+      f.until = f.until ? new Date(f.until) : undefined;
+    });
+  }
+  return res;
 }

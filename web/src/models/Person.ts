@@ -1,6 +1,24 @@
 import { API } from '@/api';
 import * as person from '@/api/person';
 import Organ from './Organ';
+import RelationType from './RelationTypes';
+
+/**
+ * Represents the relation with another person.
+ */
+export class Relation {
+  public type: RelationType;
+  public other: Person;
+  public since: Date;
+  public until?: Date;
+
+  public constructor (type: RelationType, other: Person, since: Date, until?: Date) {
+    this.type = type;
+    this.other = other;
+    this.since = since;
+    this.until = until;
+  }
+}
 
 /**
  * Represents a natural person.
@@ -16,6 +34,26 @@ class Person extends Organ implements person.Person {
     src: () => string;
     set: (pic: Blob) => Promise<void>;
     remove: () => Promise<void>;
+  };
+
+  public parents: {
+    get: () => Promise<Relation[]>;
+  };
+
+  public children: {
+    get: () => Promise<Relation[]>;
+  };
+
+  public romantic: {
+    get: () => Promise<Relation[]>;
+  };
+
+  public friends: {
+    get: () => Promise<Relation[]>;
+  };
+
+  public relations: {
+    get: () => Promise<Relation[]>;
   };
 
   public constructor (
@@ -44,6 +82,91 @@ class Person extends Organ implements person.Person {
       remove: async () => {
         await person.pic.remove(this.id);
       },
+    };
+
+    this.parents = {
+      get: async () => {
+        const res = await person.parents(this.id);
+        return res.parents?.map(r => new Relation(
+          RelationType.PARENT,
+          new Person(
+            r.to.id,
+            r.to.bio,
+            r.to.firstname,
+            r.to.lastname,
+            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+          ), 
+          r.since, 
+          r.until
+        )) || [];
+      },
+    };
+
+    this.children = {
+      get: async () => {
+        const res = await person.children(this.id);
+        return res.children?.map(r => new Relation(
+          RelationType.CHILD,
+          new Person(
+            r.to.id,
+            r.to.bio,
+            r.to.firstname,
+            r.to.lastname,
+            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+          ), 
+          r.since, 
+          r.until
+        )) || [];
+      },
+    };
+
+    this.romantic = {
+      get: async () => {
+        const res = await person.romantic(this.id);
+        return res.romantic?.map(r => new Relation(
+          RelationType.ROMANTIC,
+          new Person(
+            r.to.id,
+            r.to.bio,
+            r.to.firstname,
+            r.to.lastname,
+            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+          ), 
+          r.since, 
+          r.until
+        )) || [];
+      },
+    };
+
+    this.friends = {
+      get: async () => {
+        const res = await person.friends(this.id);
+        return res.friends?.map(r => new Relation(
+          RelationType.FRIEND,
+          new Person(
+            r.to.id,
+            r.to.bio,
+            r.to.firstname,
+            r.to.lastname,
+            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+          ), 
+          r.since, 
+          r.until
+        )) || [];
+      },
+    };
+
+    this.relations = {
+      get: async () => [ 
+        ...await this.parents.get(), 
+        ...await this.children.get(), 
+        ...await this.romantic.get(), 
+        ...await this.friends.get()
+      ],
     };
   }
 
