@@ -295,6 +295,7 @@ const removeRelationSource = (s: RelationSource) => {
   fetch(`http://localhost:8888/api/person/${shownSources.value.from.id}/relation/sources/${s.sid}`, {
     method: 'DELETE',
   }).then(r => r.json()).then(r => {
+    shownSources.value.sources = shownSources.value.sources.filter(ss => ss.sid !== s.sid);
   })
 }
 
