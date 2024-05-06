@@ -7,7 +7,7 @@ import VueCodeMirror from 'vue-codemirror'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave } from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave, faCalendarDay } from '@fortawesome/free-solid-svg-icons'
 
 import VNetworkGraph from 'v-network-graph'
 import 'v-network-graph/lib/style.css'
@@ -30,7 +30,7 @@ app.use(VueCodeMirror, {
   lineWrapping: true,
 })
 
-library.add(faGithub, faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave)
+library.add(faGithub, faMagnifyingGlass, faEyeSlash, faCircleNodes, faFile, faBaby, faSkull, faEdit, faClose, faTrash, faUser, faPlus, faFaceKiss, faHandshake, faSave, faCalendarDay)
 app.component('font-awesome-icon', FontAwesomeIcon)
 
 app.mount('#app')

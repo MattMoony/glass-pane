@@ -9,6 +9,19 @@ interface OrganSource {
   url: string;
 }
 
+interface Relation {
+  to: {
+    id: number,
+    bio: string,
+    firstname: string,
+    lastname: string,
+    birthdate?: Date,
+    deathdate?: Date,
+  },
+  since: Date,
+  until?: Date,
+}
+
 const props = defineProps<{
   person: {
     id: string
@@ -32,15 +45,34 @@ const deathdate = ref('')
 const sources = ref<OrganSource[]>([])
 const newSource = ref('')
 
+const parents = ref<Relation[]>([])
+const children = ref<Relation[]>([])
+const romantic = ref<Relation[]>([])
+const friends = ref<Relation[]>([])
+
 const watchPerson = async () => {
   const person = props.person;
-  if (!person) return;
+  if (!person || !person.id) return;
   bio.value = person.bio ?? '';
   firstname.value = person.firstname ?? '';
   lastname.value = person.lastname ?? '';
   birthdate.value = person.birthdate ? `${person.birthdate.getFullYear()}-${("0"+(person.birthdate.getMonth()+1)).slice(-2)}-${("0"+(person.birthdate.getDate())).slice(-2)}` : '';
   deathdate.value = person.deathdate ? `${person.deathdate.getFullYear()}-${("0"+(person.deathdate.getMonth()+1)).slice(-2)}-${("0"+(person.deathdate.getDate())).slice(-2)}` : '';
   sources.value = (await fetch(`http://localhost:8888/api/organ/${person.id}/sources`).then(r => r.json())).sources ?? [];
+
+  const _2dates = (rs: any[]) => rs.map(r => ({
+    to: {
+      ...r.to,
+      birthdate: r.to.birthdate ? new Date(r.to.birthdate) : null,
+      deathdate: r.to.deathdate ? new Date(r.to.deathdate) : null,
+    },
+    since: new Date(r.since),
+    until: r.until ? new Date(r.until) : null,
+  }));
+  parents.value = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/parents`).then(r => r.json())).parents);
+  children.value = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/children`).then(r => r.json())).children);
+  romantic.value = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/romantic`).then(r => r.json())).romantic);
+  friends.value = _2dates((await fetch(`http://localhost:8888/api/person/${props.person.id}/friends`).then(r => r.json())).friends);
 };
 
 watch(() => props.person, watchPerson);
@@ -171,12 +203,12 @@ const removeSource = async (sid: number) => {
     <div :class="[ 'bio', $props.fullPage ? 'full-bio' : '', ]">
       <h2>Bio</h2>
       <div 
-        class="bio-content md-bio-content" 
+        class="subsection bio-content md-bio-content" 
         v-if="!editPerson" 
         v-dompurify-html="$props.person && marked($props.person.bio)"
       ></div>
       <div
-        class="bio-content"
+        class="subsection bio-content"
         v-else>
         <codemirror 
           :style="{height: '30vh', width: '100%',}" 
@@ -185,8 +217,127 @@ const removeSource = async (sid: number) => {
           :extensions="[markdown(), oneDark,]"
         />
       </div>
+      <h2>Parents</h2>
+      <div v-if="!editPerson" class="subsection">
+        <RouterLink 
+          class="associated-person" 
+          v-if="parents.length" 
+          v-for="parent in parents" 
+          :key="parent.to.id+''+parent.since"
+          :to="`/p/${parent.to.id}`"
+        >
+          <div>
+            <img :src="`http://localhost:8888/api/person/${parent.to.id}/pic`" alt="Parent's face." />
+          </div>
+          <div>
+            <div>{{ parent.to.firstname }} {{ parent.to.lastname }}</div>
+            <span>
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              {{ parent.since.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              -
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              <span v-if="parent.until">
+                {{ parent.until.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              </span>
+              <span v-else>
+                present
+              </span>
+            </span>            
+          </div>
+        </RouterLink>
+        <i v-else>No parents yet ...</i>
+      </div>
+      <h2>Partners</h2>
+      <div v-if="!editPerson" class="subsection">
+        <RouterLink 
+          class="associated-person" 
+          v-if="romantic.length" 
+          v-for="partner in romantic" 
+          :key="partner.to.id+''+partner.since"
+          :to="`/p/${partner.to.id}`"
+        >
+          <div>
+            <img :src="`http://localhost:8888/api/person/${partner.to.id}/pic`" alt="Partner's face." />
+          </div>
+          <div>
+            <div>{{ partner.to.firstname }} {{ partner.to.lastname }}</div>
+            <span>
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              {{ partner.since.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              -
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              <span v-if="partner.until">
+                {{ partner.until.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              </span>
+              <span v-else>
+                present
+              </span>
+            </span>            
+          </div>
+        </RouterLink>
+      </div>
+      <h2>Children</h2>
+      <div v-if="!editPerson" class="subsection">
+        <RouterLink 
+          class="associated-person" 
+          v-if="children.length" 
+          v-for="child in children" 
+          :key="child.to.id+''+child.since"
+          :to="`/p/${child.to.id}`"
+        >
+          <div>
+            <img :src="`http://localhost:8888/api/person/${child.to.id}/pic`" alt="Child's face." />
+          </div>
+          <div>
+            <div>{{ child.to.firstname }} {{ child.to.lastname }}</div>
+            <span>
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              {{ child.since.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              -
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              <span v-if="child.until">
+                {{ child.until.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              </span>
+              <span v-else>
+                present
+              </span>
+            </span>            
+          </div>
+        </RouterLink>
+        <i v-else>No children yet ...</i>
+      </div>
+      <h2>Friends</h2>
+      <div v-if="!editPerson" class="subsection">
+        <RouterLink 
+          class="associated-person" 
+          v-if="friends.length" 
+          v-for="friend in friends" 
+          :key="friend.to.id+''+friend.since"
+          :to="`/p/${friend.to.id}`"
+        >
+          <div>
+            <img :src="`http://localhost:8888/api/person/${friend.to.id}/pic`" alt="Friend's face." />
+          </div>
+          <div>
+            <div>{{ friend.to.firstname }} {{ friend.to.lastname }}</div>
+            <span>
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              {{ friend.since.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              -
+              <font-awesome-icon icon="fa-solid fa-calendar-day" />
+              <span v-if="friend.until">
+                {{ friend.until.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+              </span>
+              <span v-else>
+                present
+              </span>
+            </span>            
+          </div>
+        </RouterLink>
+        <i v-else>No friends yet ...</i>
+      </div>
       <h2>Sources</h2>
-      <div v-if="!editPerson" class="sources">
+      <div v-if="!editPerson" class="subsection sources">
         <ol v-if="sources.length">
           <li v-for="source in sources" :key="source.sid">
             <a :href="source.url" target="_blank">{{ source.url }}</a>
@@ -194,7 +345,7 @@ const removeSource = async (sid: number) => {
         </ol>
         <i v-else>No sources yet ...</i>
       </div>
-      <div class="sources edit-sources" v-else>
+      <div class="subsection sources edit-sources" v-else>
         <ol>
           <li v-for="source in sources" :key="source.sid">
             <input type="text" v-model="source.url" @keyup="e => e.key === 'Enter' ? updateSource(source.sid) : null" />
@@ -386,10 +537,34 @@ input:focus {
   display: none;
 }
 
-.bio-content, .sources {
+.subsection {
   padding: 1em;
   border-left: 2px dashed var(--color-border);
   margin: 1em 0;
+}
+
+.subsection .associated-person {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1em;
+  padding: .5em 0;
+  border: 2px solid var(--color-border);
+  margin: .5em 0;
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.subsection .associated-person:first-child {
+  margin-top: 0;
+}
+
+.subsection .associated-person:last-child {
+  margin-bottom: 0;
+}
+
+.subsection .associated-person img {
+  width: 3em;
 }
 
 .sources ol {
