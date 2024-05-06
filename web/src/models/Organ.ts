@@ -67,9 +67,9 @@ class Organ implements organ.Organ {
     return res.organ ? new Organ(res.organ.id, res.organ.bio) : null;
   }
 
-  public static async create (bio: string): Promise<number|null> {
+  public static async create (bio: string, ...args: any[]): Promise<Organ|null> {
     const res = await organ.create(bio);
-    return res.id ? res.id : null;
+    return res.id ? new Organ(res.id, bio) : null;
   }
 }
 

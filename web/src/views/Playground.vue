@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import Person from '@/models/Person';
 
 import PersonBanner from '@/components/PersonBanner.vue';
+import PersonNetworkNew from '@/components/PersonNetworkNew.vue';
 
 const person = ref<Person | null>(null);
 
@@ -13,7 +14,7 @@ const person = ref<Person | null>(null);
 </script>
 
 <template>
-  <div class="about">
+  <div class="playground">
     <div class="controls">
       <h1>Playground</h1>
       <input 
@@ -29,16 +30,30 @@ const person = ref<Person | null>(null);
         autofocus
       />
     </div>
-    <PersonBanner 
-      :person="person" 
-      socials
-    />
+    <div>
+      <PersonBanner 
+        :person="person" 
+        socials
+      />
+    </div>
+    <div class="netw-wrapper">
+      <PersonNetworkNew
+        :person="person"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped>
-.about {
+.playground {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
   padding: 1em;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
 }
 
 .controls {
@@ -60,5 +75,10 @@ const person = ref<Person | null>(null);
 
 .controls input:focus {
   outline: none;
+}
+
+.netw-wrapper {
+  flex-grow: 1;
+  flex-basis: 0;
 }
 </style>
