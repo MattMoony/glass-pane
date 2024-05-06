@@ -87,7 +87,7 @@ export class Relation {
     );
     client.release();
     if (res.rows.length === 0) return [];
-    return res.rows;
+    return res.rows.map((row) => ({ sid: +row.sid, url: row.url, }));
   }
 
   public static async updateSource (sid: number, url: string): Promise<void> {
