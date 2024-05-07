@@ -13,11 +13,11 @@ import OrganSource from '../models/OrganSource';
  * @returns Nothing.
  */
 export const parseOid = async (req: Request, res: Response, next: () => void): Promise<void> => {
-  if (isNaN(parseInt(req.params.organId))) {
+  if (isNaN(parseInt(req.params.oid))) {
     res.send({ 'success': false, 'msg': 'bad organId' });
     return;
   }
-  const organ = await Organ.get(parseInt(req.params.organId));
+  const organ = await Organ.get(parseInt(req.params.oid));
   if (organ === null) {
     res.send({ 'success': false, 'msg': 'organ not found' });
     return;
@@ -32,7 +32,7 @@ export const parseOid = async (req: Request, res: Response, next: () => void): P
  * @param res The response object.
  */
 export const create = async (req: Request, res: Response): Promise<void> => {
-  const organ = await Organ.create();
+  const organ = await Organ.create(req.body.bio);
   if (!organ) res.send({ 'success': false, 'msg': 'failed to create' });
   res.send({ 'success': true, organ });
 };
@@ -75,7 +75,7 @@ export const addSource = async (req: Request, res: Response): Promise<void> => {
  */
 export const updateSource = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
-  await organ.update(new OrganSource(parseInt(req.params.sourceId), req.body.url));
+  await organ.update(new OrganSource(parseInt(req.params.sid), req.body.url));
   res.send({ 'success': true });
 };
 
@@ -86,6 +86,6 @@ export const updateSource = async (req: Request, res: Response): Promise<void> =
  */
 export const removeSource = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
-  await organ.remove(new OrganSource(parseInt(req.params.sourceId), ''));
+  await organ.remove(new OrganSource(parseInt(req.params.sid), ''));
   res.send({ 'success': true });
 };
