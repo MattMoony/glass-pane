@@ -1,26 +1,130 @@
 import { Router } from 'express';
 import * as controller from '../controllers/person';
+import { requireBody, requireQuery } from '../middleware';
 
 const router: Router = Router();
 
-router.post('/new', controller.create);
-router.get('/:userId', controller.parseUid, controller.get);
-router.get('/:userId/name', controller.parseUid, controller.getName);
-router.get('/:userId/pic', controller.parseUid, controller.getPic);
-router.post('/:userId/pic', controller.parseUid, controller.setPic);
-router.delete('/:userId/pic', controller.parseUid, controller.removePic);
-router.patch('/:userId', controller.parseUid, controller.update);
-router.delete('/:userId', controller.parseUid, controller.remove);
-router.post('/:userId/relation', controller.parseUid, controller.addRelation);
-router.patch('/:userId/relation', controller.parseUid, controller.updateRelation);
-router.delete('/:userId/relation', controller.parseUid, controller.removeRelation);
-router.get('/:userId/relation/sources', controller.parseUid, controller.getRelationSources);
-router.post('/:userId/relation/sources', controller.parseUid, controller.addRelationSource);
-router.patch('/:userId/relation/sources/:sourceId', controller.parseUid, controller.updateRelationSource);
-router.delete('/:userId/relation/sources/:sourceId', controller.parseUid, controller.removeRelationSource);
-router.get('/:userId/parents', controller.parseUid, controller.getParents);
-router.get('/:userId/children', controller.parseUid, controller.getChildren);
-router.get('/:userId/romantic', controller.parseUid, controller.getRomantic);
-router.get('/:userId/friends', controller.parseUid, controller.getFriends);
+router.post('/', 
+  requireBody({
+    firstname: { type: 'string', },
+    lastname: { type: 'string', },
+    bio: { type: 'string', optional: true, },
+    birthdate: { type: 'string', optional: true, },
+    deathdate: { type: 'string', optional: true, },
+  }), 
+  controller.create
+);
+router.get('/:pid', 
+  controller.parsePid, 
+  controller.get
+);
+router.get('/:pid/name', 
+  controller.parsePid, 
+  controller.getName
+);
+router.patch('/:pid', 
+  requireBody({
+    firstname: { type: 'string', optional: true, },
+    lastname: { type: 'string', optional: true, },
+    bio: { type: 'string', optional: true, },
+    birthdate: { type: 'string', optional: true, },
+    deathdate: { type: 'string', optional: true, },
+  }), 
+  controller.parsePid, 
+  controller.update
+);
+router.delete('/:pid', 
+  controller.parsePid, 
+  controller.remove
+);
+
+router.get('/:pid/pic', 
+  controller.parsePid, 
+  controller.getPic
+);
+router.post('/:pid/pic', 
+  controller.parsePid, 
+  controller.setPic
+);
+router.delete('/:pid/pic', 
+  controller.parsePid, 
+  controller.removePic
+);
+
+router.post('/:pid/relation', 
+  requireBody({
+    type: { type: 'number', },
+    other: { type: 'number', },
+    source: { type: 'string', },
+    since: { type: 'string', },
+    until: { type: 'string', optional: true, },
+  }), 
+  controller.parsePid, 
+  controller.addRelation
+);
+router.patch('/:pid/relation', 
+  requireBody({
+    type: { type: 'number', },
+    other: { type: 'number', },
+    since: { type: 'string', },
+    until: { type: 'string', optional: true, },
+  }), 
+  controller.parsePid, 
+  controller.updateRelation
+);
+router.delete('/:pid/relation', 
+  requireBody({
+    type: { type: 'number', },
+    other: { type: 'number', },
+    since: { type: 'string', },
+  }), 
+  controller.parsePid, 
+  controller.removeRelation
+);
+router.get('/:pid/parents', 
+  controller.parsePid, 
+  controller.getParents
+);
+router.get('/:pid/children', 
+  controller.parsePid, 
+  controller.getChildren
+);
+router.get('/:pid/romantic', 
+  controller.parsePid, 
+  controller.getRomantic
+);
+router.get('/:pid/friends', 
+  controller.parsePid, 
+  controller.getFriends
+);
+
+router.get('/:pid/relation/sources', 
+  requireQuery({
+    other: { type: 'string', },
+    since: { type: 'string', },
+  }), 
+  controller.parsePid, 
+  controller.getRelationSources
+);
+router.post('/:pid/relation/sources', 
+  requireBody({
+    other: { type: 'number', },
+    since: { type: 'string', },
+    url: { type: 'string', },
+  }), 
+  controller.parsePid, 
+  controller.addRelationSource
+);
+router.patch('/:pid/relation/sources/:sid', 
+  requireBody({
+    url: { type: 'string', },
+  }), 
+  controller.parsePid, 
+  controller.updateRelationSource
+);
+router.delete('/:pid/relation/sources/:sid', 
+  controller.parsePid, 
+  controller.removeRelationSource
+);
 
 export default router;

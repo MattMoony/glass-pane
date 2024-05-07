@@ -1,5 +1,7 @@
 import 'process';
 import { Request, Response } from 'express';
+import fs from 'fs';
+import fileUpload from 'express-fileupload';
 
 import Organ from '../models/Organ';
 import OrganSource from '../models/OrganSource';
@@ -44,6 +46,51 @@ export const create = async (req: Request, res: Response): Promise<void> => {
  */
 export const get = async (req: Request, res: Response): Promise<void> => {
   res.send({ 'success': true, 'organ': res.locals.organ as Organ });
+};
+
+/**
+ * Gets the profile picture of the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const getPic = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  if (fs.existsSync(`${process.env.DATA_DIR}/${organ.id}.jpg`))
+    res.sendFile(`${process.env.DATA_DIR}/${organ.id}.jpg`);
+  else
+    res.sendFile(`${process.env.DATA_DIR}/default.png`);
+};
+
+/**
+ * Sets the profile picture of the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const setPic = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  if (!req.files || !req.files.pic) {
+    res.send({ 'success': false, 'msg': 'missing parameters' });
+    return;
+  }
+  const pic = req.files.pic as fileUpload.UploadedFile;
+  if (!['image/jpeg', 'image/png', 'image/gif',].includes(pic.mimetype)) {
+    res.send({ 'success': false, 'msg': 'bad mimetype' });
+    return;
+  }
+  await pic.mv(`${process.env.DATA_DIR}/${organ.id}.jpg`);
+  res.send({ 'success': true });
+};
+
+/**
+ * Removes the profile picture of the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const removePic = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  if (fs.existsSync(`${process.env.DATA_DIR}/${organ.id}.jpg`))
+    fs.unlinkSync(`${process.env.DATA_DIR}/${organ.id}.jpg`);
+  res.send({ 'success': true });
 };
 
 /**

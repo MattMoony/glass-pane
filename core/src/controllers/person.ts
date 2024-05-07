@@ -14,12 +14,12 @@ import RelationType from '../models/RelationshipType';
  * @param req The request object.
  * @param res The response object.
  */
-export const parseUid = async (req: Request, res: Response, next: () => void): Promise<void> => {
-  if (isNaN(parseInt(req.params.userId))) {
+export const parsePid = async (req: Request, res: Response, next: () => void): Promise<void> => {
+  if (isNaN(parseInt(req.params.pid))) {
     res.send({ 'success': false, 'msg': 'bad userid' });
     return;
   }
-  const person = await Person.get(parseInt(req.params.userId));
+  const person = await Person.get(parseInt(req.params.pid));
   if (person === null) {
     res.send({ 'success': false, 'msg': 'person not found' });
     return;
@@ -34,10 +34,6 @@ export const parseUid = async (req: Request, res: Response, next: () => void): P
  * @param res The response object.
  */
 export const create = async (req: Request, res: Response): Promise<void> => {
-  if (!req.body.firstname || !req.body.lastname) {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
   const birthdate = req.body.birthdate ? new Date(req.body.birthdate) : undefined;
   const deathdate = req.body.deathdate ? new Date(req.body.deathdate) : undefined;
   const person = await Person.create(req.body.firstname, req.body.lastname, birthdate, deathdate, req.body.bio);
@@ -147,23 +143,18 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
 export const addRelation = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  if (!req.body.type || !req.body.personId || !req.body.source || !req.body.since) {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
-
-  if (!(+req.body.type in RelationType)) {
+  if (!(req.body.type in RelationType)) {
     res.send({ 'success': false, 'msg': 'bad type' });
     return;
   }
 
-  const relative = await Person.get(parseInt(req.body.personId));
+  const relative = await Person.get(req.body.other);
   if (relative === null) {
     res.send({ 'success': false, 'msg': 'not found' });
     return;
   }
 
-  const relation = new Relation(+req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
+  const relation = new Relation(req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
   try {
     await person.add(relation, typeof req.body.source === 'string' ? [req.body.source,] : req.body.source);
     res.send({ 'success': true });
@@ -180,17 +171,12 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
 export const updateRelation = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  if (!req.body.personId || !req.body.type || !req.body.since) {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
-
-  if (!(+req.body.type in RelationType)) {
+  if (!(req.body.type in RelationType)) {
     res.send({ 'success': false, 'msg': 'bad type' });
     return;
   }
 
-  const relative = await Person.get(parseInt(req.body.personId));
+  const relative = await Person.get(req.body.other);
   if (relative === null) {
     res.send({ 'success': false, 'msg': 'not found' });
     return;
@@ -209,23 +195,18 @@ export const updateRelation = async (req: Request, res: Response): Promise<void>
 export const removeRelation = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  if (!req.body.personId || !req.body.type || !req.body.since) {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
-
-  if (!(+req.body.type in RelationType)) {
+  if (!(req.body.type in RelationType)) {
     res.send({ 'success': false, 'msg': 'bad type' });
     return;
   }
 
-  const relative = await Person.get(parseInt(req.body.personId));
+  const relative = await Person.get(req.body.other);
   if (relative === null) {
     res.send({ 'success': false, 'msg': 'not found' });
     return;
   }
 
-  const relation = new Relation(+req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
+  const relation = new Relation(req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
   await person.remove(relation);
   res.send({ 'success': true });
 }
@@ -282,18 +263,13 @@ export const getFriends = async (req: Request, res: Response): Promise<void> => 
 export const getRelationSources = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  if (!req.query.to || typeof req.query.to !== 'string' || !req.query.since || typeof req.query.since !== 'string') {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
-
-  const relative = await Person.get(parseInt(req.query.to));
+  const relative = await Person.get(parseInt(req.query.other as string));
   if (relative === null) {
     res.send({ 'success': false, 'msg': 'not found' });
     return;
   }
 
-  const sources = await Relation.sources(person, relative, new Date(req.query.since));
+  const sources = await Relation.sources(person, relative, new Date(req.query.since as string));
   res.send({ 'success': true, 'sources': sources });
 };
 
@@ -305,12 +281,7 @@ export const getRelationSources = async (req: Request, res: Response): Promise<v
 export const addRelationSource = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  if (!req.body.to || !req.body.since || !req.body.url) {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
-
-  const relative = await Person.get(parseInt(req.body.to));
+  const relative = await Person.get(parseInt(req.body.other));
   if (relative === null) {
     res.send({ 'success': false, 'msg': 'not found' });
     return;
@@ -333,13 +304,7 @@ export const addRelationSource = async (req: Request, res: Response): Promise<vo
  */
 export const updateRelationSource = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-
-  if (!req.params.sourceId || !req.body.url) {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
-
-  const source = new RelationSource(parseInt(req.params.sourceId), req.body.url);
+  const source = new RelationSource(parseInt(req.params.sid), req.body.url);
   await source.update();
   res.send({ 'success': true, });
 };
@@ -351,13 +316,7 @@ export const updateRelationSource = async (req: Request, res: Response): Promise
  */
 export const removeRelationSource = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-
-  if (!req.params.sourceId) {
-    res.send({ 'success': false, 'msg': 'missing parameters' });
-    return;
-  }
-
-  const source = new RelationSource(parseInt(req.params.sourceId), '');
+  const source = new RelationSource(parseInt(req.params.sid), '');
   await source.remove();
   res.send({ 'success': true });
 };
