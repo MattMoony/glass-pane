@@ -32,6 +32,10 @@ export interface PersonResponse extends APIResponse {
   person?: Person;
 }
 
+export interface PeopleResponse extends APIResponse {
+  people: Person[];
+}
+
 export interface NewPersonResponse extends PersonResponse {
 }
 
@@ -66,7 +70,7 @@ export const create = async (
   birthdate?: Date,
   deathdate?: Date
 ): Promise<NewPersonResponse> => {
-  return await jreq(`${API}/person/new`, {
+  return await jreq(`${API}/person`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ firstname, lastname, bio, birthdate, deathdate, }),
@@ -82,23 +86,13 @@ export const get = async (pid: number): Promise<PersonResponse> => {
   return res;
 }
 
-export const pic = async (pid: number): Promise<Blob> => {
-  return await fetch(`${API}/person/${pid}/pic`).then(res => res.blob());
-}
-
-pic.set = async (pid: number, pic: Blob): Promise<APIResponse> => {
-  const formData = new FormData();
-  formData.append('pic', pic);
-  return await jreq(`${API}/person/${pid}/pic`, {
-    method: 'POST',
-    body: formData,
+export const search = async (query: string): Promise<PeopleResponse> => {
+  const res = await jreq(`${API}/person?q=${query}`) as PeopleResponse;
+  res.people.forEach(p => {
+    p.birthdate = p.birthdate ? new Date(p.birthdate) : undefined;
+    p.deathdate = p.deathdate ? new Date(p.deathdate) : undefined;
   });
-}
-
-pic.remove = async (pid: number): Promise<APIResponse> => {
-  return await jreq(`${API}/person/${pid}/pic`, {
-    method: 'DELETE',
-  });
+  return res;
 }
 
 export const parents = async (pid: number): Promise<ParentsResponse> => {
@@ -154,44 +148,44 @@ export const friends = async (pid: number): Promise<FriendsResponse> => {
 }
 
 export const rel = {
-  add: async (type: string, pid: number, to: number, since: Date, until?: Date): Promise<APIResponse> => {
+  add: async (type: string, pid: number, other: number, sources: string[], since: Date, until?: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, to, since, until, }),
+      body: JSON.stringify({ type, other, since, until, sources, }),
     });
   },
 
-  update: async (pid: number, to: number, since: Date, until?: Date): Promise<APIResponse> => {
+  update: async (pid: number, other: number, since: Date, until?: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, since, until }),
+      body: JSON.stringify({ other, since, until }),
     });
   },
 
-  remove: async (pid: number, to: number, since: Date): Promise<APIResponse> => {
+  remove: async (pid: number, other: number, since: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, since, }),
+      body: JSON.stringify({ other, since, }),
     });
   },
 };
 
-export const rel_sources = async (pid: number, to: number, since: Date): Promise<RelationSourcesResponse> => {
-  return await jreq(`${API}/person/${pid}/relation/sources?to=${to}&since=${since.toISOString()}`) as RelationSourcesResponse;
+export const rel_sources = async (pid: number, other: number, since: Date): Promise<RelationSourcesResponse> => {
+  return await jreq(`${API}/person/${pid}/relation/sources?other=${other}&since=${since.toISOString()}`) as RelationSourcesResponse;
 };
 
-rel_sources.add = async (pid: number, to: number, since: Date, url: string): Promise<NewRelationSourceResponse> => {
+rel_sources.add = async (pid: number, other: number, since: Date, url: string): Promise<NewRelationSourceResponse> => {
   return await jreq(`${API}/person/${pid}/relation/sources`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ to, since, url }),
+    body: JSON.stringify({ other, since, url }),
   }) as NewRelationSourceResponse;
 }
 
-rel_sources.update = async (pid: number, to: number, sid: number, url: string): Promise<APIResponse> => {
+rel_sources.update = async (pid: number, sid: number, url: string): Promise<APIResponse> => {
   return await jreq(`${API}/person/${pid}/relation/sources/${sid}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

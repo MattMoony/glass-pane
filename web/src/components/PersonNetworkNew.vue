@@ -9,6 +9,14 @@ import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/force-l
 import Person from '../models/Person';
 import Relation from '../models/Relation';
 import RelationType, { COLORS } from '../models/RelationTypes';
+import Organization from '@/models/Organization';
+import Membership from '@/models/Membership';
+
+const router = useRouter();
+const props = defineProps<{
+  person?: Person;
+  showMemberships?: boolean;
+}>();
 
 class PersonNode extends Person {
   public name: string;
@@ -56,13 +64,49 @@ class RelationEdge extends Relation {
   }
 }
 
-const router = useRouter();
-const props = defineProps<{
-  person?: Person;
-}>();
+class OrganizationNode extends Organization {
+  public name: string;
+  public color: string;
 
-const nodes: Ref<{[id: string]: PersonNode}> = ref({});
-const edges: Ref<any[]> = ref([]);
+  public constructor(organization: Organization, color?: string) {
+    super(
+      organization.id,
+      organization.bio,
+      organization.name,
+      organization.established,
+      organization.dissolved,
+    );
+    this.name = `${organization.name}${organization.established ? '\n*' + organization.established.getUTCFullYear() : ''}`;
+    this.color = color || getComputedStyle(document.body).getPropertyValue('--color-border');
+  }
+}
+
+class MembershipEdge extends Membership {
+  public source: string;
+  public target: string;
+  public label: string;
+  public direction: string;
+  public color: string;
+
+  public constructor(membership: Membership) {
+    super(
+      membership.organ,
+      membership.organization,
+      membership.role,
+      membership.since,
+      membership.until,
+    );
+
+    this.source = this.organ.id.toString();
+    this.target = this.organization.id.toString();
+    this.direction = 'out';
+    this.label = `${this.role.name} (${membership.since.getUTCFullYear()} ~ ${membership.until?.getUTCFullYear() ?? '-'})`;
+    this.color = getComputedStyle(document.body).getPropertyValue('--color-border');
+  }
+}
+
+const nodes: Ref<{[id: string]: PersonNode|OrganizationNode}> = ref({});
+const edges: Ref<(RelationEdge|MembershipEdge)[]> = ref([]);
 const configs = ref(
   vNG.defineConfigs({
     view: {
@@ -125,30 +169,45 @@ const configs = ref(
 );
 const eventHandlers: vNG.EventHandlers = {
   'node:click': ({ node }) => {
-    router.push(`/p/${node}`);
+    const n = nodes.value[node];
+    if (n instanceof PersonNode)
+      router.push(`/p/${n.id}`);
+    else if (n instanceof OrganizationNode)
+      router.push(`/o/${n.id}`);
   },
 }
 
 const refreshNodes = async (
   person: Person,
-  relations: Relation[]
+  relations: Relation[],
+  memberships: Membership[]
 ) => ({
   [person.id.toString()]: new PersonNode(person),
   ...relations.map(r => ({
     [r.other.id.toString()]: new PersonNode(r.other)
   })).reduce((a, b) => ({ ...a, ...b }), {}),
+  ...memberships.map(m => ({
+    [m.organization.id.toString()]: new OrganizationNode(m.organization)
+  })).reduce((a, b) => ({ ...a, ...b }), {}),
 });
 
 const refreshesEdges = async (
   person: Person,
-  relations: Relation[]
-) => relations.map(r => new RelationEdge(r, person));
+  relations: Relation[],
+  memberships: Membership[]
+) => [
+  ...relations.map(r => new RelationEdge(r, person)),
+  ...memberships.map(m => new MembershipEdge(m)),
+];
 
 const refreshNetwork = async () => {
   if (!props.person) return;
   const relations = await props.person.relations.get();
-  nodes.value = await refreshNodes(props.person, relations);
-  edges.value = await refreshesEdges(props.person, relations);
+  let memberships: Membership[];
+  if (props.showMemberships) memberships = await Membership.get(props.person);
+  else memberships = [] as Membership[];
+  nodes.value = await refreshNodes(props.person, relations, memberships);
+  edges.value = await refreshesEdges(props.person, relations, memberships);
 };
 
 watch(() => props.person, refreshNetwork, { immediate: true });

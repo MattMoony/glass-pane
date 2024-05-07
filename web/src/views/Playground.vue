@@ -10,7 +10,7 @@ import PersonNetworkNew from '@/components/PersonNetworkNew.vue';
 const person = ref<Person | null>(null);
 
 (async () => {
-  const p = await Person.get(6);
+  const p = await Person.get(35);
   person.value = p;
 })();
 
@@ -41,6 +41,7 @@ window.Organization = Organization;
     <div class="netw-wrapper">
       <PersonNetworkNew
         :person="person"
+        show-memberships
       />
     </div>
   </div>

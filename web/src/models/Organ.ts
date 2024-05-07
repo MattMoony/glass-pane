@@ -1,3 +1,4 @@
+import { API } from '@/api';
 import * as organ from '@/api/organ';
 import { marked } from 'marked';
 
@@ -10,6 +11,13 @@ class Organ implements organ.Organ {
   public id: number;
   public bio: string;
 
+  public pic: {
+    get: () => Promise<Blob>;
+    src: () => string;
+    set: (pic: Blob) => Promise<void>;
+    remove: () => Promise<void>;
+  };
+
   public sources: {
     get: () => Promise<organ.OrganSource[]>;
     add: (url: string) => Promise<organ.OrganSource|null>;
@@ -21,6 +29,19 @@ class Organ implements organ.Organ {
     this.id = id;
     this.bio = bio;
 
+    this.pic = {
+      get: async () => {
+        return await organ.pic(this.id);
+      },
+      src: () => `${API}/organ/${this.id}/pic`,
+      set: async (pic: Blob) => {
+        await organ.pic.set(this.id, pic);
+      },
+      remove: async () => {
+        await organ.pic.remove(this.id);
+      },
+    };
+
     this.sources = {
       get: async () => {
         const res = await organ.sources(this.id);
@@ -28,7 +49,7 @@ class Organ implements organ.Organ {
       },
       add: async (url: string) => {
         const res = await organ.sources.add(this.id, url);
-        return res.id ? { sid: res.id, url } : null;
+        return res.source ? { sid: res.source.sid, url } : null;
       },
       update: async (sid: number, url: string) => {
         await organ.sources.update(this.id, sid, url);
@@ -69,7 +90,7 @@ class Organ implements organ.Organ {
 
   public static async create (bio: string, ...args: any[]): Promise<Organ|null> {
     const res = await organ.create(bio);
-    return res.id ? new Organ(res.id, bio) : null;
+    return res.organ ? new Organ(res.organ.id, res.organ.bio) : null;
   }
 }
 

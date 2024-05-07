@@ -1,4 +1,3 @@
-import { API } from '@/api';
 import * as person from '@/api/person';
 
 import Organ from './Organ';
@@ -13,13 +12,6 @@ class Person extends Organ implements person.Person {
   public lastname: string;
   public birthdate?: Date;
   public deathdate?: Date;
-
-  public pic: {
-    get: () => Promise<Blob>;
-    src: () => string;
-    set: (pic: Blob) => Promise<void>;
-    remove: () => Promise<void>;
-  };
 
   public parents: {
     get: () => Promise<Relation[]>;
@@ -62,19 +54,6 @@ class Person extends Organ implements person.Person {
     this.lastname = lastname;
     this.birthdate = birthdate;
     this.deathdate = deathdate;
-
-    this.pic = {
-      get: async () => {
-        return await person.pic(this.id);
-      },
-      src: () => `${API}/person/${this.id}/pic`,
-      set: async (pic: Blob) => {
-        await person.pic.set(this.id, pic);
-      },
-      remove: async () => {
-        await person.pic.remove(this.id);
-      },
-    };
 
     this.parents = {
       get: async () => {

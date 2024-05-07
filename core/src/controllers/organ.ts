@@ -73,8 +73,11 @@ export const getPic = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
   if (fs.existsSync(`${process.env.DATA_DIR}/${organ.id}.jpg`))
     res.sendFile(`${process.env.DATA_DIR}/${organ.id}.jpg`);
-  else
-    res.sendFile(`${process.env.DATA_DIR}/default.png`);
+  else {
+    const person = await Person.get(organ.id);
+    if (person) res.sendFile(`${process.env.DATA_DIR}/default-person.png`);
+    else res.sendFile(`${process.env.DATA_DIR}/default-organization.png`);
+  }
 };
 
 /**
