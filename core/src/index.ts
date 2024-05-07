@@ -8,6 +8,7 @@ import fileUpload from 'express-fileupload';
 import searchRouter from './routes/search';
 import organRouter from './routes/organ';
 import personRouter from './routes/person';
+import organizationRouter from './routes/organization';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(fileUpload());
 app.use('/api/search/', searchRouter);
 app.use('/api/organ/', organRouter);
 app.use('/api/person/', personRouter);
+app.use('/api/organization/', organizationRouter);
 
 app.use('/api/*', (req: Request, res: Response) => {
   res.status(404);

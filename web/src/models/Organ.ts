@@ -51,7 +51,7 @@ class Organ implements organ.Organ {
     return marked(this.bio);
   }
 
-  public json (): Object {
+  public json (): organ.Organ {
     return {
       id: this.id,
       bio: this.bio,

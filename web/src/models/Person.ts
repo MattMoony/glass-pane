@@ -235,13 +235,13 @@ class Person extends Organ implements person.Person {
     return this.birthdate.getUTCMonth() > deathdate.getUTCMonth() ? diff - 1 : diff;
   }
 
-  public json (): Object {
+  public json (): person.Person {
     return {
       ...super.json(),
       firstname: this.firstname,
       lastname: this.lastname,
-      birthdate: this.birthdate?.toISOString(),
-      deathdate: this.deathdate?.toISOString(),
+      birthdate: this.birthdate,
+      deathdate: this.deathdate,
     };
   }
 

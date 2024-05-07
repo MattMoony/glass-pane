@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+
 import Person from '@/models/Person';
+import Organization from '@/models/Organization';
 
 import PersonBanner from '@/components/PersonBanner.vue';
 import PersonNetworkNew from '@/components/PersonNetworkNew.vue';
@@ -13,6 +15,7 @@ const person = ref<Person | null>(null);
 })();
 
 window.Person = Person;
+window.Organization = Organization;
 </script>
 
 <template>
