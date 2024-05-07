@@ -85,7 +85,7 @@ class Organization extends Organ {
     await super.update();
     const client = await pool.connect();
     await client.query(
-      'UPDATE organizations SET name = $1, established = $2, dissolved = $3 WHERE id = $4',
+      'UPDATE organization SET name = $1, established = $2, dissolved = $3 WHERE id = $4',
       [this.name, this.established, this.dissolved, this.id]
     );
     client.release();
@@ -115,7 +115,7 @@ class Organization extends Organ {
     // TODO: organ, etc. - fix this later
     const client = await pool.connect();
     await client.query(
-      'DELETE FROM organizations WHERE id = $1',
+      'DELETE FROM organization WHERE id = $1',
       [this.id]
     );
     client.release();
@@ -149,7 +149,7 @@ class Organization extends Organ {
       const organ = v4 ? await Organ.create(v4) : await super.create();
       const client = await pool.connect();
       const res = await client.query(
-        'INSERT INTO organizations (id, name, established, dissolved) VALUES ($1, $2, $3, $4) RETURNING id',
+        'INSERT INTO organization (id, name, established, dissolved) VALUES ($1, $2, $3, $4) RETURNING id',
         [organ.id, v, v2, v3]
       );
       client.release();
@@ -168,7 +168,7 @@ class Organization extends Organ {
     if (!organ) return null;
     const client = await pool.connect();
     const res = await client.query(
-      'SELECT name, established, dissolved FROM organizations WHERE id = $1', 
+      'SELECT name, established, dissolved FROM organization WHERE id = $1', 
       [id]
     );
     client.release();
@@ -191,7 +191,7 @@ class Organization extends Organ {
     const client = await pool.connect();
     const res = await client.query(
       `SELECT   *
-       FROM     organizations
+       FROM     organization
        WHERE    name ILIKE $1`,
       [`%${query}%`]
     );

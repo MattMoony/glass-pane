@@ -2,6 +2,7 @@ import 'process';
 import { Request, Response } from 'express';
 
 import Person from '../models/Person';
+import Organization from '../models/Organization';
 
 /**
  * Searches for people/organizations based on a query string.
@@ -16,6 +17,9 @@ export const search = async (req: Request, res: Response): Promise<void> => {
   }
 
   const query = (req.query.q as string).trim().toLowerCase();
-  const results = await Person.find(query);
-  res.send({ 'success': true, 'people': results, });
+  res.send({ 
+    'success': true, 
+    'people': await Person.find(query), 
+    'organizations': await Organization.find(query),
+  });
 };
