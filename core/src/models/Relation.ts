@@ -56,10 +56,12 @@ class Relation {
       [this.from.id, this.to.id, this.type, this.since, this.until],
     );
 
-    await client.query(
-      'INSERT INTO relation_source (person, relative, since, url) VALUES ($1, $2, $3, $4)',
-      sources.map(s => [this.from.id, this.to.id, this.since, s,]),
-    );
+    for (const source of sources) {
+      await client.query(
+        'INSERT INTO relation_source (person, relative, since, url) VALUES ($1, $2, $3, $4)',
+        [this.from.id, this.to.id, this.since, source],
+      );
+    }
     client.release();
   }
 

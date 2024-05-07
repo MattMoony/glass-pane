@@ -149,7 +149,7 @@ class Organization extends Organ {
       const organ = v4 ? await Organ.create(v4) : await super.create();
       const client = await pool.connect();
       const res = await client.query(
-        'INSERT INTO organization (id, name, established, dissolved) VALUES ($1, $2, $3, $4) RETURNING oid',
+        'INSERT INTO organization (oid, name, established, dissolved) VALUES ($1, $2, $3, $4) RETURNING oid',
         [organ.id, v, v2, v3]
       );
       client.release();

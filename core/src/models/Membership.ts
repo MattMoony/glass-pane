@@ -57,10 +57,12 @@ class Membership {
       'INSERT INTO membership (organ, organization, role, since, until) VALUES ($1, $2, $3, $4, $5)',
       [this.organ.id, this.organization.id, this.role.id, this.since, this.until]
     );
-    await client.query(
-      'INSERT INTO membership_sources (organ, organization, role, since, url) VALUES ($1, $2, $3, $4, $5)',
-      sources.map(s => [this.organ.id, this.organization.id, this.role.id, this.since, s])
-    );
+    for (const source of sources) {
+      await client.query(
+        'INSERT INTO membership_sources (organ, organization, role, since, url) VALUES ($1, $2, $3, $4, $5)',
+        [this.organ.id, this.organization.id, this.role.id, this.since, source]
+      );
+    }
     client.release();
   }
 

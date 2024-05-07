@@ -38,7 +38,9 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     res.send({ 'success': false, 'msg': 'missing parameters' });
     return;
   }
-  const person = await Person.create(req.body.firstname, req.body.lastname, req.body.birthdate, req.body.deathdate);
+  const birthdate = req.body.birthdate ? new Date(req.body.birthdate) : undefined;
+  const deathdate = req.body.deathdate ? new Date(req.body.deathdate) : undefined;
+  const person = await Person.create(req.body.firstname, req.body.lastname, birthdate, deathdate, req.body.bio);
   res.send({ 'success': true, 'person': person.json() });
 };
 
@@ -162,8 +164,12 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
   }
 
   const relation = new Relation(+req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
-  await person.add(relation, typeof req.body.source === 'string' ? [req.body.source,] : req.body.source);
-  res.send({ 'success': true });
+  try {
+    await person.add(relation, typeof req.body.source === 'string' ? [req.body.source,] : req.body.source);
+    res.send({ 'success': true });
+  } catch {
+    res.send({ 'success': false, 'msg': 'duplicate' });
+  }
 };
 
 /**

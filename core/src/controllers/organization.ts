@@ -32,7 +32,9 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     res.send({ 'success': false, 'msg': 'missing name', });
     return;
   }
-  const organization = await Organization.create(req.body.name, req.body.established, req.body.dissolved);
+  const established = req.body.established ? new Date(req.body.established) : undefined;
+  const dissolved = req.body.dissolved ? new Date(req.body.dissolved) : undefined;
+  const organization = await Organization.create(req.body.name, established, dissolved, req.body.bio);
   res.send({ 'success': true, 'organization': organization });
 };
 
@@ -54,6 +56,7 @@ export const get = async (req: Request, res: Response): Promise<void> => {
 export const update = async (req: Request, res: Response): Promise<void> => {
   const organization = res.locals.organization as Organization;
  
+  if (req.body.bio) organization.bio = req.body.bio;
   if (req.body.name) organization.name = req.body.name;
   if (req.body.established) organization.established = req.body.established;
   if (req.body.dissolved) organization.dissolved = req.body.dissolved;

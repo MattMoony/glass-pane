@@ -32,9 +32,9 @@ export const parseOid = async (req: Request, res: Response, next: () => void): P
  * @param res The response object.
  */
 export const create = async (req: Request, res: Response): Promise<void> => {
-  const id = await Organ.create();
-  if (!id) res.send({ 'success': false, 'msg': 'failed to create' });
-  res.send({ 'success': true, id });
+  const organ = await Organ.create();
+  if (!organ) res.send({ 'success': false, 'msg': 'failed to create' });
+  res.send({ 'success': true, organ });
 };
 
 /**
@@ -64,8 +64,8 @@ export const getSources = async (req: Request, res: Response): Promise<void> => 
  */
 export const addSource = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
-  const sid = await organ.add(req.body.url);
-  res.send({ 'success': true, id: sid, });
+  const source = await organ.add(req.body.url);
+  res.send({ 'success': true, source, });
 };
 
 /**
