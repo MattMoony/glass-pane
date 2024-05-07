@@ -1,7 +1,8 @@
 import 'process';
 import { Request, Response } from 'express';
 
-import Organ, { OrganSource } from '../models/Organ';
+import Organ from '../models/Organ';
+import OrganSource from '../models/OrganSource';
 
 /**
  * Parses the organ ID from the request parameters to

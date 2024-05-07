@@ -3,7 +3,9 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 import fileUpload from 'express-fileupload';
 
-import Person, { Relation, RelationSource } from '../models/Person';
+import Person from '../models/Person';
+import Relation from '../models/Relation';
+import RelationSource from '../models/RelationSource';
 import RelationType from '../models/RelationshipType';
 
 /**

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+
 import Organization from '../models/Organization';
 
 /**
