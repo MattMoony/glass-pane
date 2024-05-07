@@ -6,7 +6,8 @@ import * as vNG from 'v-network-graph';
 import { ForceLayout } from 'v-network-graph/lib/force-layout';
 import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/force-layout';
 
-import Person, { Relation } from '../models/Person';
+import Person from '../models/Person';
+import Relation from '../models/Relation';
 import RelationType, { COLORS } from '../models/RelationTypes';
 
 class PersonNode extends Person {

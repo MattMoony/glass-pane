@@ -11,6 +11,8 @@ const person = ref<Person | null>(null);
   const p = await Person.get(6);
   person.value = p;
 })();
+
+window.Person = Person;
 </script>
 
 <template>
