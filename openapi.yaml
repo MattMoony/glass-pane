@@ -1,0 +1,97 @@
+openapi: 3.1.0
+info:
+  title: glass-pane
+  description: An attempt at a glass pane through which to view the internals of power. 🪟
+  termsOfService: https://github.com/MattMoony/glass-pane/blob/master/LICENSE
+  version: 0.0.1
+  license:
+    name: GNU General Public License v3.0
+    identifier: GPL-3.0-or-later
+  contact:
+    name: MattMoony
+    url: https://github.com/MattMoony
+externalDocs:
+  description: General documentation
+  url: https://github.com/MattMoony/glass-pane/
+servers:
+  - url: http://localhost:8888
+    description: Currently not public (locally hosted).
+tags:
+  - name: organs
+    description: All operations relating to base organs.
+  - name: people
+    description: All operatoins relating to people.
+  - name: organizations
+    description: All operations relating to organizations.
+paths:
+  /organ/{organId}:
+    get:
+      tags:
+        - organs
+      summary: Get an organ by its ID.
+      description: Get an organ by its ID.
+      operationId: organ-get
+      parameters:
+        - in: path
+          name: organId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the organ to get.
+      responses:
+        "200":
+          description: The target organ, if found.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Response"
+                  - type: object
+                    properties:
+                      organ:
+                        $ref: "#/components/schemas/Organ"
+              examples:
+                ValidResponse:
+                  description: Valid Response.
+                  value:
+                    success: true
+                    organ:
+                      id: 8
+                      bio: This is some info bla bla.
+                InvalidResponse:
+                  $ref: "#/components/examples/InvalidResponse"
+components:
+  schemas:
+    Response:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+        msg:
+          type: string
+    Organ:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+        bio:
+          type: string
+  examples:
+    ValidResponse:
+      description: Valid response.
+      value:
+        success: true
+    InvalidResponse:
+      description: Invalid response.
+      value:
+        success: false
+        msg: Missing parameters.
+    SampleOrgan:
+      description: A sample organ.
+      value:
+        id: 8
+        bio: Some description bla bla.
