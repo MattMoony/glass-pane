@@ -5,6 +5,10 @@ import fileUpload from 'express-fileupload';
 
 import Organ from '../models/Organ';
 import OrganSource from '../models/OrganSource';
+import Membership from '../models/Membership';
+import Role from '../models/Role';
+import Organization from '../models/Organization';
+import Person from '../models/Person';
 
 /**
  * Parses the organ ID from the request parameters to
@@ -27,6 +31,18 @@ export const parseOid = async (req: Request, res: Response, next: () => void): P
   res.locals.organ = organ;
   next();
 }
+
+/**
+ * Searches for organs.
+ * @param req The request object.
+ * @param res The response object.
+ */
+export const search = async (req: Request, res: Response): Promise<void> => {
+  const query = (req.query.q as string).trim().toLowerCase();
+  const people = await Person.find(query);
+  const organizations = await Organization.find(query);
+  res.send({ 'success': true, people, organizations, });
+};
 
 /**
  * Creates a new organ. No body is required.
@@ -135,4 +151,98 @@ export const removeSource = async (req: Request, res: Response): Promise<void> =
   const organ = res.locals.organ as Organ;
   await organ.remove(new OrganSource(parseInt(req.params.sid), ''));
   res.send({ 'success': true });
+};
+
+/**
+ * Gets the memberships of the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const getMemberships = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  const memberships = await Membership.get(organ);
+  res.send({ 'success': true, 'memberships': memberships.map(m => ({ ...m.json(), organ: undefined, })) });
+};
+
+/**
+ * Adds a membership to the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const addMembership = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  const organization = await Organization.get(parseInt(req.body.organization));
+  if (!organization) {
+    res.send({ 'success': false, 'msg': 'unknown organization' });
+    return;
+  }
+  const role = await Role.get(parseInt(req.body.role));
+  if (!role) {
+    res.send({ 'success': false, 'msg': 'unknown role' });
+    return;
+  }
+  const since = new Date(req.body.since);
+  const until = req.body.until ? new Date(req.body.until) : undefined;
+  const sources = req.body.sources as string[];
+  try {
+    const membership = await Membership.create(sources, organ, organization, role, since, until);
+    res.send({ 'success': true, membership, });
+  } catch {
+    res.send({ 'success': false, 'msg': 'membership already exists', });
+  }
+};
+
+/**
+ * Updates a membership of the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const updateMembership = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  const organization = await Organization.get(parseInt(req.body.organization));
+  if (!organization) {
+    res.send({ 'success': false, 'msg': 'unknown organization' });
+    return;
+  }
+  const role = await Role.get(parseInt(req.body.role));
+  if (!role) {
+    res.send({ 'success': false, 'msg': 'unknown role' });
+    return;
+  }
+  const since = new Date(req.body.since);
+  const until = req.body.until ? new Date(req.body.until) : undefined;
+  const membership = new Membership(organ, organization, role, since, until);
+  try {
+    await membership.update();
+    res.send({ 'success': true });
+  } catch {
+    res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
+  }
+};
+
+/**
+ * Removes a membership from the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const removeMembership = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  const organization = await Organization.get(parseInt(req.body.organization));
+  if (!organization) {
+    res.send({ 'success': false, 'msg': 'unknown organization' });
+    return;
+  }
+  const role = await Role.get(parseInt(req.body.role));
+  if (!role) {
+    res.send({ 'success': false, 'msg': 'unknown role' });
+    return;
+  }
+  const since = new Date(req.body.since);
+  try {
+    const membership = new Membership(organ, organization, role, since, undefined);
+    await membership.remove();
+    res.send({ 'success': true });
+  } catch {
+    res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
+  }
 };

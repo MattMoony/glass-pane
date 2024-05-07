@@ -14,14 +14,9 @@ router.post('/',
   }), 
   controller.create
 );
-router.get('/:pid', 
-  controller.parsePid, 
-  controller.get
-);
-router.get('/:pid/name', 
-  controller.parsePid, 
-  controller.getName
-);
+router.get('/', requireQuery({ q: { type: 'string', }, }), controller.search);
+router.get('/:pid', controller.parsePid, controller.get);
+router.get('/:pid/name', controller.parsePid, controller.getName);
 router.patch('/:pid', 
   requireBody({
     firstname: { type: 'string', optional: true, },
@@ -33,29 +28,17 @@ router.patch('/:pid',
   controller.parsePid, 
   controller.update
 );
-router.delete('/:pid', 
-  controller.parsePid, 
-  controller.remove
-);
+router.delete('/:pid', controller.parsePid, controller.remove);
 
-router.get('/:pid/pic', 
-  controller.parsePid, 
-  controller.getPic
-);
-router.post('/:pid/pic', 
-  controller.parsePid, 
-  controller.setPic
-);
-router.delete('/:pid/pic', 
-  controller.parsePid, 
-  controller.removePic
-);
+router.get('/:pid/pic', controller.parsePid, controller.getPic);
+router.post('/:pid/pic', controller.parsePid, controller.setPic);
+router.delete('/:pid/pic', controller.parsePid, controller.removePic);
 
 router.post('/:pid/relation', 
   requireBody({
     type: { type: 'number', },
     other: { type: 'number', },
-    source: { type: 'string', },
+    sources: { type: 'array', items: 'string', },
     since: { type: 'string', },
     until: { type: 'string', optional: true, },
   }), 
@@ -81,22 +64,10 @@ router.delete('/:pid/relation',
   controller.parsePid, 
   controller.removeRelation
 );
-router.get('/:pid/parents', 
-  controller.parsePid, 
-  controller.getParents
-);
-router.get('/:pid/children', 
-  controller.parsePid, 
-  controller.getChildren
-);
-router.get('/:pid/romantic', 
-  controller.parsePid, 
-  controller.getRomantic
-);
-router.get('/:pid/friends', 
-  controller.parsePid, 
-  controller.getFriends
-);
+router.get('/:pid/parents', controller.parsePid, controller.getParents);
+router.get('/:pid/children', controller.parsePid, controller.getChildren);
+router.get('/:pid/romantic', controller.parsePid, controller.getRomantic);
+router.get('/:pid/friends', controller.parsePid, controller.getFriends);
 
 router.get('/:pid/relation/sources', 
   requireQuery({
@@ -122,9 +93,6 @@ router.patch('/:pid/relation/sources/:sid',
   controller.parsePid, 
   controller.updateRelationSource
 );
-router.delete('/:pid/relation/sources/:sid', 
-  controller.parsePid, 
-  controller.removeRelationSource
-);
+router.delete('/:pid/relation/sources/:sid', controller.parsePid, controller.removeRelationSource);
 
 export default router;

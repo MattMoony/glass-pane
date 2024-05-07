@@ -9,17 +9,27 @@ import Organization from '../models/Organization';
  * @param res The response object.
  */
 export const parseOid = async (req: Request, res: Response, next: Function): Promise<void> => {
-  if (isNaN(parseInt(req.params.orgId))) {
+  if (isNaN(parseInt(req.params.oid))) {
     res.send({ 'success': false, 'msg': 'bad organizationid', });
     return;
   }
-  const organization = await Organization.get(parseInt(req.params.orgId));
+  const organization = await Organization.get(parseInt(req.params.oid));
   if (!organization) {
     res.send({ 'success': false, 'msg': 'organization not found', });
     return;
   }
   res.locals.organization = organization;
   next();
+};
+
+/**
+ * Searches for organizations.
+ * @param req The request object.
+ * @param res The response object.
+ */
+export const search = async (req: Request, res: Response): Promise<void> => {
+  const organizations = await Organization.find(req.query.q as string);
+  res.send({ 'success': true, 'organizations': organizations.map(organization => organization.json()), });
 };
 
 /**

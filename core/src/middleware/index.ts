@@ -14,6 +14,7 @@ interface CheckTemplate {
   [ key: string ]: {
     type: string|CheckTemplate;
     optional?: boolean;
+    items?: string;
   };
 }
 
@@ -42,8 +43,9 @@ const checkBody = (
   nested?: boolean
 ): BodyCheckResult => {
   for (const key in template) {
-    console.log(key, template[key])
     if (typeof template[key].type === 'object') {
+      if (!body[key] && !template[key].optional) return { ok: false, msg: `Missing "${path.length ? path.join('.') + '.' : ''}${key}"` };
+      if (!nested || typeof body[key] !== 'object') return { ok: false, msg: `Invalid "${path.length ? path.join('.') + '.' : ''}${key}"` };
       const result = checkBody(
         body[key], 
         template[key].type as CheckTemplate,
@@ -52,9 +54,19 @@ const checkBody = (
       );
       if (!result.ok) return result;
     }
-    if (body[key] === undefined && !template[key].optional)
+    else if (template[key].type === 'array') {
+      if (!Array.isArray(body[key])) return { ok: false, msg: `Invalid "${path.length ? path.join('.') + '.' : ''}${key}"` };
+      if (!body[key].length && !template[key].optional) return { ok: false, msg: `Missing "${path.length ? path.join('.') + '.' : ''}${key}"` };
+      if (template[key].items) {
+        for (let i = 0; i < body[key].length; i++) {
+          if (typeof body[key][i] !== template[key].items)
+            return { ok: false, msg: `Invalid "${path.length ? path.join('.') + '.' : ''}${key}[${i}]"` };
+        }
+      }
+    }
+    else if (body[key] === undefined && !template[key].optional)
       return { ok: false, msg: `Missing "${path.length ? path.join('.') + '.' : ''}${key}"` };
-    if ((typeof body[key] !== template[key].type) && (!template[key].optional || body[key] !== undefined))
+    else if ((typeof body[key] !== template[key].type) && (!template[key].optional || body[key] !== undefined))
       return { ok: false, msg: `Invalid "${path.length ? path.join('.') + '.' : ''}${key}"` };
   }
   return { ok: true }

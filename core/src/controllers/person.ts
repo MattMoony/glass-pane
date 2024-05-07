@@ -29,6 +29,16 @@ export const parsePid = async (req: Request, res: Response, next: () => void): P
 }
 
 /**
+ * Searches for people.
+ * @param req The request object.
+ * @param res The response object.
+ */
+export const search = async (req: Request, res: Response): Promise<void> => {
+  const people = await Person.find(req.query.q as string);
+  res.send({ 'success': true, 'people': people.map(person => person.json()), });
+};
+
+/**
  * Creates a new person.
  * @param req The request object.
  * @param res The response object.
@@ -156,10 +166,10 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
 
   const relation = new Relation(req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
   try {
-    await person.add(relation, typeof req.body.source === 'string' ? [req.body.source,] : req.body.source);
+    await person.add(relation, req.body.sources);
     res.send({ 'success': true });
   } catch {
-    res.send({ 'success': false, 'msg': 'duplicate' });
+    res.send({ 'success': false, 'msg': 'relation already exists' });
   }
 };
 
@@ -183,8 +193,12 @@ export const updateRelation = async (req: Request, res: Response): Promise<void>
   }
 
   const relation = new Relation(+req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
-  await person.update(relation);
-  res.send({ 'success': true });
+  try {
+    await person.update(relation);
+    res.send({ 'success': true });
+  } catch {
+    res.send({ 'success': false, 'msg': 'relation doesn\'t exist', });
+  }
 }
 
 /**

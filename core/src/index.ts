@@ -9,6 +9,7 @@ import searchRouter from './routes/search';
 import organRouter from './routes/organ';
 import personRouter from './routes/person';
 import organizationRouter from './routes/organization';
+import roleRouter from './routes/role';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use('/api/search/', searchRouter);
 app.use('/api/organ/', organRouter);
 app.use('/api/person/', personRouter);
 app.use('/api/organization/', organizationRouter);
+app.use('/api/role/', roleRouter);
 
 app.use('/api/*', (req: Request, res: Response) => {
   res.status(404);

@@ -59,7 +59,7 @@ class Membership {
     );
     for (const source of sources) {
       await client.query(
-        'INSERT INTO membership_sources (organ, organization, role, since, url) VALUES ($1, $2, $3, $4, $5)',
+        'INSERT INTO membership_source (organ, organization, role, since, url) VALUES ($1, $2, $3, $4, $5)',
         [this.organ.id, this.organization.id, this.role.id, this.since, source]
       );
     }
@@ -113,7 +113,7 @@ class Membership {
     if (v instanceof MembershipSource) return v.remove();
     const client = await pool.connect();
     await client.query(
-      'DELETE FROM membership_sources WHERE organ = $1 AND organization = $2 AND role = $3 AND since = $4',
+      'DELETE FROM membership_source WHERE organ = $1 AND organization = $2 AND role = $3 AND since = $4',
       [this.organ.id, this.organization.id, this.role.id, this.since]
     );
     await client.query(
@@ -124,6 +124,41 @@ class Membership {
   }
 
   /**
+   * Creates a new membership.
+   * @param sources The sources of the membership.
+   * @param organ The organ of the membership.
+   * @param organization The organization of the membership.
+   * @param role The role of the membership.
+   * @param since The since date of the membership.
+   * @param until The until date of the membership.
+   * @returns A promise that resolves with the new membership.
+   */
+  public static async create (
+    sources: string[], 
+    organ: Organ, 
+    organization: Organization, 
+    role: Role, 
+    since: Date, 
+    until?: Date
+  ): Promise<Membership> {
+    const membership = new Membership(organ, organization, role, since, until);
+    await membership.create(sources);
+    return membership;
+  }
+
+  /**
+   * Gets all memberships of an organ.
+   * @param organ The organ to get memberships of.
+   * @returns A promise that resolves with the memberships of the organ.
+   */
+  public static async get (organ: Organ): Promise<Membership[]>;
+  /**
+   * Gets all members of an organization.
+   * @param organization The organization to get members of.
+   * @returns A promise that resolves with the members of the organization.
+   */
+  public static async get (organization: Organization): Promise<Membership[]>;
+  /**
    * Gets a membership by its organ, organization, role and since date.
    * @param organ The organ of the membership.
    * @param organization The organization of the membership.
@@ -131,15 +166,49 @@ class Membership {
    * @param since The since date of the membership.
    * @returns A promise that resolves with the membership, or null if it doesn't exist.
    */
-  public static async get (organ: Organ, organization: Organization, role: Role, since: Date): Promise<Membership|null> {
+  public static async get (organ: Organ, organization: Organization, role: Role, since: Date): Promise<Membership|null>;
+  public static async get (v: Organ|Organization, v2?: Organization, v3?: Role, v4?: Date): Promise<Membership|Membership[]|null> {
+    if (v instanceof Organization) {
+      const client = await pool.connect();
+      const res = await client.query(
+        'SELECT organ, role, since, until FROM membership WHERE organization = $1',
+        [v.id]
+      );
+      client.release();
+      const memberships = [];
+      for (const row of res.rows) {
+        const organ = await Organ.get(row.organ);
+        const role = await Role.get(row.role);
+        if (!organ || !role) continue;
+        memberships.push(new Membership(organ, v, role, row.since, row.until));
+      }
+      return memberships;
+    } else if (v instanceof Organ && !v2 && !v3 && !v4) {
+      const client = await pool.connect();
+      const res = await client.query(
+        'SELECT organization, role, since, until FROM membership WHERE organ = $1',
+        [v.id]
+      );
+      client.release();
+      const memberships = [];
+      for (const row of res.rows) {
+        const organization = await Organization.get(row.organization);
+        const role = await Role.get(row.role);
+        if (!organization || !role) continue;
+        memberships.push(new Membership(v, organization, role, row.since, row.until));
+      }
+      return memberships;
+    }
+    if (!(v instanceof Organ) || !(v2 instanceof Organization) || !(v3 instanceof Role) || !(v4 instanceof Date))
+      throw new Error('Invalid argument types');
     const client = await pool.connect();
     const res = await client.query(
       'SELECT until FROM membership WHERE organ = $1 AND organization = $2 AND role = $3 AND since = $4',
-      [organ.id, organization.id, role.id, since]
+      [v.id, v2.id, v3.id, v4]
     );
     client.release();
     if (res.rows.length === 0) return null;
-    return new Membership(organ, organization, role, since, res.rows[0].until);
+    return new Membership(v, v2, v3, v4, res.rows[0].until);
   }
 }
 

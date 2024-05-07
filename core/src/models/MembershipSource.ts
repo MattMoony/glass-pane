@@ -40,7 +40,7 @@ class MembershipSource {
   public async update (): Promise<void> {
     const client = await pool.connect();
     await client.query(
-      'UPDATE membership_sources SET url = $1 WHERE sid = $2',
+      'UPDATE membership_source SET url = $1 WHERE sid = $2',
       [this.url, this.sid]
     );
     client.release();
@@ -53,7 +53,7 @@ class MembershipSource {
   public async remove (): Promise<void> {
     const client = await pool.connect();
     await client.query(
-      'DELETE FROM membership_sources WHERE sid = $1',
+      'DELETE FROM membership_source WHERE sid = $1',
       [this.sid]
     );
     client.release();
@@ -68,7 +68,7 @@ class MembershipSource {
   public static async create (membership: Membership, url: string): Promise<MembershipSource> {
     const client = await pool.connect();
     const res = await client.query(
-      'INSERT INTO membership_sources (organ, organization, role, since, url) VALUES ($1, $2, $3, $4, $5) RETURNING sid',
+      'INSERT INTO membership_source (organ, organization, role, since, url) VALUES ($1, $2, $3, $4, $5) RETURNING sid',
       [membership.organ.id, membership.organization.id, membership.role.id, membership.since, url]
     );
     client.release();
@@ -83,7 +83,7 @@ class MembershipSource {
   public static async get (sid: number): Promise<MembershipSource|null> {
     const client = await pool.connect();
     const res = await client.query(
-      'SELECT url FROM membership_sources WHERE sid = $1',
+      'SELECT url FROM membership_source WHERE sid = $1',
       [sid]
     );
     client.release();
