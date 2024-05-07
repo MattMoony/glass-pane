@@ -10,6 +10,373 @@
 			"name": "organs",
 			"item": [
 				{
+					"name": "picture",
+					"item": [
+						{
+							"name": "get organ picture",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/pic",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"pic"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set organ picture",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/pic",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"pic"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "remove organ picture",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/pic",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"pic"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "memberships",
+					"item": [
+						{
+							"name": "get organ memberships",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"memberships"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add organ membership",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"sources\": [\r\n        \"source uno\"\r\n    ],\r\n    \"organization\": {{new_organization}},\r\n    \"role\": {{new_role}},\r\n    \"since\": \"{{membership_since}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"memberships"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update organ membership",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"organization\": {{new_organization}},\r\n    \"role\": {{new_role}},\r\n    \"since\": \"{{membership_since}}\",\r\n    \"until\": \"2024-03-20\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"memberships"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete membership",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"organization\": {{new_organization}},\r\n    \"role\": {{new_role}},\r\n    \"since\": \"{{membership_since}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"memberships"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "sources",
+					"item": [
+						{
+							"name": "get organ sources",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/sources",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"sources"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add organ source",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const res = pm.response.json();\r",
+											"if (res.source)\r",
+											"    pm.environment.set(\"new_organ_source\", res.source.sid)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"url\": \"https://test.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/sources",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"sources"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "new organ source",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"url\": \"https://test.com\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:8888/api/organ//sources",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8888",
+											"path": [
+												"api",
+												"organ",
+												"",
+												"sources"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "X-Powered-By",
+											"value": "Express"
+										},
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "*"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "57"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"39-fAqtPNCKYB4PZ3xYtNsDr/8PX+k\""
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 07 May 2024 16:08:43 GMT"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Keep-Alive",
+											"value": "timeout=5"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"success\": true,\n    \"id\": {\n        \"sid\": 11,\n        \"url\": \"https://test.com\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "update organ source",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"url\": \"https://changedsourceagain.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/sources/{{new_organ_source}}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"sources",
+										"{{new_organ_source}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete organ source",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/organ/{{new_organ}}/sources/{{new_organ_source}}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organ",
+										"{{new_organ}}",
+										"sources",
+										"{{new_organ_source}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "create organ",
 					"event": [
 						{
@@ -29,13 +396,13 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}/organ/new",
+							"raw": "{{baseURL}}/organ/",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"organ",
-								"new"
+								""
 							]
 						}
 					},
@@ -100,6 +467,29 @@
 							"body": "{\n    \"success\": true,\n    \"id\": {\n        \"id\": 27,\n        \"bio\": \"\"\n    }\n}"
 						}
 					]
+				},
+				{
+					"name": "search organs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/organ?q=muster",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"organ"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "muster"
+								}
+							]
+						}
+					},
+					"response": []
 				},
 				{
 					"name": "get organ",
@@ -234,186 +624,6 @@
 							"body": "{\n    \"success\": true,\n    \"organ\": {\n        \"id\": 6,\n        \"bio\": \"some bio content for [Max Mustermann](/p/6/) here.\\n\\nlook, a penguin!\\n\\nsome new stuff here\\n\\n![penguin](https://www.cabq.gov/artsculture/biopark/news/10-cool-facts-about-penguins/@@images/1a36b305-412d-405e-a38b-0947ce6709ba.jpeg)\\n\\n| asdf | bsdf |\\n| --- | --- |\\n| 1 | 2 |\\n| testgjhgjhgjh | table stuff |\\n| more | rows |\\n\"\n    }\n}"
 						}
 					]
-				},
-				{
-					"name": "get organ sources",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseURL}}/organ/{{new_organ}}/sources",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"organ",
-								"{{new_organ}}",
-								"sources"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "add organ source",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const res = pm.response.json();\r",
-									"if (res.source)\r",
-									"    pm.environment.set(\"new_organ_source\", res.source.sid)"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"url\": \"https://test.com\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseURL}}/organ/{{new_organ}}/sources",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"organ",
-								"{{new_organ}}",
-								"sources"
-							]
-						}
-					},
-					"response": [
-						{
-							"name": "new organ source",
-							"originalRequest": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"url\": \"https://test.com\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8888/api/organ//sources",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8888",
-									"path": [
-										"api",
-										"organ",
-										"",
-										"sources"
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "X-Powered-By",
-									"value": "Express"
-								},
-								{
-									"key": "Access-Control-Allow-Origin",
-									"value": "*"
-								},
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Content-Length",
-									"value": "57"
-								},
-								{
-									"key": "ETag",
-									"value": "W/\"39-fAqtPNCKYB4PZ3xYtNsDr/8PX+k\""
-								},
-								{
-									"key": "Date",
-									"value": "Tue, 07 May 2024 16:08:43 GMT"
-								},
-								{
-									"key": "Connection",
-									"value": "keep-alive"
-								},
-								{
-									"key": "Keep-Alive",
-									"value": "timeout=5"
-								}
-							],
-							"cookie": [],
-							"body": "{\n    \"success\": true,\n    \"id\": {\n        \"sid\": 11,\n        \"url\": \"https://test.com\"\n    }\n}"
-						}
-					]
-				},
-				{
-					"name": "update organ source",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"url\": \"https://changedsourceagain.com\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseURL}}/organ/{{new_organ}}/sources/{{new_organ_source}}",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"organ",
-								"{{new_organ}}",
-								"sources",
-								"{{new_organ_source}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete organ source",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseURL}}/organ/{{new_organ}}/sources/{{new_organ_source}}",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"organ",
-								"{{new_organ}}",
-								"sources",
-								"{{new_organ_source}}"
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
@@ -424,13 +634,211 @@
 					"name": "relations",
 					"item": [
 						{
+							"name": "sources",
+							"item": [
+								{
+									"name": "get relation sources",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseURL}}/person/{{new_person}}/relation/sources?other={{relative}}&since={{relation_since}}",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"person",
+												"{{new_person}}",
+												"relation",
+												"sources"
+											],
+											"query": [
+												{
+													"key": "other",
+													"value": "{{relative}}"
+												},
+												{
+													"key": "since",
+													"value": "{{relation_since}}"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "get relation sources",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseURL}}/person/{{new_person}}/relation/sources?to={{relative}}&since={{relation_since}}",
+													"host": [
+														"{{baseURL}}"
+													],
+													"path": [
+														"person",
+														"{{new_person}}",
+														"relation",
+														"sources"
+													],
+													"query": [
+														{
+															"key": "to",
+															"value": "{{relative}}"
+														},
+														{
+															"key": "since",
+															"value": "{{relation_since}}"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "X-Powered-By",
+													"value": "Express"
+												},
+												{
+													"key": "Access-Control-Allow-Origin",
+													"value": "*"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Content-Length",
+													"value": "82"
+												},
+												{
+													"key": "ETag",
+													"value": "W/\"52-oTCMIjdYk3Fqv1AYTrW5n3Jc8yE\""
+												},
+												{
+													"key": "Date",
+													"value": "Tue, 07 May 2024 16:33:42 GMT"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Keep-Alive",
+													"value": "timeout=5"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"success\": true,\n    \"sources\": [\n        {\n            \"sid\": 48,\n            \"url\": \"source1\"\n        },\n        {\n            \"sid\": 49,\n            \"url\": \"source2\"\n        }\n    ]\n}"
+										}
+									]
+								},
+								{
+									"name": "add relation source",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const res = pm.response.json();\r",
+													"if (res.source)\r",
+													"    pm.environment.set(\"new_relation_source\", res.source.sid)"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"to\": {{relative}},\r\n    \"since\": \"{{relation_since}}\",\r\n    \"url\": \"new source here\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseURL}}/person/{{new_person}}/relation/sources",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"person",
+												"{{new_person}}",
+												"relation",
+												"sources"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "update relation source",
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"url\": \"changed my mind about that again\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseURL}}/person/{{new_person}}/relation/sources/{{new_relation_source}}",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"person",
+												"{{new_person}}",
+												"relation",
+												"sources",
+												"{{new_relation_source}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "delete relation source",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseURL}}/person/{{new_person}}/relation/sources/{{new_relation_source}}",
+											"host": [
+												"{{baseURL}}"
+											],
+											"path": [
+												"person",
+												"{{new_person}}",
+												"relation",
+												"sources",
+												"{{new_relation_source}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "add person relation",
 							"request": {
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"type\": {{relation_type}},\r\n    \"personId\": {{relative}},\r\n    \"source\": [\r\n        \"source1\",\r\n        \"source2\"\r\n    ],\r\n    \"since\": \"{{relation_since}}\"\r\n}",
+									"raw": "{\r\n    \"type\": {{relation_type}},\r\n    \"other\": {{relative}},\r\n    \"sources\": [\r\n        \"source1\",\r\n        \"source2\"\r\n    ],\r\n    \"since\": \"{{relation_since}}\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -502,199 +910,6 @@
 										"person",
 										"{{new_person}}",
 										"relation"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "get relation sources",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseURL}}/person/{{new_person}}/relation/sources?to={{relative}}&since={{relation_since}}",
-									"host": [
-										"{{baseURL}}"
-									],
-									"path": [
-										"person",
-										"{{new_person}}",
-										"relation",
-										"sources"
-									],
-									"query": [
-										{
-											"key": "to",
-											"value": "{{relative}}"
-										},
-										{
-											"key": "since",
-											"value": "{{relation_since}}"
-										}
-									]
-								}
-							},
-							"response": [
-								{
-									"name": "get relation sources",
-									"originalRequest": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{baseURL}}/person/{{new_person}}/relation/sources?to={{relative}}&since={{relation_since}}",
-											"host": [
-												"{{baseURL}}"
-											],
-											"path": [
-												"person",
-												"{{new_person}}",
-												"relation",
-												"sources"
-											],
-											"query": [
-												{
-													"key": "to",
-													"value": "{{relative}}"
-												},
-												{
-													"key": "since",
-													"value": "{{relation_since}}"
-												}
-											]
-										}
-									},
-									"status": "OK",
-									"code": 200,
-									"_postman_previewlanguage": "json",
-									"header": [
-										{
-											"key": "X-Powered-By",
-											"value": "Express"
-										},
-										{
-											"key": "Access-Control-Allow-Origin",
-											"value": "*"
-										},
-										{
-											"key": "Content-Type",
-											"value": "application/json; charset=utf-8"
-										},
-										{
-											"key": "Content-Length",
-											"value": "82"
-										},
-										{
-											"key": "ETag",
-											"value": "W/\"52-oTCMIjdYk3Fqv1AYTrW5n3Jc8yE\""
-										},
-										{
-											"key": "Date",
-											"value": "Tue, 07 May 2024 16:33:42 GMT"
-										},
-										{
-											"key": "Connection",
-											"value": "keep-alive"
-										},
-										{
-											"key": "Keep-Alive",
-											"value": "timeout=5"
-										}
-									],
-									"cookie": [],
-									"body": "{\n    \"success\": true,\n    \"sources\": [\n        {\n            \"sid\": 48,\n            \"url\": \"source1\"\n        },\n        {\n            \"sid\": 49,\n            \"url\": \"source2\"\n        }\n    ]\n}"
-								}
-							]
-						},
-						{
-							"name": "add relation source",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"const res = pm.response.json();\r",
-											"if (res.source)\r",
-											"    pm.environment.set(\"new_relation_source\", res.source.sid)"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"to\": {{relative}},\r\n    \"since\": \"{{relation_since}}\",\r\n    \"url\": \"new source here\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseURL}}/person/{{new_person}}/relation/sources",
-									"host": [
-										"{{baseURL}}"
-									],
-									"path": [
-										"person",
-										"{{new_person}}",
-										"relation",
-										"sources"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "update relation source",
-							"request": {
-								"method": "PATCH",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"url\": \"changed my mind about that again\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseURL}}/person/{{new_person}}/relation/sources/{{new_relation_source}}",
-									"host": [
-										"{{baseURL}}"
-									],
-									"path": [
-										"person",
-										"{{new_person}}",
-										"relation",
-										"sources",
-										"{{new_relation_source}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "delete relation source",
-							"request": {
-								"method": "DELETE",
-								"header": [],
-								"url": {
-									"raw": "{{baseURL}}/person/{{new_person}}/relation/sources/{{new_relation_source}}",
-									"host": [
-										"{{baseURL}}"
-									],
-									"path": [
-										"person",
-										"{{new_person}}",
-										"relation",
-										"sources",
-										"{{new_relation_source}}"
 									]
 								}
 							},
@@ -889,6 +1104,29 @@
 					]
 				},
 				{
+					"name": "search persons",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/person?q=muster",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"person"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "muster"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "get person",
 					"request": {
 						"method": "GET",
@@ -965,143 +1203,6 @@
 							"body": "{\n    \"success\": true,\n    \"person\": {\n        \"id\": 34,\n        \"bio\": \"A little thing about this person here.\",\n        \"firstname\": \"Postman\",\n        \"lastname\": \"Tester 2\",\n        \"birthdate\": \"2003-05-07T00:00:00.000Z\",\n        \"deathdate\": \"2024-05-07T00:00:00.000Z\"\n    }\n}"
 						}
 					]
-				},
-				{
-					"name": "get person name",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseURL}}/person/{{new_person}}/name",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"person",
-								"{{new_person}}",
-								"name"
-							]
-						}
-					},
-					"response": [
-						{
-							"name": "get person name",
-							"originalRequest": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "http://localhost:8888/api/person//name",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8888",
-									"path": [
-										"api",
-										"person",
-										"",
-										"name"
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "X-Powered-By",
-									"value": "Express"
-								},
-								{
-									"key": "Access-Control-Allow-Origin",
-									"value": "*"
-								},
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Content-Length",
-									"value": "60"
-								},
-								{
-									"key": "ETag",
-									"value": "W/\"3c-AKPKizpJKkTbY5a5WZhMNi2IsdM\""
-								},
-								{
-									"key": "Date",
-									"value": "Tue, 07 May 2024 16:17:30 GMT"
-								},
-								{
-									"key": "Connection",
-									"value": "keep-alive"
-								},
-								{
-									"key": "Keep-Alive",
-									"value": "timeout=5"
-								}
-							],
-							"cookie": [],
-							"body": "{\n    \"success\": true,\n    \"firstname\": \"Postman\",\n    \"lastname\": \"Tester 2\"\n}"
-						}
-					]
-				},
-				{
-					"name": "get person picture",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseURL}}/person/{{new_person}}/pic",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"person",
-								"{{new_person}}",
-								"pic"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "set person picture",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{baseURL}}/person/{{new_person}}/pic",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"person",
-								"{{new_person}}",
-								"pic"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete person picture",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseURL}}/person/{{new_person}}/pic",
-							"host": [
-								"{{baseURL}}"
-							],
-							"path": [
-								"person",
-								"{{new_person}}",
-								"pic"
-							]
-						}
-					},
-					"response": []
 				},
 				{
 					"name": "update person",
@@ -1297,7 +1398,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Corp A\",\r\n    \"established\": \"1940-01-01\",\r\n    \"dissolved\": \"2000-01-01\",\r\n    \"bio\": \"A description of this company in markdown again.\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Muster Corp\",\r\n    \"established\": \"1940-01-01\",\r\n    \"dissolved\": \"2000-01-01\",\r\n    \"bio\": \"A description of this company in markdown again.\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1305,13 +1406,36 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseURL}}/organization/new",
+							"raw": "{{baseURL}}/organization/",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"organization",
-								"new"
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "search organizations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/organization?q=corp",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"organization"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "corp"
+								}
 							]
 						}
 					},
@@ -1440,95 +1564,133 @@
 			]
 		},
 		{
-			"name": "search",
+			"name": "roles",
 			"item": [
 				{
-					"name": "search entity",
+					"name": "search roles",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}/search?q=muster",
+							"raw": "{{baseURL}}/role?q=test",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"search"
+								"role"
 							],
 							"query": [
 								{
 									"key": "q",
-									"value": "muster"
+									"value": "test"
 								}
 							]
 						}
 					},
-					"response": [
-						{
-							"name": "search entity",
-							"originalRequest": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "http://localhost:8888/api/search?q=muster",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8888",
-									"path": [
-										"api",
-										"search"
-									],
-									"query": [
-										{
-											"key": "q",
-											"value": "muster"
-										}
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "X-Powered-By",
-									"value": "Express"
-								},
-								{
-									"key": "Access-Control-Allow-Origin",
-									"value": "*"
-								},
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Content-Length",
-									"value": "844"
-								},
-								{
-									"key": "ETag",
-									"value": "W/\"34c-FE6yeCAvCk9bY+14bZjK6tc+BSM\""
-								},
-								{
-									"key": "Date",
-									"value": "Tue, 07 May 2024 16:13:35 GMT"
-								},
-								{
-									"key": "Connection",
-									"value": "keep-alive"
-								},
-								{
-									"key": "Keep-Alive",
-									"value": "timeout=5"
-								}
+					"response": []
+				},
+				{
+					"name": "get role",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/role/{{new_role}}",
+							"host": [
+								"{{baseURL}}"
 							],
-							"cookie": [],
-							"body": "{\n    \"success\": true,\n    \"people\": [\n        {\n            \"id\": 9,\n            \"bio\": \"short test 123\",\n            \"firstname\": \"Maria\",\n            \"lastname\": \"Musterfrau\",\n            \"birthdate\": null,\n            \"deathdate\": null\n        },\n        {\n            \"id\": 19,\n            \"bio\": \"\",\n            \"firstname\": \"Anita\",\n            \"lastname\": \"Mustermann\",\n            \"birthdate\": \"1972-06-14T00:00:00.000Z\",\n            \"deathdate\": null\n        },\n        {\n            \"id\": 11,\n            \"bio\": \"\",\n            \"firstname\": \"Maria\",\n            \"lastname\": \"Musterfrau II\",\n            \"birthdate\": null,\n            \"deathdate\": null\n        },\n        {\n            \"id\": 6,\n            \"bio\": \"some bio content for [Max Mustermann](/p/6/) here.\\n\\nlook, a penguin!\\n\\nsome new stuff here\\n\\n![penguin](https://www.cabq.gov/artsculture/biopark/news/10-cool-facts-about-penguins/@@images/1a36b305-412d-405e-a38b-0947ce6709ba.jpeg)\\n\\n| asdf | bsdf |\\n| --- | --- |\\n| 1 | 2 |\\n| testgjhgjhgjh | table stuff |\\n| more | rows |\\n\",\n            \"firstname\": \"Max\",\n            \"lastname\": \"Mustermann\",\n            \"birthdate\": \"2003-02-27T00:00:00.000Z\",\n            \"deathdate\": \"2023-12-18T00:00:00.000Z\"\n        }\n    ],\n    \"organizations\": []\n}"
+							"path": [
+								"role",
+								"{{new_role}}"
+							]
 						}
-					]
+					},
+					"response": []
+				},
+				{
+					"name": "create role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"if (res.role)\r",
+									"    pm.environment.set(\"new_role\", res.role.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"test123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/role",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"role"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update role",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"anothertest\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/role/{{new_role}}",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"role",
+								"{{new_role}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete role",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/role/{{new_role}}",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"role",
+								"{{new_role}}"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
