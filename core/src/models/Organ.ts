@@ -119,12 +119,14 @@ class Organ {
    * @returns A promise that resolves with the found organ, or null if it doesn't exist.
    */
   public static async get (id: number): Promise<Organ|null> {
+    const _id = +id;
+    if (isNaN(_id)) return null;
     const client = await pool.connect();
-    const res = await client.query('SELECT * FROM organ WHERE oid = $1', [id]);
+    const res = await client.query('SELECT * FROM organ WHERE oid = $1', [_id]);
     client.release();
     if (res.rows.length === 0) return null;
-    if (!fs.existsSync(`${process.env.DATA_DIR}/${id}.md`)) fs.writeFileSync(`${process.env.DATA_DIR}/${id}.md`, '');
-    return new Organ(+res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${id}.md`, 'utf8'));
+    if (!fs.existsSync(`${process.env.DATA_DIR}/${_id}.md`)) fs.writeFileSync(`${process.env.DATA_DIR}/${_id}.md`, '');
+    return new Organ(+res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${_id}.md`, 'utf8'));
   }
 }
 
