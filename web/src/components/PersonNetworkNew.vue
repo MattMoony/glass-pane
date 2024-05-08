@@ -14,7 +14,13 @@ import Membership from '@/models/Membership';
 
 const router = useRouter();
 const props = defineProps<{
+  /**
+   * The person to show the network for.
+   */
   person?: Person;
+  /**
+   * Whether to show memberships in organizations.
+   */
   showMemberships?: boolean;
 }>();
 

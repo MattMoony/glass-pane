@@ -8,20 +8,70 @@ import { marked } from 'marked';
  * be an organization, for example.
  */
 class Organ implements organ.Organ {
+  /**
+   * The ID of the organ. This is unique across all organs.
+   */
   public id: number;
+  /**
+   * The bio of the organ. This is a Markdown string.
+   */
   public bio: string;
 
+  /**
+   * The picture of the organ. This is a blob, and can be
+   * set, removed, and fetched.
+   */
   public pic: {
+    /**
+     * Fetches the picture of the organ.
+     * @returns A promise that resolves to the picture of the organ.
+     */
     get: () => Promise<Blob>;
+    /**
+     * Gets the URL of the picture of the organ.
+     * @returns The URL of the picture of the organ.
+     */
     src: () => string;
+    /**
+     * Sets the picture of the organ.
+     * @param pic The picture to set.
+     * @returns A promise that resolves when the picture is set.
+     */
     set: (pic: Blob) => Promise<void>;
+    /**
+     * Removes the picture of the organ.
+     * @returns A promise that resolves when the picture is removed.
+     */
     remove: () => Promise<void>;
   };
 
+  /**
+   * The sources of the organ. These are URLs that are
+   * associated with the organ.
+   */
   public sources: {
+    /**
+     * Gets the sources of the organ.
+     * @returns A promise that resolves to the sources of the organ.
+     */
     get: () => Promise<organ.OrganSource[]>;
+    /**
+     * Adds a source to the organ.
+     * @param url The URL of the source to add.
+     */
     add: (url: string) => Promise<organ.OrganSource|null>;
+    /**
+     * Updates a source of the organ.
+     * @param sid The ID of the source to update.
+     * @param url The new URL of the source.
+     * @returns A promise that resolves when the source is updated.
+     */
     update: (sid: number, url: string) => Promise<void>;
+    /**
+     * Removes a source of the organ.
+     * @param sid The ID of the source to remove.
+     * @returns A promise that resolves when the source is removed.
+     */
     remove: (sid: number) => Promise<void>;
   }
 
@@ -72,6 +122,10 @@ class Organ implements organ.Organ {
     return marked(this.bio);
   }
 
+  /**
+   * Converts the organ to a JSON object.
+   * @returns The organ as a JSON object.
+   */
   public json (): organ.Organ {
     return {
       id: this.id,
@@ -79,15 +133,30 @@ class Organ implements organ.Organ {
     };
   }
 
+  /**
+   * Converts the organ to a string.
+   * @returns The organ as a string.
+   */
   public toString (): string {
     return `Organ#${this.id}`;
   }
 
+  /**
+   * Fetches an organ by its ID.
+   * @param id The ID of the organ to fetch.
+   * @returns A promise that resolves to the organ fetched.
+   */
   public static async get (id: number): Promise<Organ|null> {
     const res = await organ.get(id);
     return res.organ ? new Organ(res.organ.id, res.organ.bio) : null;
   }
 
+  /**
+   * Creates a new organ.
+   * @param bio The bio of the organ.
+   * @param args Any additional arguments (for children to use).
+   * @returns A promise that resolves to the organ created.
+   */
   public static async create (bio: string, ...args: any[]): Promise<Organ|null> {
     const res = await organ.create(bio);
     return res.organ ? new Organ(res.organ.id, res.organ.bio) : null;

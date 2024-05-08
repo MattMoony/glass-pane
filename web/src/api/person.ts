@@ -2,81 +2,171 @@ import { API, jreq } from './index';
 import type { Organ } from './organ';
 import type { APIResponse } from './index';
 
+/**
+ * Represents a person.
+ */
 export interface Person extends Organ {
+  /**
+   * The ID of the person. This is unique across all people.
+   */
   id: number;
+  /**
+   * The first name of the person.
+   */
   firstname: string;
+  /**
+   * The last name of the person.
+   */
   lastname: string;
+  /**
+   * The date of birth of the person.
+   */
   birthdate?: Date;
+  /**
+   * The date of death of the person.
+   */
   deathdate?: Date;
 }
 
+/**
+ * Represents the relation of a specific person to another person.
+ */
+export interface PersonRelation {
+  /**
+   * The person that the relation is with.
+   */
+  to: Person;
+  /**
+   * The date that the relation started.
+   */
+  since: Date;
+  /**
+   * The date that the relation ended.
+   */
+  until?: Date;
+}
+
+/**
+ * Represents a relation between two people.
+ * Relations are identified by their `from`, `to`, and `since` fields.
+ */
 export interface Relation {
+  /**
+   * The person that the relation is from.
+   */
   from: Person;
+  /**
+   * The person that the relation is to.
+   */
   to: Person;
+  /**
+   * The date that the relation started.
+   */
   since: Date;
+  /**
+   * The date that the relation ended.
+   */
   until?: Date;
 }
 
-export interface AbbrRelation {
-  to: Person;
-  since: Date;
-  until?: Date;
-}
-
+/**
+ * Represents a source for a relation.
+ */
 export interface RelationSource {
+  /**
+   * The ID of the source. This is unique across all sources.
+   */
   sid: number;
+  /**
+   * The URL of the source.
+   */
   url: string;
 }
 
+/**
+ * Represents a response from the API for a person.
+ */
 export interface PersonResponse extends APIResponse {
   person?: Person;
 }
 
+/**
+ * 
+ */
 export interface PeopleResponse extends APIResponse {
   people: Person[];
 }
 
-export interface NewPersonResponse extends PersonResponse {
-}
-
+/**
+ * Represents a response from the API for the parents of a person.
+ */
 export interface ParentsResponse extends APIResponse {
-  parents?: AbbrRelation[];
+  parents?: PersonRelation[];
 }
 
+/**
+ * Represents a response from the API for the children of a person.
+ */
 export interface ChildrenResponse extends APIResponse {
-  children?: AbbrRelation[];
+  children?: PersonRelation[];
 }
 
+/**
+ * Represents a response from the API for the romantic relations of a person.
+ */
 export interface RomanticResponse extends APIResponse {
-  romantic?: AbbrRelation[];
+  romantic?: PersonRelation[];
 }
 
+/**
+ * Represents a response from the API for the friends of a person.
+ */
 export interface FriendsResponse extends APIResponse {
-  friends?: AbbrRelation[];
+  friends?: PersonRelation[];
 }
 
+/**
+ * Represents a response from the API for the sources of a relation.
+ */
 export interface RelationSourcesResponse extends APIResponse {
   sources?: RelationSource[];
 }
 
-export interface NewRelationSourceResponse extends APIResponse {
+/**
+ * Represents a response from the API for a source of a relation.
+ */
+export interface RelationSourceResponse extends APIResponse {
   source?: RelationSource;
 }
 
+/**
+ * Creates a new person.
+ * @param firstname The first name of the person.
+ * @param lastname The last name of the person.
+ * @param bio The biography of the person.
+ * @param birthdate The date of birth of the person.
+ * @param deathdate The date of death of the person.
+ * @returns The response from the API containing the person.
+ */
 export const create = async (
   firstname: string, 
   lastname: string, 
   bio: string,
   birthdate?: Date,
   deathdate?: Date
-): Promise<NewPersonResponse> => {
+): Promise<PersonResponse> => {
   return await jreq(`${API}/person`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ firstname, lastname, bio, birthdate, deathdate, }),
-  }) as NewPersonResponse;
+  }) as PersonResponse;
 }
 
+/**
+ * Gets a person by their ID.
+ * @param pid The ID of the person.
+ * @returns The response from the API containing the person.
+ */
 export const get = async (pid: number): Promise<PersonResponse> => {
   const res = await jreq(`${API}/person/${pid}`) as PersonResponse;
   if (res.person) {
@@ -86,6 +176,11 @@ export const get = async (pid: number): Promise<PersonResponse> => {
   return res;
 }
 
+/**
+ * Searches for people by their names.
+ * @param query The query to search for.
+ * @returns The response from the API containing the people that match the query.
+ */
 export const search = async (query: string): Promise<PeopleResponse> => {
   const res = await jreq(`${API}/person?q=${query}`) as PeopleResponse;
   res.people.forEach(p => {
@@ -95,6 +190,11 @@ export const search = async (query: string): Promise<PeopleResponse> => {
   return res;
 }
 
+/**
+ * Gets a person's parents.
+ * @param pid The ID of the person.
+ * @returns The response from the API containing the parents of the person.
+ */
 export const parents = async (pid: number): Promise<ParentsResponse> => {
   const res = await jreq(`${API}/person/${pid}/parents`) as ParentsResponse;
   if (res.parents) {
@@ -108,6 +208,11 @@ export const parents = async (pid: number): Promise<ParentsResponse> => {
   return res;
 }
 
+/**
+ * Gets a person's children.
+ * @param pid The ID of the person.
+ * @returns The response from the API containing the children of the person.
+ */
 export const children = async (pid: number): Promise<ChildrenResponse> => {
   const res = await jreq(`${API}/person/${pid}/children`) as ChildrenResponse;
   if (res.children) {
@@ -121,6 +226,11 @@ export const children = async (pid: number): Promise<ChildrenResponse> => {
   return res;
 }
 
+/**
+ * Gets a person's romantic relations.
+ * @param pid The ID of the person.
+ * @returns The response from the API containing the romantic relations of the person.
+ */
 export const romantic = async (pid: number): Promise<RomanticResponse> => {
   const res = await jreq(`${API}/person/${pid}/romantic`) as RomanticResponse;
   if (res.romantic) {
@@ -134,6 +244,11 @@ export const romantic = async (pid: number): Promise<RomanticResponse> => {
   return res;
 }
 
+/**
+ * Gets a person's friends.
+ * @param pid The ID of the person.
+ * @returns The response from the API containing the friends of the person.
+ */
 export const friends = async (pid: number): Promise<FriendsResponse> => {
   const res = await jreq(`${API}/person/${pid}/friends`) as FriendsResponse;
   if (res.friends) {
@@ -147,7 +262,20 @@ export const friends = async (pid: number): Promise<FriendsResponse> => {
   return res;
 }
 
+/**
+ * Interact with the person's relations.
+ */
 export const rel = {
+  /**
+   * Adds a relation to a person.
+   * @param type The type of relation.
+   * @param pid The ID of the person.
+   * @param other The ID of the other person.
+   * @param sources The sources of the relation.
+   * @param since The date the relation started.
+   * @param until The date the relation ended.
+   * @returns The response from the API.
+   */
   add: async (type: string, pid: number, other: number, sources: string[], since: Date, until?: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'POST',
@@ -156,6 +284,14 @@ export const rel = {
     });
   },
 
+  /**
+   * Updates a relation of a person.
+   * @param pid The ID of the person.
+   * @param other The ID of the other person.
+   * @param since The date the relation started.
+   * @param until The date the relation ended.
+   * @returns The response from the API.
+   */
   update: async (pid: number, other: number, since: Date, until?: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'PATCH',
@@ -164,6 +300,13 @@ export const rel = {
     });
   },
 
+  /**
+   * Removes a relation from a person.
+   * @param pid The ID of the person.
+   * @param other The ID of the other person.
+   * @param since The date the relation started.
+   * @returns The response from the API.
+   */
   remove: async (pid: number, other: number, since: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'DELETE',
@@ -173,18 +316,40 @@ export const rel = {
   },
 };
 
+/**
+ * Get the sources of a relation.
+ * @param pid The ID of the person.
+ * @param other The ID of the other person.
+ * @param since The date the relation started.
+ * @returns The response from the API containing the sources of the relation.
+ */
 export const rel_sources = async (pid: number, other: number, since: Date): Promise<RelationSourcesResponse> => {
   return await jreq(`${API}/person/${pid}/relation/sources?other=${other}&since=${since.toISOString()}`) as RelationSourcesResponse;
 };
 
-rel_sources.add = async (pid: number, other: number, since: Date, url: string): Promise<NewRelationSourceResponse> => {
+/**
+ * Add a source to a relation.
+ * @param pid The ID of the person.
+ * @param other The ID of the other person.
+ * @param since The date the relation started.
+ * @param url The URL of the source.
+ * @returns The response from the API containing the new source.
+ */
+rel_sources.add = async (pid: number, other: number, since: Date, url: string): Promise<RelationSourceResponse> => {
   return await jreq(`${API}/person/${pid}/relation/sources`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ other, since, url }),
-  }) as NewRelationSourceResponse;
+  }) as RelationSourceResponse;
 }
 
+/**
+ * Updates a source for a relation.
+ * @param pid The ID of the person.
+ * @param sid The ID of the source.
+ * @param url The new URL of the source.
+ * @returns The response from the API.
+ */
 rel_sources.update = async (pid: number, sid: number, url: string): Promise<APIResponse> => {
   return await jreq(`${API}/person/${pid}/relation/sources/${sid}`, {
     method: 'PATCH',
@@ -193,6 +358,12 @@ rel_sources.update = async (pid: number, sid: number, url: string): Promise<APIR
   });
 }
 
+/**
+ * Removes a source from a relation.
+ * @param pid The ID of the person.
+ * @param sid The ID of the source.
+ * @returns The response from the API.
+ */
 rel_sources.remove = async (pid: number, sid: number): Promise<APIResponse> => {
   return await jreq(`${API}/person/${pid}/relation/sources/${sid}`, {
     method: 'DELETE',

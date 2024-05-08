@@ -8,35 +8,118 @@ import RelationType from './RelationTypes';
  * Represents a natural person.
  */
 class Person extends Organ implements person.Person {
+  /**
+   * The first name of the person.
+   */
   public firstname: string;
+  /**
+   * The last name of the person.
+   */
   public lastname: string;
+  /**
+   * The birthdate of the person.
+   */
   public birthdate?: Date;
+  /**
+   * The deathdate of the person.
+   */
   public deathdate?: Date;
 
+  /**
+   * The parents of the person.
+   */
   public parents: {
+    /**
+     * Gets the parents of the person.
+     */
     get: () => Promise<Relation[]>;
+    /**
+     * Adds a parent to the person.
+     * @param other The parent to add.
+     * @param since The date the parent became a parent of the person.
+     * @returns A promise that resolves to the relation between the person and the parent, or null if the relation could not be added.
+     */
     add: (other: Person, since: Date) => Promise<Relation|null>;
   };
 
+  /**
+   * The children of the person.
+   */
   public children: {
+    /**
+     * Gets the children of the person.
+     */
     get: () => Promise<Relation[]>;
+    /**
+     * Adds a child to the person.
+     * @param other The child to add.
+     * @param since The date the person became a parent of the child.
+     * @returns A promise that resolves to the relation between the person and the child, or null if the relation could not be added.
+     */
     add: (other: Person, since: Date) => Promise<Relation|null>;
   };
 
+  /**
+   * The romantic partners of the person.
+   */
   public romantic: {
+    /**
+     * Gets the romantic partners of the person.
+     */
     get: () => Promise<Relation[]>;
+    /**
+     * Adds a romantic partner to the person.
+     * @param other The romantic partner to add.
+     * @param since The date the person became romantically involved with the partner.
+     * @returns A promise that resolves to the relation between the person and the partner, or null if the relation could not be added.
+     */
     add: (other: Person, since: Date) => Promise<Relation|null>;
   };
 
+  /**
+   * The friends of the person.
+   */
   public friends: {
+    /**
+     * Gets the friends of the person.
+     * @returns A promise that resolves to the friends of the person.
+     */
     get: () => Promise<Relation[]>;
+    /**
+     * Adds a friend to the person.
+     * @param other The friend to add.
+     * @param since The date the person became friends with the friend.
+     * @returns A promise that resolves to the relation between the person and the friend, or null if the relation could not be added.
+     */
     add: (other: Person, since: Date) => Promise<Relation|null>;
   };
 
+  /**
+   * The relations of the person.
+   */
   public relations: {
+    /**
+     * Gets the relations of the person.
+     * @returns A promise that resolves to the relations of the person.
+     */
     get: () => Promise<Relation[]>;
+    /**
+     * Adds a relation to the person.
+     * @param rel The relation to add.
+     * @returns A promise that resolves to the relation between the person and the other person, or null if the relation could not be added.
+     */
     add: (rel: Relation) => Promise<Relation|null>;
+    /**
+     * Updates a relation of the person.
+     * @param rel The relation to update.
+     * @returns A promise that resolves when the relation is updated.
+     */
     update: (rel: Relation) => Promise<void>;
+    /**
+     * Removes a relation of the person.
+     * @param rel The relation to remove.
+     * @returns A promise that resolves when the relation is removed.
+     */
     remove: (rel: Relation) => Promise<void>;
   };
 
@@ -207,6 +290,10 @@ class Person extends Organ implements person.Person {
     };
   }
 
+  /**
+   * The age of the person.
+   * @returns The age of the person, or -1 if the birthdate is not set.
+   */
   public get age (): number {
     if (!this.birthdate) return -1;
     const deathdate = this.deathdate || new Date();
@@ -214,6 +301,10 @@ class Person extends Organ implements person.Person {
     return this.birthdate.getUTCMonth() > deathdate.getUTCMonth() ? diff - 1 : diff;
   }
 
+  /**
+   * Converts the person to a JSON object.
+   * @returns The JSON object representing the person.
+   */
   public json (): person.Person {
     return {
       ...super.json(),
@@ -224,10 +315,19 @@ class Person extends Organ implements person.Person {
     };
   }
 
+  /**
+   * Converts the person to a string.
+   * @returns The string representation of the person.
+   */
   public toString (): string {
     return `"${this.firstname} ${this.lastname}" (Person#${this.id})`;
   }
 
+  /**
+   * Gets a person by their ID.
+   * @param id The ID of the person to get.
+   * @returns A promise that resolves to the person with the given ID, or null if no such person exists.
+   */
   public static async get (id: number): Promise<Person|null> {
     const res = await person.get(id);
     return res.person ? new Person(
@@ -240,6 +340,15 @@ class Person extends Organ implements person.Person {
     ) : null;
   }
 
+  /**
+   * Creates a new person.
+   * @param firstname The first name of the person.
+   * @param lastname The last name of the person.
+   * @param bio The biography of the person.
+   * @param birthdate The birthdate of the person.
+   * @param deathdate The deathdate of the person.
+   * @returns A promise that resolves to the new person, or null if the person could not be created.
+   */
   public static async create (
     firstname: string, 
     lastname: string, 

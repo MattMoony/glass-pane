@@ -9,6 +9,9 @@ enum RelationType {
   CHILD,
 }
 
+/**
+ * The colors of the different types of relationships.
+ */
 export const COLORS = {
   [RelationType.PARENT]: '#23FF2D',
   [RelationType.ROMANTIC]: '#FF3423',

@@ -1,58 +1,69 @@
 import { API, jreq } from './index';
 import type { APIResponse } from './index';
 import type { Organ } from './organ';
-import type { Role } from './role';
 
+/**
+ * Represents an organization.
+ */
 export interface Organization extends Organ {
+  /**
+   * The ID of the organization. This is unique across all organizations.
+   */
   id: number;
+  /**
+   * The name of the organization.
+   */
   name: string;
+  /**
+   * The date the organization was established.
+   */
   established?: Date;
+  /**
+   * The date the organization was dissolved.
+   */
   dissolved?: Date;
 }
 
-export interface Membership {
-  organ: Organ;
-  organization: Organization;
-  role: Role;
-  since: Date;
-  until?: Date;
-}
-
-export interface MembershipSource {
-  sid: number;
-  url: string;
-}
-
+/**
+ * Represents a response from the API for an organization.
+ */
 export interface OrganizationResponse extends APIResponse {
   organization?: Organization;
 }
 
+/**
+ * Represents a response from the API for multiple organizations.
+ */
 export interface OrganizationsResponse extends APIResponse {
   organizations: Organization[];
 }
 
-export interface NewOrganizationResponse extends OrganizationResponse {
-}
-
-export interface UpdateOrganizationResponse extends OrganizationResponse {
-}
-
-export interface RemoveOrganizationResponse extends APIResponse {
-}
-
+/**
+ * Creates a new organization.
+ * @param name The name of the organization.
+ * @param bio The biography of the organization.
+ * @param established The date the organization was established.
+ * @param dissolved The date the organization was dissolved.
+ * @returns The response from the API containing the organization.
+ */
 export const create = async (
   name: string, 
   bio: string,
   established?: Date, 
   dissolved?: Date
-): Promise<NewOrganizationResponse> => {
+): Promise<OrganizationResponse> => {
   return await jreq(`${API}/organization`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, bio, established, dissolved }),
-  }) as NewOrganizationResponse;
+  }) as OrganizationResponse;
 };
 
+/**
+ * Gets an organization by its ID.
+ * @param oid The ID of the organization.
+ * @returns The response from the API containing the organization.
+ */
 export const get = async (oid: number): Promise<OrganizationResponse> => {
   const res = await jreq(`${API}/organization/${oid}`) as OrganizationResponse;
   if (res.organization) {
@@ -62,6 +73,11 @@ export const get = async (oid: number): Promise<OrganizationResponse> => {
   return res;
 }
 
+/**
+ * Searches for organizations by name.
+ * @param name The name to search for.
+ * @returns The response from the API containing the organizations that match the query.
+ */
 export const search = async (name: string): Promise<OrganizationsResponse> => {
   const res = await jreq(`${API}/organization?q=${name}`) as OrganizationsResponse;
   res.organizations.forEach(o => {
@@ -71,20 +87,34 @@ export const search = async (name: string): Promise<OrganizationsResponse> => {
   return res;
 }
 
+/**
+ * Updates an organization.
+ * @param oid The ID of the organization.
+ * @param name The name of the organization.
+ * @param bio The biography of the organization.
+ * @param established The date the organization was established.
+ * @param dissolved The date the organization was dissolved.
+ * @returns The response from the API containing the updated organization.
+ */
 export const update = async (
   oid: number,
   name: string,
   bio: string,
   established?: Date,
   dissolved?: Date
-): Promise<UpdateOrganizationResponse> => {
+): Promise<OrganizationResponse> => {
   return await jreq(`${API}/organization/${oid}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, bio, established, dissolved }),
-  }) as UpdateOrganizationResponse;
+  }) as OrganizationResponse;
 };
 
-export const remove = async (oid: number): Promise<RemoveOrganizationResponse> => {
-  return await jreq(`${API}/organization/${oid}`, { method: 'DELETE' }) as RemoveOrganizationResponse;
+/**
+ * Removes an organization.
+ * @param oid The ID of the organization.
+ * @returns The response from the API.
+ */
+export const remove = async (oid: number): Promise<APIResponse> => {
+  return await jreq(`${API}/organization/${oid}`, { method: 'DELETE' }) as APIResponse;
 };

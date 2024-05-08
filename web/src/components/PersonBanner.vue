@@ -6,7 +6,13 @@ import Person from '../models/Person';
 import PopDropDown from './PopDropDown.vue';
 
 const props = defineProps<{
+  /**
+   * The person to display in the banner.
+   */
   person?: Person;
+  /**
+   * Whether to show social media links.
+   */
   socials?: boolean;
 }>();
 

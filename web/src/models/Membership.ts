@@ -7,10 +7,25 @@ import Role from './Role';
  * Represents a membership of an organization.
  */
 class Membership {
+  /**
+   * The organ that is a member of the organization.
+   */
   public organ: Organ;
+  /**
+   * The organization that the organ is a member of.
+   */
   public organization: Organization;
+  /**
+   * The role that the organ has in the organization.
+   */
   public role: Role;
+  /**
+   * The date that the organ became a member of the organization.
+   */
   public since: Date;
+  /**
+   * The date that the organ stopped being a member of the organization.
+   */
   public until?: Date;
 
   public constructor (organ: Organ, organization: Organization, role: Role, since: Date, until?: Date) {
@@ -21,7 +36,11 @@ class Membership {
     this.until = until;
   }
 
-  public json (): object {
+  /**
+   * Converts the membership to a JSON object.
+   * @returns The JSON object representing the membership.
+   */
+  public json (): organ.Membership {
     return {
       organ: this.organ.json(),
       organization: this.organization.json(),
@@ -31,12 +50,36 @@ class Membership {
     };
   }
 
+  /**
+   * Converts the membership to a string.
+   * @returns The string representation of the membership.
+   */
   public toString (): string {
     return `${this.organ} is a ${this.role} of ${this.organization}`;
   }
 
+  // TODO: could add a function for getting all memberships
+  // TODO: of a specific organ in a specific organization
+  /**
+   * Gets the memberships of an organ.
+   * @param organ The organ to get the memberships of.
+   * @returns The memberships of the organ.
+   */
   public static async get (organ: Organ): Promise<Membership[]>;
+  /**
+   * Gets all members of an organization.
+   * @param organization The organization to get the members of.
+   * @returns The members of the organization.
+   */
   public static async get (organization: Organization): Promise<Membership[]>;
+  /**
+   * Gets a specific membership.
+   * @param organ The organ that is a member of the organization.
+   * @param organization The organization that the organ is a member of.
+   * @param role The role that the organ has in the organization.
+   * @param since The date that the organ became a member of the organization.
+   * @returns The membership of the organ in the organization.
+   */
   public static async get (organ: Organ, organization: Organization, role: Role, since: Date): Promise<Membership[]>;
   public static async get (v: Organ|Organization, v2?: Organization, v3?: Role, v4?: Date): Promise<Membership[]> {
     if (v instanceof Organization) return [];
