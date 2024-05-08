@@ -1,5 +1,7 @@
 import { API } from '@/api';
 import * as organ from '@/api/organ';
+import * as person from '@/api/person';
+import * as organization from '@/api/organization';
 import { marked } from 'marked';
 
 /**

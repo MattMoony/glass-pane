@@ -89,6 +89,22 @@ class Organization extends Organ implements organization.Organization {
       dissolved,
     ) : null;
   }
+
+  /**
+   * Searches for organizations by name.
+   * @param query The query to search for.
+   * @returns A promise that resolves to the organizations that match the query.
+   */
+  public static async search (query: string): Promise<Organization[]> {
+    const res = await organization.search(query);
+    return res.organizations.map(org => new Organization(
+      org.id,
+      org.bio,
+      org.name,
+      org.established,
+      org.dissolved,
+    ));
+  }
 }
 
 export default Organization;

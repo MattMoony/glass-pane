@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Person from '../models/Person';
 import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import type { OrganSource } from '@/api/organ';
+import Person from '../models/Person';
 import type Relation from '@/models/Relation';
 import Membership from '@/models/Membership';
 

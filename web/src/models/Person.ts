@@ -366,6 +366,23 @@ class Person extends Organ implements person.Person {
       deathdate
     ) : null;
   }
+
+  /**
+   * Searches for people by their name.
+   * @param query The name of the person to search for.
+   * @returns A promise that resolves to the people that match the query.
+   */
+  public static async search (query: string): Promise<Person[]> {
+    const res = await person.search(query);
+    return res.people.map(p => new Person(
+      p.id,
+      p.bio,
+      p.firstname,
+      p.lastname,
+      p.birthdate ? new Date(p.birthdate) : undefined,
+      p.deathdate ? new Date(p.deathdate) : undefined,
+    ));
+  }
 }
 
 export default Person;

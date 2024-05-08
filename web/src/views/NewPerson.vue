@@ -3,9 +3,11 @@ import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import { useRoute, useRouter, type RouteLocationNormalized, type Router } from 'vue-router';
 
 import Person from '@/models/Person';
+
 import PersonNetworkNew from '@/components/PersonNetworkNew.vue';
 import PersonBanner from '@/components/PersonBanner.vue';
 import PersonDetails from '@/components/PersonDetails.vue';
+import NavBarNew from '@/components/NavBarNew.vue';
 
 const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
@@ -19,6 +21,7 @@ watch(pid, async (newPid: number) => {
 
 <template>
   <main>
+    <NavBarNew />
     <article>
       <div class="controls">
 
