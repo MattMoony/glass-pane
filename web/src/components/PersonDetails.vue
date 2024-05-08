@@ -18,8 +18,8 @@ const props = defineProps<{
 const bio: Ref<string|undefined> = ref(undefined);
 const sources: Ref<OrganSource[]> = ref([]);
 const parents: Ref<Relation[]> = ref([]);
-const children: Ref<Relation[]> = ref([]);
 const romantic: Ref<Relation[]> = ref([]);
+const children: Ref<Relation[]> = ref([]);
 const friends: Ref<Relation[]> = ref([]);
 const memberships: Ref<Membership[]> = ref([]);
 
@@ -63,22 +63,6 @@ watch(() => props.person, async (newPerson: Person|null) => {
             </RouterLink>
           </div>
         </template>
-        <template v-if="children.length">
-          <h3>Children</h3>
-          <div>
-            <RouterLink
-              class="connection-wrapper"
-              v-for="child in children"
-              :key="child.other.id"
-              :to="`/p/${child.other.id}`"
-            >
-              <PersonBanner
-                :person="child.other"
-                small
-              />
-            </RouterLink>
-          </div>
-        </template>
         <template v-if="romantic.length">
           <h3>Romantic</h3>
           <div>
@@ -90,6 +74,22 @@ watch(() => props.person, async (newPerson: Person|null) => {
             >
               <PersonBanner
                 :person="partner.other"
+                small
+              />
+            </RouterLink>
+          </div>
+        </template>
+        <template v-if="children.length">
+          <h3>Children</h3>
+          <div>
+            <RouterLink
+              class="connection-wrapper"
+              v-for="child in children"
+              :key="child.other.id"
+              :to="`/p/${child.other.id}`"
+            >
+              <PersonBanner
+                :person="child.other"
                 small
               />
             </RouterLink>
