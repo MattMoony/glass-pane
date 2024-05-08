@@ -17,7 +17,7 @@ const props = defineProps<{
   /**
    * The person to show the network for.
    */
-  person?: Person;
+  person: Person|null;
   /**
    * Whether to show memberships in organizations.
    */

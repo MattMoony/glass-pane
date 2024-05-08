@@ -25,5 +25,6 @@ const props = defineProps<{
   word-break: break-all;
   box-shadow: 0 5px 5px rgba(0, 0, 0, .2);
   border-radius: 0 0 5px 5px;
+  z-index: 100;
 }
 </style>

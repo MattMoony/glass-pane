@@ -9,11 +9,15 @@ const props = defineProps<{
   /**
    * The person to display in the banner.
    */
-  person?: Person;
+  person: Person|null;
   /**
    * Whether to show social media links.
    */
   socials?: boolean;
+  /**
+   * Whether to show the banner in a small size.
+   */
+  small?: boolean;
 }>();
 
 const icons: {[name: string]: { icon: string, title: string, }} = {
@@ -58,14 +62,17 @@ Object.keys(socials.value).forEach((name) => {
 </script>
 
 <template>
-  <div class="banner">
+  <div :class="['banner', props.small ? 'small' : '',]">
     <div 
       class="banner-facts"
       v-if="props.person"
     >
-      <h1>
+      <h1 v-if="!props.small">
         {{ props.person.firstname }} {{ props.person.lastname }}
       </h1>
+      <h3 v-else>
+        {{ props.person.firstname }} {{ props.person.lastname }}
+      </h3>
       <div class="banner-birth-death">
         <span v-if="props.person.birthdate">
           <font-awesome-icon icon="fa-solid fa-baby" />
@@ -123,9 +130,12 @@ Object.keys(socials.value).forEach((name) => {
       class="banner-facts"
       v-else
     >
-      <h1>
+      <h1 v-if="!props.small">
         <i>Person doesn't exist (anymore) ...</i>
       </h1>
+      <h3 v-else>
+        <i>Person doesn't exist (anymore) ...</i>
+      </h3>
     </div>
     <div class="banner-image">
       <img 
@@ -146,6 +156,10 @@ Object.keys(socials.value).forEach((name) => {
   padding: 1.5em;
 }
 
+.banner.small {
+  padding: 1em;
+}
+
 .banner-facts {
   flex-grow: 1;
   flex-basis: 0;
@@ -155,6 +169,10 @@ Object.keys(socials.value).forEach((name) => {
   width: auto;
   height: 12em;
   border-radius: 5px;
+}
+
+.small .banner-image img {
+  height: 4em;
 }
 
 .banner-facts h1 {
@@ -168,6 +186,11 @@ Object.keys(socials.value).forEach((name) => {
   gap: 1em;
   margin-top: .2em;
   padding: 0 .5em;
+}
+
+.small .banner-birth-death {
+  padding: 0;
+  gap: .5em;
 }
 
 .banner-birth-death span {
