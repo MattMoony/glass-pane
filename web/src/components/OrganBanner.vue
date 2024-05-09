@@ -179,6 +179,7 @@ if (props.socials) {
   display: flex;
   justify-content: stretch;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1em;
   border-bottom: 2px solid var(--color-border);
   padding: 1.5em;
