@@ -12,8 +12,7 @@ const props = defineProps<{
    * The result to display in the search bar.
    */
   result?: Organ;
-}>()
-
+}>();
 </script>
 
 <template>

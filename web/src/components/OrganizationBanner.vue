@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue';
 
-import Person from '../models/Person';
+import Organization from '../models/Organization';
 
 import OrganBanner from './OrganBanner.vue';
 
 const props = defineProps<{
   /**
-   * The person to display in the banner.
+   * The organization to display in the banner.
    */
-  person: Person|null;
+  organization: Organization|null;
   /**
    * Whether to show social media links.
    */
@@ -43,10 +43,10 @@ const socials: Ref<{[name: string]: string[]}> = ref({
 
 <template>
   <OrganBanner
-    :organ="person"
-    :name="person ? person.firstname + ' ' + person.lastname : ''"
-    :from="person?.birthdate"
-    :to="person?.deathdate"
+    :organ="organization"
+    :name="organization ? organization.name : ''"
+    :from="organization?.established"
+    :to="organization?.dissolved"
     :socials="socials"
     :showSocials="props.socials"
     :small="props.small"

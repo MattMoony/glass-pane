@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import SearchBar from '@/components/SearchBar.vue';
-
+import SearchBarNew from '@/components/SearchBarNew.vue';
 </script>
 
 <template>
@@ -10,7 +9,7 @@ import SearchBar from '@/components/SearchBar.vue';
       P<img class="logo" src="/pane.png" alt="pane" />ne
     </h1>
     <div class="bar-container">
-      <SearchBar />
+      <SearchBarNew />
     </div>
   </div>
 </template>

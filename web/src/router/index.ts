@@ -20,6 +20,11 @@ const router = createRouter({
       component: () => import('../views/Person.vue'),
     },
     {
+      path: '/o/:oid',
+      name: 'organization',
+      component: () => import('../views/Organization.vue'),
+    },
+    {
       path: '/playground',
       name: 'playground',
       component: () => import('../views/Playground.vue'),

@@ -33,7 +33,8 @@
     "vue": "^3.4.15",
     "vue-codemirror": "^6.1.1",
     "vue-dompurify-html": "^5.0.1",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "vue-spinner": "^1.0.4"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.7.2",

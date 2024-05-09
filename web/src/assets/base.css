@@ -37,6 +37,9 @@
   --color-highlight: var(--vt-c-lightblue);
 
   --section-gap: 160px;
+
+  --color-person: var(--vt-c-indigo);
+  --color-organization: var(--vt-c-lightblue);
 }
 
 @media (prefers-color-scheme: dark) {
