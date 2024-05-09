@@ -80,13 +80,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"raw": "{{baseURL}}/organ/{{new_person}}/memberships",
 									"host": [
 										"{{baseURL}}"
 									],
 									"path": [
 										"organ",
-										"{{new_organ}}",
+										"{{new_person}}",
 										"memberships"
 									]
 								}
@@ -120,13 +120,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"raw": "{{baseURL}}/organ/{{new_person}}/memberships",
 									"host": [
 										"{{baseURL}}"
 									],
 									"path": [
 										"organ",
-										"{{new_organ}}",
+										"{{new_person}}",
 										"memberships"
 									]
 								}
@@ -148,13 +148,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"raw": "{{baseURL}}/organ/{{new_person}}/memberships",
 									"host": [
 										"{{baseURL}}"
 									],
 									"path": [
 										"organ",
-										"{{new_organ}}",
+										"{{new_person}}",
 										"memberships"
 									]
 								}
@@ -176,13 +176,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseURL}}/organ/{{new_organ}}/memberships",
+									"raw": "{{baseURL}}/organ/{{new_person}}/memberships",
 									"host": [
 										"{{baseURL}}"
 									],
 									"path": [
 										"organ",
-										"{{new_organ}}",
+										"{{new_person}}",
 										"memberships"
 									]
 								}
@@ -269,16 +269,13 @@
 											}
 										},
 										"url": {
-											"raw": "http://localhost:8888/api/organ//sources",
-											"protocol": "http",
+											"raw": "{{baseURL}}/organ/{{new_organ}}/sources",
 											"host": [
-												"localhost"
+												"{{baseURL}}"
 											],
-											"port": "8888",
 											"path": [
-												"api",
 												"organ",
-												"",
+												"{{new_organ}}",
 												"sources"
 											]
 										}
@@ -413,14 +410,11 @@
 								"method": "POST",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8888/api/organ/new",
-									"protocol": "http",
+									"raw": "{{baseURL}}/organ/new",
 									"host": [
-										"localhost"
+										"{{baseURL}}"
 									],
-									"port": "8888",
 									"path": [
-										"api",
 										"organ",
 										"new"
 									]
@@ -514,16 +508,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8888/api/organ/364",
-									"protocol": "http",
+									"raw": "{{baseURL}}/organ/{{$randomInt}}",
 									"host": [
-										"localhost"
+										"{{baseURL}}"
 									],
-									"port": "8888",
 									"path": [
-										"api",
 										"organ",
-										"364"
+										"{{$randomInt}}"
 									]
 								}
 							},
@@ -756,7 +747,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"to\": {{relative}},\r\n    \"since\": \"{{relation_since}}\",\r\n    \"url\": \"new source here\"\r\n}",
+											"raw": "{\r\n    \"other\": {{relative}},\r\n    \"since\": \"{{relation_since}}\",\r\n    \"url\": \"new source here\"\r\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -1048,14 +1039,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:8888/api/person/new",
-									"protocol": "http",
+									"raw": "{{baseURL}}/person/new",
 									"host": [
-										"localhost"
+										"{{baseURL}}"
 									],
-									"port": "8888",
 									"path": [
-										"api",
 										"person",
 										"new"
 									]
@@ -1104,7 +1092,7 @@
 					]
 				},
 				{
-					"name": "search persons",
+					"name": "search people",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1149,16 +1137,13 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:8888/api/person/",
-									"protocol": "http",
+									"raw": "{{baseURL}}/person/{{new_person}}",
 									"host": [
-										"localhost"
+										"{{baseURL}}"
 									],
-									"port": "8888",
 									"path": [
-										"api",
 										"person",
-										""
+										"{{new_person}}"
 									]
 								}
 							},
@@ -1377,6 +1362,30 @@
 		{
 			"name": "organizations",
 			"item": [
+				{
+					"name": "members",
+					"item": [
+						{
+							"name": "get members",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/organization/{{new_organization}}/members",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"organization",
+										"{{new_organization}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
 				{
 					"name": "create organization",
 					"event": [

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import Organization from '../models/Organization';
+import Membership from '../models/Membership';
 
 /**
  * Parses the organization ID from the request parameters to
@@ -84,4 +85,15 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
   const organization = res.locals.organization as Organization;
   await organization.remove();
   res.send({ 'success': true, });
+}
+
+/**
+ * Gets the members of an organization.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organization`).
+ */
+export const getMembers = async (req: Request, res: Response): Promise<void> => {
+  const organization = res.locals.organization as Organization;
+  const members = await Membership.get(organization);
+  res.send({ 'success': true, 'members': members.map(member => ({ ...member.json(), organization: undefined, })), });
 }

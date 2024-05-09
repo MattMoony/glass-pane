@@ -1,6 +1,9 @@
 import * as organ from '@/api/organ';
+import * as organization from '@/api/organization';
+import * as person from '@/api/person';
 import Organ from './Organ';
 import Organization from './Organization';
+import Person from './Person';
 import Role from './Role';
 
 /**
@@ -82,7 +85,34 @@ class Membership {
    */
   public static async get (organ: Organ, organization: Organization, role: Role, since: Date): Promise<Membership[]>;
   public static async get (v: Organ|Organization, v2?: Organization, v3?: Role, v4?: Date): Promise<Membership[]> {
-    if (v instanceof Organization) return [];
+    if (v instanceof Organization) {
+      const res = await organization.members(v.id);
+      return res.members.map((m: any) => new Membership(
+        (m.organ as person.Person).firstname !== undefined
+        ? new Person(
+            m.organ.id,
+            m.organ.bio,
+            m.organ.firstname, 
+            m.organ.lastname, 
+            m.organ.birthdate,
+            m.organ.deathdate
+          )
+        : new Organization(
+            m.organ.id, 
+            m.organ.bio, 
+            m.organ.name, 
+            m.organ.established, 
+            m.organ.dissolved
+          ),
+        v,
+        new Role(
+          m.role.id, 
+          m.role.name
+        ),
+        new Date(m.since),
+        m.until ? new Date(m.until) : undefined
+      ));
+    }
     else if (v instanceof Organ) {
       const res = await organ.memberships(v.id);
       return res.memberships.map((m: any) => new Membership(

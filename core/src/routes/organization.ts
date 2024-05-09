@@ -10,4 +10,6 @@ router.get('/:oid', controller.parseOid, controller.get);
 router.patch('/:oid', controller.parseOid, controller.update);
 router.delete('/:oid', controller.parseOid, controller.remove);
 
+router.get('/:oid/members', controller.parseOid, controller.getMembers);
+
 export default router;

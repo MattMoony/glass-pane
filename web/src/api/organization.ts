@@ -1,6 +1,7 @@
 import { API, jreq } from './index';
 import type { APIResponse } from './index';
-import type { Organ } from './organ';
+import type { Organ, OrganizationMember } from './organ';
+import type { Person } from './person';
 
 /**
  * Represents an organization.
@@ -36,6 +37,13 @@ export interface OrganizationResponse extends APIResponse {
  */
 export interface OrganizationsResponse extends APIResponse {
   organizations: Organization[];
+}
+
+/**
+ * Represents a response from the API for the members of an organization.
+ */
+export interface OrganizationMembersResponse extends APIResponse {
+  members: OrganizationMember[];
 }
 
 /**
@@ -117,4 +125,19 @@ export const update = async (
  */
 export const remove = async (oid: number): Promise<APIResponse> => {
   return await jreq(`${API}/organization/${oid}`, { method: 'DELETE' }) as APIResponse;
+};
+
+export const members = async (oid: number): Promise<OrganizationMembersResponse> => {
+  const res = await jreq(`${API}/organization/${oid}/members`) as OrganizationMembersResponse;
+  res.members.forEach(m => {
+    const person = m.organ as Person;
+    if (person.birthdate !== undefined) person.birthdate = new Date(person.birthdate);
+    if (person.deathdate !== undefined) person.deathdate = new Date(person.deathdate);
+    const organization = m.organ as Organization;
+    if (organization.established !== undefined) organization.established = new Date(organization.established);
+    if (organization.dissolved !== undefined) organization.dissolved = new Date(organization.dissolved);
+    m.since = new Date(m.since);
+    m.until = m.until ? new Date(m.until) : undefined;
+  });
+  return res;
 };

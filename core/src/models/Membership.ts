@@ -5,6 +5,7 @@ import OrganSource from './OrganSource';
 import Role from './Role';
 import Organization from './Organization';
 import MembershipSource from './MembershipSource';
+import Person from './Person';
 
 /**
  * Represents a membership in an organization.
@@ -177,7 +178,11 @@ class Membership {
       client.release();
       const memberships = [];
       for (const row of res.rows) {
-        const organ = await Organ.get(row.organ);
+        let organ: Person|Organization|null = await Person.get(row.organ);
+        if (!organ)
+          organ = await Organization.get(row.organ);
+        if (!organ)
+          continue;
         const role = await Role.get(row.role);
         if (!organ || !role) continue;
         memberships.push(new Membership(organ, v, role, row.since, row.until));

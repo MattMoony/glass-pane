@@ -54,6 +54,25 @@ export interface OrganMembership {
   until?: Date;
 }
 
+export interface OrganizationMember {
+  /**
+   * The organ that is a member of the organization.
+   */
+  organ: Organ;
+  /**
+   * The role that the person has in the organization.
+   */
+  role: Role;
+  /**
+   * The date that the person became a member of the organization.
+   */
+  since: Date;
+  /**
+   * The date that the person stopped being a member of the organization.
+   */
+  until?: Date;
+}
+
 /**
  * Represents a membership of an organ in an organization.
  * A membership is identified by its `organ`, `organization`,
