@@ -12,6 +12,7 @@ import OrganizationDetails from '@/components/OrganizationDetails.vue';
 const router: Router = useRouter();
 const organization: Ref<Organization> = ref(new Organization(-1, '', ''));
 const sources: Ref<OrganSource[]> = ref([]);
+const bannerUpdated = ref({ pic: undefined, });
 
 const createOrganization = async () => {
   if (!organization.value.name.trim()) return;
@@ -25,7 +26,8 @@ const createOrganization = async () => {
   for (const source of sources.value) {
     await newOrganization.sources.add(source.url);
   }
-  // TODO: upload image as well
+  if (bannerUpdated.value.pic)
+    await newOrganization.pic.set(bannerUpdated.value.pic);
   router.push(`/o/${newOrganization.id}`);
 };
 </script>
@@ -38,6 +40,7 @@ const createOrganization = async () => {
         <OrganizationBanner
           :organization="organization"
           edit
+          :updated="bannerUpdated"
         />
         <OrganizationDetails
           :organization="organization"

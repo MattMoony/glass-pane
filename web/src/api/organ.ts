@@ -193,7 +193,7 @@ pic.set = async (oid: number, pic: Blob): Promise<APIResponse> => {
   const formData = new FormData();
   formData.append('pic', pic);
   return await jreq(`${API}/organ/${oid}/pic`, {
-    method: 'POST',
+    method: 'PUT',
     body: formData,
   });
 };

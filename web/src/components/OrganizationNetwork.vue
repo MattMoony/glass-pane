@@ -23,7 +23,6 @@ const refreshNetwork = async () => {
   if (!props.organization) return;
   memberships.value = await Membership.get(new Organ(props.organization.id, props.organization.bio));
   members.value = await Membership.get(props.organization);
-  console.log(members.value);
 };
 
 watch(() => props.organization, refreshNetwork, { immediate: true });

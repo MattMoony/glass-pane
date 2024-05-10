@@ -11,7 +11,8 @@ import PersonDetails from '@/components/PersonDetails.vue';
 
 const router: Router = useRouter();
 const person: Ref<Person> = ref(new Person(-1, '', '', ''));
-const sources: Ref<OrganSource[]> = ref([]); 
+const sources: Ref<OrganSource[]> = ref([]);
+const bannerUpdated = ref({ pic: undefined, });
 
 const createPerson = async () => {
   if (!person.value.firstname.trim() || !person.value.lastname.trim()) return;
@@ -26,7 +27,8 @@ const createPerson = async () => {
   for (const source of sources.value) {
     await newPerson.sources.add(source.url);
   }
-  // TODO: upload image as well
+  if (bannerUpdated.value.pic)
+    await newPerson.pic.set(bannerUpdated.value.pic);
   router.push(`/p/${newPerson.id}`);
 };
 </script>
@@ -39,6 +41,7 @@ const createPerson = async () => {
         <PersonBanner
           :person="person"
           edit
+          :updated="bannerUpdated"
         />
         <PersonDetails
           :person="person"

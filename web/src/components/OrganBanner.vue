@@ -48,6 +48,16 @@ const props = defineProps<{
    * Whether to allow editing the organ.
    */
   edit?: boolean;
+  /**
+   * Updates to export to the parent.
+   */
+  updated?: {
+    /**
+     * If the image shouldn't be updated automatically,
+     * but exported to the parent component.
+     */
+    pic?: File;
+  }
 }>();
 
 const image: Ref<string|undefined> = ref(undefined);
@@ -86,6 +96,8 @@ const updateImage = (event: Event) => {
     reader.onload = () => {
       image.value = reader.result as string;
     };
+    if (props.updated !== undefined)
+      props.updated.pic = input.files[0];
     reader.readAsDataURL(input.files[0]);
   }
 };
@@ -93,6 +105,8 @@ const updateImage = (event: Event) => {
 const removeImage = () => {
   image.value = undefined;
   imageInput.value!.value = '';
+  if (props.updated !== undefined)
+    props.updated.pic = undefined;
 };
 </script>
 

@@ -26,6 +26,16 @@ const props = defineProps<{
    * Whether to allow editing the person.
    */
   edit?: boolean;
+  /**
+   * Updates to export to the parent.
+   */
+  updated?: {
+    /**
+     * If the image shouldn't be updated automatically,
+     * but exported to the parent component.
+     */
+    pic?: File;
+  }
 }>();
 
 // mock for now
@@ -56,6 +66,7 @@ const socials: Ref<{[name: string]: string[]}> = ref({
     :small="props.small"
     :extraSmall="props.extraSmall"
     :edit="props.edit"
+    :updated="props.updated"
   />
 </template>
 
