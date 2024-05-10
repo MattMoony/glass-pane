@@ -249,7 +249,7 @@ const refreshNetwork = async () => {
 };
 
 watch(
-  () => [props.organ, props.memberships, props.members], 
+  () => [props.organ, props.organ?._vref, props.memberships, props.members,], 
   refreshNetwork, 
   { immediate: true }
 );

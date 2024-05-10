@@ -102,10 +102,12 @@ const updateImage = (event: Event) => {
     reader.onload = () => {
       image.value = reader.result as string;
     };
-    if (props.updated !== undefined)
+    if (props.updated !== undefined) {
+
       props.updated.pic = input.files[0];
-    else if (props.organ)
+    } else if (props.organ) {
       props.organ.pic.set(input.files[0]);
+    }
     reader.readAsDataURL(input.files[0]);
   }
 };
@@ -119,11 +121,15 @@ const removeImage = () => {
     props.organ.pic.remove();
 };
 
-watch(() => props.organ, (newOrgan) => {
-  if (newOrgan && newOrgan.id > 0) {
-    image.value = newOrgan.pic.src();
-  }
-}, { immediate: true, });
+watch(
+  () => [ props.organ, props.organ?._vref, ], 
+  (e) => {
+    if (props.organ && props.organ.id > 0) {
+      image.value = props.organ.pic.src();
+    }
+  }, 
+  { immediate: true, }
+);
 </script>
 
 <template>

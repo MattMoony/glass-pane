@@ -86,6 +86,7 @@ const addMembership = async () => {
   await newMembership.value.create([ 'none', ]);
   memberships.value.push(newMembership.value);
   newMembership.value = null;
+  props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
 const removeMembership = async (membership: Membership) => {
@@ -96,17 +97,22 @@ const removeMembership = async (membership: Membership) => {
     m.role.id === membership.role.id &&
     m.since === membership.since);
   memberships.value.splice(index);
+  props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
-watch(() => props.organization, async (newOrganization: Organization|null) => {
-  if (!newOrganization) return;
-  bio.value = await newOrganization.bioHTML();
-  sources.value = await newOrganization.sources.get();
-  if (!props.hideMemberships)
-    memberships.value = await Membership.get(new Organ(newOrganization.id, newOrganization.bio));
-  if (!props.hideMembers)
-    members.value = await Membership.get(newOrganization);
-}, { immediate: true });
+watch(
+  () => [ props.organization, props.organization?._vref, ], 
+  async () => {
+    if (!props.organization) return;
+    bio.value = await props.organization.bioHTML();
+    sources.value = await props.organization.sources.get();
+    if (!props.hideMemberships)
+      memberships.value = await Membership.get(new Organ(props.organization.id, props.organization.bio));
+    if (!props.hideMembers)
+      members.value = await Membership.get(props.organization);
+  }, 
+  { immediate: true }
+);
 
 watch(() => props.organization?.bio, async () => {
   if (!props.organization) return;

@@ -24,7 +24,17 @@ watch(oid, async (newOid: number) => {
   <OrganPage 
     :organ="organization"
     :edit="editing"
-    @edit="st => { editing = st; organization && router.push(`/o/${organization.id}${editing ? '?edit' : ''}`) }"
+    @edit="st => { 
+      editing = st; 
+      if (organization) {
+        router.push(`/o/${organization.id}${editing ? '?edit' : ''}`);
+        // the following is weird code, but it seems to be the only
+        // way to get the behaviour I want?
+        // TODO: maybe look at this again later
+        if (!editing)
+          organization._vref = Math.floor(Math.random() * 1000);
+      }
+    }"
   >
     <template #left>
       <OrganizationBanner

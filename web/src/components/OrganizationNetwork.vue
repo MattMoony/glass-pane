@@ -25,7 +25,11 @@ const refreshNetwork = async () => {
   members.value = await Membership.get(props.organization);
 };
 
-watch(() => props.organization, refreshNetwork, { immediate: true });
+watch(
+  () => [ props.organization, props.organization?._vref, ], 
+  refreshNetwork, 
+  { immediate: true }
+);
 </script>
 
 <template>

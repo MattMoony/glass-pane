@@ -3,6 +3,7 @@ import * as organ from '@/api/organ';
 import * as person from '@/api/person';
 import * as organization from '@/api/organization';
 import { marked } from 'marked';
+import { reactive, ref, type Ref } from 'vue';
 
 /**
  * Represents a member of an organization. That member
@@ -18,6 +19,10 @@ class Organ implements organ.Organ {
    * The bio of the organ. This is a Markdown string.
    */
   public bio: string;
+  /**
+   * Maybe this helps for reactivity in Vue or something.
+   */
+  public _vref: Ref<number>;
 
   /**
    * The picture of the organ. This is a blob, and can be
@@ -85,12 +90,14 @@ class Organ implements organ.Organ {
       get: async () => {
         return await organ.pic(this.id);
       },
-      src: () => `${API}/organ/${this.id}/pic`,
+      src: () => `${API}/organ/${this.id}/pic#${this._vref.value}`,
       set: async (pic: Blob) => {
         await organ.pic.set(this.id, pic);
+        this.triggerChange();
       },
       remove: async () => {
         await organ.pic.remove(this.id);
+        this.triggerChange();
       },
     };
 
@@ -110,6 +117,15 @@ class Organ implements organ.Organ {
         await organ.sources.remove(this.id, sid);
       },
     };
+
+    this._vref = ref(Math.floor(Math.random() * 1000));
+  }
+
+  /**
+   * Helper for Vue reactivity?
+   */
+  public triggerChange(): void {
+    this._vref.value = Math.floor(Math.random()*1000);
   }
 
   /**

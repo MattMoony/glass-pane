@@ -29,7 +29,7 @@ const refreshNetwork = async () => {
 };
 
 watch(() => props.showMemberships, refreshNetwork);
-watch(() => props.person, refreshNetwork, { immediate: true });
+watch(() => [props.person, props.person?._vref,], refreshNetwork, { immediate: true });
 </script>
 
 <template>
