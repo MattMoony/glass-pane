@@ -291,7 +291,7 @@ export const rel = {
    * @param until The date the relation ended.
    * @returns The response from the API.
    */
-  add: async (type: string, pid: number, other: number, sources: string[], since: Date, until?: Date): Promise<APIResponse> => {
+  add: async (type: number, pid: number, other: number, sources: string[], since: Date, until?: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -301,32 +301,34 @@ export const rel = {
 
   /**
    * Updates a relation of a person.
+   * @param type The type of relation.
    * @param pid The ID of the person.
    * @param other The ID of the other person.
    * @param since The date the relation started.
    * @param until The date the relation ended.
    * @returns The response from the API.
    */
-  update: async (pid: number, other: number, since: Date, until?: Date): Promise<APIResponse> => {
+  update: async (type: number, pid: number, other: number, since: Date, until?: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ other, since, until }),
+      body: JSON.stringify({ type, other, since, until }),
     });
   },
 
   /**
    * Removes a relation from a person.
+   * @param type The type of relation.
    * @param pid The ID of the person.
    * @param other The ID of the other person.
    * @param since The date the relation started.
    * @returns The response from the API.
    */
-  remove: async (pid: number, other: number, since: Date): Promise<APIResponse> => {
+  remove: async (type: number, pid: number, other: number, since: Date): Promise<APIResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ other, since, }),
+      body: JSON.stringify({ type, other, since, }),
     });
   },
 };

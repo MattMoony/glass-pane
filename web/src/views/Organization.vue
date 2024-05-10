@@ -13,7 +13,7 @@ const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
 const oid: ComputedRef<number> = computed(() => +route.params.oid);
 const organization: Ref<Organization | null> = ref(null);
-const editing: Ref<boolean> = ref(Object.keys(route.query).includes('edit'));
+const editing: ComputedRef<boolean> = computed(() => Object.keys(route.query).includes('edit'));
 
 watch(oid, async (newOid: number) => {
   organization.value = await Organization.get(newOid);
@@ -25,13 +25,12 @@ watch(oid, async (newOid: number) => {
     :organ="organization"
     :edit="editing"
     @edit="st => { 
-      editing = st; 
       if (organization) {
-        router.push(`/o/${organization.id}${editing ? '?edit' : ''}`);
+        router.push(`/o/${organization.id}${st ? '?edit' : ''}`);
         // the following is weird code, but it seems to be the only
         // way to get the behaviour I want?
         // TODO: maybe look at this again later
-        if (!editing)
+        if (!st)
           organization._vref = Math.floor(Math.random() * 1000);
       }
     }"

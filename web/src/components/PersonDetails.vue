@@ -5,11 +5,16 @@ import { oneDark } from '@codemirror/theme-one-dark';
 
 import type { OrganSource } from '@/api/organ';
 import Person from '../models/Person';
-import type Relation from '@/models/Relation';
+import Relation from '@/models/Relation';
+import RelationType from '@/models/RelationTypes';
 import Membership from '@/models/Membership';
+import Role from '@/models/Role';
+import type Organization from '@/models/Organization';
 
 import PersonBanner from './PersonBanner.vue';
 import MembershipInfo from './MembershipInfo.vue';
+import SelectSearchNew from './SelectSearchNew.vue';
+import RelationInfo from './RelationInfo.vue';
 
 const props = defineProps<{
   /**
@@ -42,6 +47,11 @@ const children: Ref<Relation[]> = ref([]);
 const friends: Ref<Relation[]> = ref([]);
 const memberships: Ref<Membership[]> = ref([]);
 const newSource: Ref<string> = ref('');
+const newParent: Ref<Relation|null> = ref(null);
+const newRomantic: Ref<Relation|null> = ref(null);
+const newChild: Ref<Relation|null> = ref(null);
+const newFriend: Ref<Relation|null> = ref(null);
+const newMembership: Ref<Membership|null> = ref(null);
 
 const addSource = async () => {
   if (!newSource.value.trim()) return;
@@ -79,6 +89,94 @@ const removeSource = async (source: OrganSource) => {
       props.updatedSources.splice(index, 1);
     }
   }
+};
+
+const addMembership = async () => {
+  if (!props.person || !newMembership.value || newMembership.value.role.id < 0) return;
+  await newMembership.value.create([ 'none', ]);
+  memberships.value.push(newMembership.value);
+  newMembership.value = null;
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const removeMembership = async (membership: Membership) => {
+  await membership.remove();
+  const index = memberships.value.findIndex(m => 
+    m.organ.id === membership.organ.id &&
+    m.organization.id === membership.organization.id &&
+    m.role.id === membership.role.id &&
+    m.since === membership.since);
+  memberships.value.splice(index, 1);
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const addParent = async () => {
+  if (!props.person || !newParent.value) return;
+  console.log(newParent.value);
+  await props.person.relations.add(newParent.value, [ 'none', ]);
+  parents.value.push(newParent.value);
+  newParent.value = null;
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const removeParent = async (parent: Relation) => {
+  if (!props.person) return;
+  await props.person.relations.remove(parent);
+  parents.value = parents.value.filter(p => 
+    p.other.id !== parent.other.id ||
+    p.since !== parent.since);
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const addRomantic = async () => {
+  if (!props.person || !newRomantic.value) return;
+  await props.person.relations.add(newRomantic.value, [ 'none', ]);
+  romantic.value.push(newRomantic.value);
+  newRomantic.value = null;
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const removeRomantic = async (romantic: Relation) => {
+  if (!props.person) return;
+  await props.person.relations.remove(romantic);
+  romantic.value = romantic.value.filter(r => 
+    r.other.id !== romantic.other.id ||
+    r.since !== romantic.since);
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const addChild = async () => {
+  if (!props.person || !newChild.value) return;
+  await props.person.relations.add(newChild.value, [ 'none', ]);
+  children.value.push(newChild.value);
+  newChild.value = null;
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const removeChild = async (child: Relation) => {
+  if (!props.person) return;
+  await props.person.relations.remove(child);
+  children.value = children.value.filter(c => 
+    c.other.id !== child.other.id ||
+    c.since !== child.since);
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const addFriend = async () => {
+  if (!props.person || !newFriend.value) return;
+  await props.person.relations.add(newFriend.value, [ 'none', ]);
+  friends.value.push(newFriend.value);
+  newFriend.value = null;
+  props.person._vref = Math.floor(Math.random() * 1000);
+};
+
+const removeFriend = async (friend: Relation) => {
+  if (!props.person) return;
+  await props.person.relations.remove(friend);
+  friends.value = friends.value.filter(f => 
+    f.other.id !== friend.other.id ||
+    f.since !== friend.since);
+  props.person._vref = Math.floor(Math.random() * 1000);
 };
 
 watch(() => props.person, async (newPerson: Person|null) => {
@@ -131,89 +229,345 @@ watch(() => props.person?.bio, async () => {
         />
       </div>
     </div>
+    <div class="memberships" v-if="!hideMemberships">
+      <h2>Memberships</h2>
+      <div>
+        <template v-if="memberships && memberships.length">
+          <template v-if="!edit">
+            <RouterLink
+              class="connection-wrapper"
+              v-for="membership in memberships"
+              :key="membership.organization.id"
+              :to="`/o/${membership.organization.id}`"
+            >
+              <MembershipInfo
+                :membership="membership"
+                organ-membership
+              />
+            </RouterLink>
+          </template>
+          <template v-else>
+            <div
+              v-for="membership in memberships"
+              :key="membership.organization.id"
+            >
+              <MembershipInfo
+                :membership="membership"
+                organ-membership
+                edit
+                @change="async () => await membership.update()"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeMembership(membership)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
+        </template>
+        <template v-else-if="!edit">
+          <i>No known memberships.</i>
+        </template>
+        <template v-if="edit">
+          <h3>New Membership</h3>
+          <template v-if="!newMembership">
+            <SelectSearchNew
+              type="organization"
+              @select="org => {
+                if (person)
+                  newMembership = new Membership(person, org as Organization, new Role(-1, ''), new Date());
+              }"
+            />
+          </template>
+          <template v-else>
+            <MembershipInfo
+              :membership="newMembership"
+              organ-membership
+              edit
+              create
+            />
+            <div class="button-wrapper">
+              <button @click="newMembership = null">
+                <font-awesome-icon icon="times" />
+                Cancel
+              </button>
+              <button @click="addMembership">
+                <font-awesome-icon icon="plus" />
+                Add
+              </button>
+            </div>
+          </template>
+        </template>
+      </div>
+    </div>
     <div class="connections" v-if="!hideRelations">
       <h2>Relations</h2>
       <div>
-        <template v-if="parents.length">
-          <h3>Parents</h3>
-          <div>
+        <h3>Parents</h3>
+        <template v-if="parents && parents.length">
+          <template v-if="!edit">
             <RouterLink
               class="connection-wrapper"
               v-for="parent in parents"
               :key="parent.other.id"
               :to="`/p/${parent.other.id}`"
             >
-              <PersonBanner
-                :person="parent.other"
-                small
+              <RelationInfo
+                :relation="parent"
+                show-type
               />
             </RouterLink>
-          </div>
+          </template>
+          <template v-else>
+            <div
+              v-for="parent in parents"
+              :key="parent.other.id"
+            >
+              <RelationInfo
+                :relation="parent"
+                edit
+                @change="async () => person && await person.relations.update(parent)"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeParent(parent)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
         </template>
-        <template v-if="romantic.length">
-          <h3>Romantic</h3>
-          <div>
+        <template v-else-if="!edit">
+          <i>No known parents.</i>
+        </template>
+        <template v-if="edit">
+          <h4>New Parent</h4>
+          <template v-if="!newParent">
+            <SelectSearchNew
+              type="person"
+              @select="organ => {
+                if (organ)
+                  newParent = new Relation(RelationType.PARENT, organ as Person, new Date());
+              }"
+            />
+          </template>
+          <template v-else>
+            <RelationInfo
+              :relation="newParent"
+              edit
+              create
+            />
+            <div class="button-wrapper">
+              <button @click="newParent = null">
+                <font-awesome-icon icon="times" />
+                Cancel
+              </button>
+              <button @click="addParent">
+                <font-awesome-icon icon="plus" />
+                Add
+              </button>
+            </div>
+          </template>
+        </template>
+        <h3>Romantic</h3>
+        <template v-if="romantic && romantic.length">
+          <template v-if="!edit">
             <RouterLink
               class="connection-wrapper"
               v-for="partner in romantic"
               :key="partner.other.id"
               :to="`/p/${partner.other.id}`"
             >
-              <PersonBanner
-                :person="partner.other"
-                small
+              <RelationInfo
+                :relation="partner"
+                show-type
               />
             </RouterLink>
-          </div>
+          </template>
+          <template v-else>
+            <div
+              v-for="partner in romantic"
+              :key="partner.other.id"
+            >
+              <RelationInfo
+                :relation="partner"
+                edit
+                @change="async () => person && await person.relations.update(partner)"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeRomantic(partner)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
         </template>
-        <template v-if="children.length">
-          <h3>Children</h3>
-          <div>
+        <template v-else-if="!edit">
+          <i>No known partners.</i>
+        </template>
+        <template v-if="edit">
+          <h4>New Partner</h4>
+          <template v-if="!newRomantic">
+            <SelectSearchNew
+              type="person"
+              @select="organ => {
+                if (organ)
+                  newRomantic = new Relation(RelationType.ROMANTIC, organ as Person, new Date());
+              }"
+            />
+          </template>
+          <template v-else>
+            <RelationInfo
+              :relation="newRomantic"
+              edit
+              create
+            />
+            <div class="button-wrapper">
+              <button @click="newRomantic = null">
+                <font-awesome-icon icon="times" />
+                Cancel
+              </button>
+              <button @click="addRomantic">
+                <font-awesome-icon icon="plus" />
+                Add
+              </button>
+            </div>
+          </template>
+        </template>
+        <h3>Children</h3>
+        <template v-if="children && children.length">
+          <template v-if="!edit">
             <RouterLink
               class="connection-wrapper"
               v-for="child in children"
               :key="child.other.id"
               :to="`/p/${child.other.id}`"
             >
-              <PersonBanner
-                :person="child.other"
-                small
+              <RelationInfo
+                :relation="child"
+                show-type
               />
             </RouterLink>
-          </div>
+          </template>
+          <template v-else>
+            <div
+              v-for="child in children"
+              :key="child.other.id"
+            >
+              <RelationInfo
+                :relation="child"
+                edit
+                @change="async () => person && await person.relations.update(child)"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeChild(child)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
         </template>
-        <template v-if="friends.length">
-          <h3>Friends</h3>
-          <div>
+        <template v-else-if="!edit">
+          <i>No known children.</i>
+        </template>
+        <template v-if="edit">
+          <h4>New Child</h4>
+          <template v-if="!newChild">
+            <SelectSearchNew
+              type="person"
+              @select="organ => {
+                if (organ)
+                  newChild = new Relation(RelationType.CHILD, organ as Person, new Date());
+              }"
+            />
+          </template>
+          <template v-else>
+            <RelationInfo
+              :relation="newChild"
+              edit
+              create
+            />
+            <div class="button-wrapper">
+              <button @click="newChild = null">
+                <font-awesome-icon icon="times" />
+                Cancel
+              </button>
+              <button @click="addChild">
+                <font-awesome-icon icon="plus" />
+                Add
+              </button>
+            </div>
+          </template>
+        </template>
+        <h3>Friends</h3>
+        <template v-if="friends && friends.length">
+          <template v-if="!edit">
             <RouterLink
               class="connection-wrapper"
               v-for="friend in friends"
               :key="friend.other.id"
               :to="`/p/${friend.other.id}`"
             >
-              <PersonBanner
-                :person="friend.other"
-                small
+              <RelationInfo
+                :relation="friend"
+                show-type
               />
             </RouterLink>
-          </div>
+          </template>
+          <template v-else>
+            <div
+              v-for="friend in friends"
+              :key="friend.other.id"
+            >
+              <RelationInfo
+                :relation="friend"
+                edit
+                @change="async () => person && await person.relations.update(friend)"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeFriend(friend)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
         </template>
-      </div>
-    </div>
-    <div class="memberships" v-if="!hideMemberships">
-      <h2>Memberships</h2>
-      <div>
-        <RouterLink
-          class="connection-wrapper"
-          v-for="membership in memberships"
-          :key="membership.organization.id"
-          :to="`/o/${membership.organization.id}`"
-        >
-          <MembershipInfo
-            :membership="membership"
-            organ-membership
-          />
-        </RouterLink>
+        <template v-else-if="!edit">
+          <i>No known friends.</i>
+        </template>
+        <template v-if="edit">
+          <h4>New Friend</h4>
+          <template v-if="!newFriend">
+            <SelectSearchNew
+              type="person"
+              @select="organ => {
+                if (organ)
+                  newFriend = new Relation(RelationType.FRIEND, organ as Person, new Date());
+              }"
+            />
+          </template>
+          <template v-else>
+            <RelationInfo
+              :relation="newFriend"
+              edit
+              create
+            />
+            <div class="button-wrapper">
+              <button @click="newFriend = null">
+                <font-awesome-icon icon="times" />
+                Cancel
+              </button>
+              <button @click="addFriend">
+                <font-awesome-icon icon="plus" />
+                Add
+              </button>
+            </div>
+          </template>
+        </template>
       </div>
     </div>
     <div class="sources">
@@ -326,6 +680,24 @@ h2 + div {
 .edit input:focus,
 .edit button:focus {
   outline: none;
+}
+
+.edit .connections .button-wrapper,
+.edit .memberships .button-wrapper {
+  display: flex;
+  justify-content: stretch;
+  align-items: center;
+  gap: .4em;
+  margin-top: .4em;
+}
+
+.edit .connections button,
+.edit .memberships button {
+  width: 100%;
+}
+
+.edit h4 {
+  margin: .5em 0;
 }
 </style>
 

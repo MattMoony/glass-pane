@@ -97,7 +97,7 @@ const removeMembership = async (membership: Membership) => {
     m.organization.id === membership.organization.id &&
     m.role.id === membership.role.id &&
     m.since === membership.since);
-  memberships.value.splice(index);
+  memberships.value.splice(index, 1);
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -116,7 +116,7 @@ const removeMember = async (member: Membership) => {
     m.organization.id === member.organization.id &&
     m.role.id === member.role.id &&
     m.since === member.since);
-  members.value.splice(index);
+  members.value.splice(index, 1);
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 

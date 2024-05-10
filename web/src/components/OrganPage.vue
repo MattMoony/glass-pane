@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, type Ref } from 'vue';
+import { ref, watch, type Ref } from 'vue';
 import Organ from '../models/Organ';
 
 import NavBarNew from './NavBarNew.vue';
@@ -23,6 +23,9 @@ const emits = defineEmits<{
 }>();
 
 const editing: Ref<boolean> = ref(Boolean(props.edit));
+watch(() => props.edit, (newEdit: boolean) => {
+  editing.value = newEdit;
+}, { immediate: true });
 </script>
 
 <template>

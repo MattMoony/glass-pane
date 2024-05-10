@@ -39,7 +39,7 @@ class Person extends Organ implements person.Person {
      * @param since The date the parent became a parent of the person.
      * @returns A promise that resolves to the relation between the person and the parent, or null if the relation could not be added.
      */
-    add: (other: Person, since: Date) => Promise<Relation|null>;
+    add: (other: Person, since: Date, sources: string[]) => Promise<Relation|null>;
   };
 
   /**
@@ -56,7 +56,7 @@ class Person extends Organ implements person.Person {
      * @param since The date the person became a parent of the child.
      * @returns A promise that resolves to the relation between the person and the child, or null if the relation could not be added.
      */
-    add: (other: Person, since: Date) => Promise<Relation|null>;
+    add: (other: Person, since: Date, sources: string[]) => Promise<Relation|null>;
   };
 
   /**
@@ -73,7 +73,7 @@ class Person extends Organ implements person.Person {
      * @param since The date the person became romantically involved with the partner.
      * @returns A promise that resolves to the relation between the person and the partner, or null if the relation could not be added.
      */
-    add: (other: Person, since: Date) => Promise<Relation|null>;
+    add: (other: Person, since: Date, sources: string[]) => Promise<Relation|null>;
   };
 
   /**
@@ -91,7 +91,7 @@ class Person extends Organ implements person.Person {
      * @param since The date the person became friends with the friend.
      * @returns A promise that resolves to the relation between the person and the friend, or null if the relation could not be added.
      */
-    add: (other: Person, since: Date) => Promise<Relation|null>;
+    add: (other: Person, since: Date, sources: string[]) => Promise<Relation|null>;
   };
 
   /**
@@ -108,7 +108,7 @@ class Person extends Organ implements person.Person {
      * @param rel The relation to add.
      * @returns A promise that resolves to the relation between the person and the other person, or null if the relation could not be added.
      */
-    add: (rel: Relation) => Promise<Relation|null>;
+    add: (rel: Relation, sources: string[]) => Promise<Relation|null>;
     /**
      * Updates a relation of the person.
      * @param rel The relation to update.
@@ -155,12 +155,12 @@ class Person extends Organ implements person.Person {
           r.until
         )) || [];
       },
-      add: async (other: Person, since: Date) => {
+      add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
           RelationType.PARENT,
           other,
           since
-        ));
+        ), sources);
       },
     };
 
@@ -181,12 +181,12 @@ class Person extends Organ implements person.Person {
           r.until
         )) || [];
       },
-      add: async (other: Person, since: Date) => {
+      add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
           RelationType.CHILD,
           other,
           since
-        ));
+        ), sources);
       }
     };
 
@@ -207,12 +207,12 @@ class Person extends Organ implements person.Person {
           r.until
         )) || [];
       },
-      add: async (other: Person, since: Date) => {
+      add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
           RelationType.ROMANTIC,
           other,
           since
-        ));
+        ), sources);
       },
     };
 
@@ -233,12 +233,12 @@ class Person extends Organ implements person.Person {
           r.until
         )) || [];
       },
-      add: async (other: Person, since: Date) => {
+      add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
           RelationType.FRIEND,
           other,
           since
-        ));
+        ), sources);
       },
     };
 
@@ -249,7 +249,7 @@ class Person extends Organ implements person.Person {
         ...await this.romantic.get(), 
         ...await this.friends.get()
       ],
-      add: async (rel: Relation) => {
+      add: async (rel: Relation, sources: string[]) => {
         const _rel = rel.type !== RelationType.CHILD 
                          ? rel
                          : new Relation(
@@ -259,9 +259,10 @@ class Person extends Organ implements person.Person {
                             rel.until
                          );
         const res = await person.rel.add(
-          RelationType[_rel.type].toLowerCase(),
+          _rel.type,
           rel.type !== RelationType.CHILD ? this.id : rel.other.id,
           rel.type !== RelationType.CHILD ? _rel.other.id : this.id,
+          sources,
           _rel.since
         );
         if (!res.success) return null;
@@ -274,6 +275,7 @@ class Person extends Organ implements person.Person {
       },
       update: async (rel: Relation) => {
         await person.rel.update(
+          rel.type,
           this.id, 
           rel.other.id, 
           rel.since,
@@ -282,6 +284,7 @@ class Person extends Organ implements person.Person {
       },
       remove: async (rel: Relation) => {
         await person.rel.remove(
+          rel.type,
           this.id, 
           rel.other.id,
           rel.since,

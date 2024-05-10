@@ -13,7 +13,7 @@ const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
 const pid: ComputedRef<number> = computed(() => +route.params.pid);
 const person: Ref<Person | null> = ref(null);
-const editing: Ref<boolean> = ref(Object.keys(route.query).includes('edit'));
+const editing: ComputedRef<boolean> = computed(() => Object.keys(route.query).includes('edit'));
 
 watch(pid, async (newPid: number) => {
   person.value = await Person.get(newPid);
@@ -24,7 +24,13 @@ watch(pid, async (newPid: number) => {
   <OrganPage 
     :organ="person" 
     :edit="editing"
-    @edit="st => { editing = st; person && router.push(`/p/${person.id}${editing ? '?edit' : ''}`) }"
+    @edit="st => { 
+      if (person) {
+        router.push(`/p/${person.id}${st ? '?edit' : ''}`);
+        if (!st)
+          person._vref = Math.floor(Math.random() * 1000);
+      }
+    }"
   >
     <template #left>
       <PersonBanner 
