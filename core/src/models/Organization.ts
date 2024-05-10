@@ -147,7 +147,7 @@ class Organization extends Organ {
     if (typeof v === 'undefined') return await super.create();
     if (typeof v === 'string' && typeof v2 === 'undefined') return await super.create(v);
     if (typeof v === 'string' && typeof v2 === 'string') {
-      const organ = v4 ? await Organ.create(v2) : await super.create();
+      const organ = v2 ? await Organ.create(v2) : await super.create();
       const client = await pool.connect();
       const res = await client.query(
         'INSERT INTO organization (oid, name, established, dissolved) VALUES ($1, $2, $3, $4) RETURNING oid',

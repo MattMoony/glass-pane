@@ -221,7 +221,7 @@ pic.remove = async (oid: number): Promise<APIResponse> => {
  * @param oid The ID of the organ to get the sources of.
  * @returns A promise that resolves to the response containing the sources.
  */
-const sources = async (oid: number): Promise<OrganSourcesResponse> => {
+export const sources = async (oid: number): Promise<OrganSourcesResponse> => {
   return await jreq(`${API}/organ/${oid}/sources`) as OrganSourcesResponse;
 };
 
@@ -315,4 +315,45 @@ memberships.add = async (
   }) as MembershipResponse;
 };
 
-export { sources };
+/**
+ * Updates a membership of an organ in an organization.
+ */
+memberships.update = async (
+  organ: Organ,
+  organization: Organization,
+  role: Role,
+  since: Date,
+  until?: Date
+): Promise<APIResponse> => {
+  return await jreq(`${API}/organ/${organ.id}/memberships`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      organization: organization.id,
+      role: role.id,
+      since,
+      until,
+    }),
+  }) as APIResponse;
+};
+
+/**
+ * Remove a membership.
+ */
+memberships.remove = async (
+  organ: Organ,
+  organization: Organization,
+  role: Role,
+  since: Date
+): Promise<APIResponse> => {
+  return await jreq(`${API}/organ/${organ.id}/memberships`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      organization: organization.id,
+      role: role.id,
+      since,
+    }),
+  }) as APIResponse;
+};
+

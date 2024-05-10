@@ -77,6 +77,33 @@ class Membership {
     );
   }
 
+  /**
+   * Updates the membership.
+   * @returns A promise that resolves when the membership is updated.
+   */
+  public async update (): Promise<void> {
+    await organ.memberships.update(
+      this.organ,
+      this.organization,
+      this.role,
+      this.since,
+      this.until
+    );
+  }
+
+  /**
+   * Removes the membership.
+   * @returns A promise that resolve when the membership has been deleted.
+   */
+  public async remove (): Promise<void> {
+    await organ.memberships.remove(
+      this.organ,
+      this.organization,
+      this.role,
+      this.since
+    );
+  }
+
   // TODO: could add a function for getting all memberships
   // TODO: of a specific organ in a specific organization
   /**

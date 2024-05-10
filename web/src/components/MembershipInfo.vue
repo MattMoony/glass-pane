@@ -27,6 +27,12 @@ const props = defineProps<{
    */
   create?: boolean;
 }>();
+const emits = defineEmits<{
+  /**
+   * Emitted when the membership is updated.
+   */
+  (e: 'change', membership: Membership): void;
+}>();
 
 </script>
 
@@ -65,8 +71,10 @@ const props = defineProps<{
         <RoleSelect
           v-else
           @select="role => {
-            if (membership)
+            if (membership) {
               membership.role = role;
+              $emit('change', membership);
+            }
           }"
         />
         <span 
@@ -92,6 +100,7 @@ const props = defineProps<{
             const d = new Date((e.target as HTMLInputElement).value);
             if (!isNaN(d.getTime()) && membership) {
               membership.since = d;
+              $emit('change', membership);
             }
           }"
         />
@@ -100,7 +109,11 @@ const props = defineProps<{
           class="end"
           v-if="!edit"
         >
-          {{ membership.until ? membership.until : 'Present' }}
+          {{ 
+            membership.until 
+            ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(membership.until) 
+            : 'Present' 
+          }}
         </span>
         <input
           v-else
@@ -110,6 +123,7 @@ const props = defineProps<{
             const d = new Date((e.target as HTMLInputElement).value);
             if (!isNaN(d.getTime()) && membership) {
               membership.until = d;
+              $emit('change', membership);
             }
           }"
         />

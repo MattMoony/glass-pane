@@ -88,6 +88,16 @@ const addMembership = async () => {
   newMembership.value = null;
 };
 
+const removeMembership = async (membership: Membership) => {
+  await membership.remove();
+  const index = memberships.value.findIndex(m => 
+    m.organ.id === membership.organ.id && 
+    m.organization.id === membership.organization.id &&
+    m.role.id === membership.role.id &&
+    m.since === membership.since);
+  memberships.value.splice(index);
+};
+
 watch(() => props.organization, async (newOrganization: Organization|null) => {
   if (!newOrganization) return;
   bio.value = await newOrganization.bioHTML();
@@ -134,67 +144,77 @@ watch(() => props.organization?.bio, async () => {
     </div>
     <div v-if="!hideMemberships" class="memberships">
       <h2>Memberships</h2>
-      <div v-if="memberships && memberships.length">
-        <template v-if="!edit">
-          <RouterLink
-            class="connection-wrapper"
-            v-for="membership in memberships"
-            :key="membership.organization.id"
-            :to="`/o/${membership.organization.id}`"
-          >
-            <MembershipInfo
-              :membership="membership"
-              organ-membership
-            />
-          </RouterLink>
-        </template>
-        <template v-else>
-          <div 
-            v-for="membership in memberships" 
-            :key="membership.organization.id"
-          >
-            <MembershipInfo
-              :membership="membership"
-              organ-membership
-            />
-          </div>
-        </template>
-      </div>
-      <div v-else-if="!edit">
-        <i>No known memberships.</i>
-      </div>
-      <div v-else>
-        <h3>New Membership</h3>
-        <template v-if="!newMembership">
-          <SelectSearchNew
-            type="organization"
-            @select="org => {
-              if (organization)
-                newMembership = new Membership(organization, org as Organization, new Role(-1, ''), new Date());
-            }"
-          />
-        </template>
-        <template v-else>
-          <MembershipInfo
-            :membership="newMembership"
-            organ-membership
-            edit
-            create
-          />
-          <div class="button-wrapper">
-            <button
-              @click="newMembership = null"
+      <div>
+        <template v-if="memberships && memberships.length">
+          <template v-if="!edit">
+            <RouterLink
+              class="connection-wrapper"
+              v-for="membership in memberships"
+              :key="membership.organization.id"
+              :to="`/o/${membership.organization.id}`"
             >
-              <font-awesome-icon icon="times" />
-              Cancel
-            </button>
-            <button
-              @click="addMembership"
+              <MembershipInfo
+                :membership="membership"
+                organ-membership
+              />
+            </RouterLink>
+          </template>
+          <template v-else>
+            <div 
+              v-for="membership in memberships" 
+              :key="membership.organization.id"
             >
-              <font-awesome-icon icon="plus" />
-              Add
-            </button>
-          </div>
+              <MembershipInfo
+                :membership="membership"
+                organ-membership
+                edit
+                @change="async () => await membership.update()"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeMembership(membership)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
+        </template>
+        <template v-else-if="!edit">
+          <i>No known memberships.</i>
+        </template>
+        <template v-if="edit">
+          <h3>New Membership</h3>
+          <template v-if="!newMembership">
+            <SelectSearchNew
+              type="organization"
+              @select="org => {
+                if (organization)
+                  newMembership = new Membership(organization, org as Organization, new Role(-1, ''), new Date());
+              }"
+            />
+          </template>
+          <template v-else>
+            <MembershipInfo
+              :membership="newMembership"
+              organ-membership
+              edit
+              create
+            />
+            <div class="button-wrapper">
+              <button
+                @click="newMembership = null"
+              >
+                <font-awesome-icon icon="times" />
+                Cancel
+              </button>
+              <button
+                @click="addMembership"
+              >
+                <font-awesome-icon icon="plus" />
+                Add
+              </button>
+            </div>
+          </template>
         </template>
       </div>
     </div>
