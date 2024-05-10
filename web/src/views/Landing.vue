@@ -11,6 +11,20 @@ import SearchBarNew from '@/components/SearchBarNew.vue';
     <div class="bar-container">
       <SearchBarNew />
     </div>
+    <div class="tools">
+      <router-link to="/p">
+        <button>
+          <font-awesome-icon :icon="['fas', 'plus']" />
+          New Person
+        </button>
+      </router-link>
+      <router-link to="/o">
+        <button>
+          <font-awesome-icon :icon="['fas', 'plus']" />
+          New Organization
+        </button>
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -39,5 +53,32 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.tools {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.tools a {
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.tools button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
 }
 </style>

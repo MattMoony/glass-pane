@@ -284,7 +284,7 @@ class Person extends Organ {
   public static async create (v?: string, v2?: string, v3?: Date, v4?: Date, v5?: string): Promise<Person|Organ> {
     if (v === undefined) return await super.create();
     if (typeof v === 'string' && v2 === undefined) return await super.create(v);
-    if (typeof v === 'string' && typeof v2 === 'string' && v3 instanceof Date && v4 instanceof Date) {
+    if (typeof v === 'string' && typeof v2 === 'string') {
       const organ = v5 ? await super.create(v5) : await super.create();
       const client = await pool.connect();
       await client.query(

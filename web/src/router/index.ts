@@ -10,14 +10,19 @@ const router = createRouter({
       component: Landing
     },
     {
+      path: '/p',
+      name: 'create person',
+      component: () => import('../views/CreatePerson.vue'),
+    },
+    {
       path: '/p/:pid',
       name: 'person',
       component: () => import('../views/NewPerson.vue'),
     },
     {
-      path: '/lp/:uid',
-      name: 'legacy-person',
-      component: () => import('../views/Person.vue'),
+      path: '/o',
+      name: 'create organization',
+      component: () => import('../views/CreateOrganization.vue'),
     },
     {
       path: '/o/:oid',

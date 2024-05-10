@@ -2,6 +2,8 @@
 import { type Ref, ref } from 'vue';
 
 import Organ from '../models/Organ';
+import Person from '@/models/Person';
+import Organization from '@/models/Organization';
 
 import PopDropDown from './PopDropDown.vue';
 
@@ -42,7 +44,14 @@ const props = defineProps<{
    * Whether to show the banner in an extra small size.
    */
   extraSmall?: boolean;
+  /**
+   * Whether to allow editing the organ.
+   */
+  edit?: boolean;
 }>();
+
+const image: Ref<string|undefined> = ref(undefined);
+const imageInput: Ref<HTMLInputElement|null> = ref(null);
 
 const icons: {[name: string]: { icon: string, title: string, }} = {
   phone: { icon: 'fa-solid fa-phone', title: 'Phone', },
@@ -69,14 +78,31 @@ if (props.socials) {
     socialsShown.value[name] = false;
   });
 }
+
+const updateImage = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      image.value = reader.result as string;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+};
+
+const removeImage = () => {
+  image.value = undefined;
+  imageInput.value!.value = '';
+};
 </script>
 
 <template>
-<div 
+  <div 
     :class="[
       'banner', 
       props.small||props.extraSmall ? 'small' : '',
       props.extraSmall ? 'extra-small' : '',
+      props.edit ? 'edit' : '',
     ]"
   >
     <div 
@@ -92,24 +118,104 @@ if (props.socials) {
       class="banner-facts"
       v-if="props.organ"
     >
-      <h1 v-if="!(props.small||props.extraSmall)">
-        {{ props.name }}
-      </h1>
-      <h3 v-else>
-        {{ props.name }}
-      </h3>
+      <template v-if="!edit">
+        <h1 v-if="!(props.small||props.extraSmall)">
+          {{ props.name }}
+        </h1>
+        <h3 v-else>
+          {{ props.name }}
+        </h3>
+      </template>
+      <template v-else>
+        <div
+          v-if="organ instanceof Person" 
+          class="name-edit"
+        >
+          <input 
+            type="text" 
+            v-model="organ.firstname" 
+            placeholder="First name" 
+            maxlength="128"
+            required
+          />
+          <input 
+            type="text" 
+            v-model="organ.lastname" 
+            placeholder="Last name" 
+            maxlength="128"
+            required
+          />
+        </div>
+        <div
+          v-else-if="organ instanceof Organization" 
+          class="name-edit"
+        >
+          <input 
+            type="text" 
+            v-model="organ.name" 
+            placeholder="Organization name" 
+            maxlength="128"
+          />  
+        </div>
+      </template>
       <div class="banner-birth-death">
-        <span v-if="props.from">
-          <font-awesome-icon icon="fa-solid fa-baby" />
-          {{ props.from.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
-        </span>
-        <span v-if="props.to">
-          <font-awesome-icon icon="fa-solid fa-skull" />
-          {{ props.to.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
-        </span>
-        <span v-if="props.age">
-          (Age: {{ props.age }})
-        </span>
+        <template v-if="!edit">
+          <span v-if="props.from">
+            <font-awesome-icon icon="fa-solid fa-baby" />
+            {{ props.from.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+          </span>
+          <span v-if="props.to">
+            <font-awesome-icon icon="fa-solid fa-skull" />
+            {{ props.to.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+          </span>
+          <span v-if="props.age">
+            (Age: {{ props.age }})
+          </span>
+        </template>
+        <template v-else>
+          <div 
+            v-if="(organ instanceof Person)"
+            class="birth-death-edit"
+          >
+            <div>
+              <font-awesome-icon icon="fa-solid fa-baby" />
+              <input 
+                type="date" 
+                placeholder="Birthdate" 
+                @change="e => (organ as Person).birthdate = new Date((e.target as HTMLInputElement).value)"
+              />
+            </div>
+            <div>
+              <font-awesome-icon icon="fa-solid fa-skull" />
+              <input 
+                type="date" 
+                placeholder="Deathdate" 
+                @change="e => (organ as Person).deathdate = new Date((e.target as HTMLInputElement).value)"
+              />
+            </div>
+          </div>
+          <div
+            v-if="(organ instanceof Organization)"
+            class="birth-death-edit"
+          >
+            <div>
+              <font-awesome-icon icon="fa-solid fa-baby" />
+              <input 
+                type="date" 
+                placeholder="Foundation date" 
+                @change="e => (organ as Organization).established = new Date((e.target as HTMLInputElement).value)"
+              />
+            </div>
+            <div>
+              <font-awesome-icon icon="fa-solid fa-skull" />
+              <input 
+                type="date"  
+                placeholder="Dissolution date" 
+                @change="e => (organ as Organization).dissolved = new Date((e.target as HTMLInputElement).value)"
+              />
+            </div>
+          </div>
+        </template>
       </div>
       <div v-if="props.showSocials && props.socials" class="banner-socials">
         <template 
@@ -167,9 +273,29 @@ if (props.socials) {
       class="banner-image"
     >
       <img 
+        v-if="!edit"
         :src="props.organ ? props.organ.pic.src() : '/john-doe.png'" 
         :alt="props.name ? props.name : 'Organ image'" 
       />
+      <div
+        v-else
+        class="banner-image-upload"
+      >
+        <img
+          :src="image ? image : '/person.png'" 
+          :alt="props.name ? props.name : 'Organ image'"
+        />
+        <input
+          ref="imageInput"
+          type="file" 
+          accept="image/*"
+          @change="updateImage"
+        />
+        <button @click="removeImage">
+          <font-awesome-icon icon="fa-solid fa-trash" />
+          Remove image
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -183,6 +309,7 @@ if (props.socials) {
   gap: 1em;
   border-bottom: 2px solid var(--color-border);
   padding: 1.5em;
+  word-wrap: break-word;
 }
 
 .banner.small {
@@ -198,6 +325,26 @@ if (props.socials) {
   flex-basis: 0;
 }
 
+.banner input,
+.banner button {
+  width: 100%;
+  padding: .5em;
+  margin: .2em 0;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  color: var(--color-text);
+  background-color: var(--color-background-mute);
+}
+
+.banner input:focus,
+.banner button:focus {
+  outline: none;
+}
+
+.banner button {
+  cursor: pointer;
+}
+
 .banner-image img {
   width: auto;
   height: 12em;
@@ -210,6 +357,21 @@ if (props.socials) {
 
 .extra-small .banner-image img {
   height: 2em;
+}
+
+.edit img {
+  height: 8em;
+  margin: 1em;
+}
+
+.banner-image-upload {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: .5em;
+  border: 1px dashed var(--color-border);
+  border-radius: 5px;
 }
 
 .banner-facts h1 {
@@ -239,6 +401,26 @@ if (props.socials) {
   justify-content: flex-start;
   align-items: center;
   gap: .5em;
+}
+
+.birth-death-edit {
+  width: 100%;
+}
+
+.birth-death-edit > div {
+  display: flex;
+  justify-content: stretch;
+  align-items: center;
+  gap: .5em;
+}
+
+.birth-death-edit svg {
+  width: 2rem;
+}
+
+.birth-death-edit input {
+  flex-grow: 1;
+  display: inline-block;
 }
 
 .banner-socials {
