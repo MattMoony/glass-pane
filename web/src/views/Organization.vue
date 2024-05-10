@@ -39,7 +39,7 @@ watch(oid, async (newOid: number) => {
 </template>
 
 <style scoped>
-.person-details {
+.organization-details {
   flex-grow: 1;
   flex-basis: 0;
   overflow-y: auto;
