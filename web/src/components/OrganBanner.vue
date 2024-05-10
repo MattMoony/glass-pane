@@ -120,7 +120,7 @@ const removeImage = () => {
 };
 
 watch(() => props.organ, (newOrgan) => {
-  if (newOrgan) {
+  if (newOrgan && newOrgan.id > 0) {
     image.value = newOrgan.pic.src();
   }
 }, { immediate: true, });
