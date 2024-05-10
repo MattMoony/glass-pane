@@ -92,7 +92,7 @@ const removeSource = async (source: OrganSource) => {
 };
 
 const addMembership = async () => {
-  if (!props.person || !newMembership.value || newMembership.value.role.id < 0) return;
+  if (!props.person || !newMembership.value || newMembership.value.role.id < 0 || isNaN(newMembership.value.since.getTime())) return;
   await newMembership.value.create([ 'none', ]);
   memberships.value.push(newMembership.value);
   newMembership.value = null;
@@ -111,7 +111,7 @@ const removeMembership = async (membership: Membership) => {
 };
 
 const addParent = async () => {
-  if (!props.person || !newParent.value) return;
+  if (!props.person || !newParent.value || isNaN(newParent.value.since.getTime())) return;
   console.log(newParent.value);
   await props.person.relations.add(newParent.value, [ 'none', ]);
   parents.value.push(newParent.value);
@@ -129,7 +129,7 @@ const removeParent = async (parent: Relation) => {
 };
 
 const addRomantic = async () => {
-  if (!props.person || !newRomantic.value) return;
+  if (!props.person || !newRomantic.value || isNaN(newRomantic.value.since.getTime())) return;
   await props.person.relations.add(newRomantic.value, [ 'none', ]);
   romantic.value.push(newRomantic.value);
   newRomantic.value = null;
@@ -146,7 +146,7 @@ const removeRomantic = async (romantic: Relation) => {
 };
 
 const addChild = async () => {
-  if (!props.person || !newChild.value) return;
+  if (!props.person || !newChild.value || isNaN(newChild.value.since.getTime())) return;
   await props.person.relations.add(newChild.value, [ 'none', ]);
   children.value.push(newChild.value);
   newChild.value = null;
@@ -163,7 +163,7 @@ const removeChild = async (child: Relation) => {
 };
 
 const addFriend = async () => {
-  if (!props.person || !newFriend.value) return;
+  if (!props.person || !newFriend.value || isNaN(newFriend.value.since.getTime())) return;
   await props.person.relations.add(newFriend.value, [ 'none', ]);
   friends.value.push(newFriend.value);
   newFriend.value = null;

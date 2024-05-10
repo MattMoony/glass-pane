@@ -83,7 +83,7 @@ const removeSource = async (source: OrganSource) => {
 };
 
 const addMembership = async () => {
-  if (!props.organization || !newMembership.value || newMembership.value.role.id < 0) return;
+  if (!props.organization || !newMembership.value || newMembership.value.role.id < 0 || isNaN(newMembership.value.since.getTime())) return;
   await newMembership.value.create([ 'none', ]);
   memberships.value.push(newMembership.value);
   newMembership.value = null;
@@ -102,7 +102,7 @@ const removeMembership = async (membership: Membership) => {
 };
 
 const addMember = async () => {
-  if (!props.organization || !newMember.value || newMember.value.role.id < 0) return;
+  if (!props.organization || !newMember.value || newMember.value.role.id < 0 || isNaN(newMember.value.since.getTime())) return;
   await newMember.value.create([ 'none', ]);
   members.value.push(newMember.value);
   newMember.value = null;
