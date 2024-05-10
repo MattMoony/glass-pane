@@ -37,6 +37,12 @@ const props = defineProps<{
     pic?: File;
   }
 }>();
+const emits = defineEmits<{
+  /**
+   * Emitted when the organization changes.
+   */
+  (e: 'change', organization: Organization): void;
+}>();
 
 // mock for now
 const socials: Ref<{[name: string]: string[]}> = ref({
@@ -67,6 +73,7 @@ const socials: Ref<{[name: string]: string[]}> = ref({
     :extraSmall="props.extraSmall"
     :edit="props.edit"
     :updated="props.updated"
+    @change="newOrganization => emits('change', newOrganization as Organization)"
   />
 </template>
 

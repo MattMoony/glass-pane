@@ -40,16 +40,6 @@ const memberships: Ref<Membership[]> = ref([]);
 const members: Ref<Membership[]> = ref([]);
 const newSource: Ref<string> = ref('');
 
-watch(() => props.organization, async (newOrganization: Organization|null) => {
-  if (!newOrganization) return;
-  bio.value = await newOrganization.bioHTML();
-  sources.value = await newOrganization.sources.get();
-  if (!props.hideMemberships)
-    memberships.value = await Membership.get(new Organ(newOrganization.id, newOrganization.bio));
-  if (!props.hideMembers)
-    members.value = await Membership.get(newOrganization);
-}, { immediate: true });
-
 const addSource = async () => {
   if (!newSource.value.trim()) return;
   if (!props.updatedSources) {
@@ -87,6 +77,21 @@ const removeSource = async (source: OrganSource) => {
     }
   }
 };
+
+watch(() => props.organization, async (newOrganization: Organization|null) => {
+  if (!newOrganization) return;
+  bio.value = await newOrganization.bioHTML();
+  sources.value = await newOrganization.sources.get();
+  if (!props.hideMemberships)
+    memberships.value = await Membership.get(new Organ(newOrganization.id, newOrganization.bio));
+  if (!props.hideMembers)
+    members.value = await Membership.get(newOrganization);
+}, { immediate: true });
+
+watch(() => props.organization?.bio, async () => {
+  if (!props.organization) return;
+  bio.value = await props.organization.bioHTML();
+});
 </script>
 
 <template>
@@ -105,6 +110,15 @@ const removeSource = async (source: OrganSource) => {
         <codemirror 
           v-model="organization.bio"
           :extensions="[markdown(), oneDark,]"
+          @keydown="(e: KeyboardEvent) => {
+            if (e.key === 's' && e.ctrlKey) {
+              console.log(e.key, e.ctrlKey, e.metaKey, e.shiftKey, e.altKey);
+              e.preventDefault();
+              (async () => organization && await organization.update())();
+              return false;
+            }
+          }"
+          @blur="async () => organization && await organization.update()"
         />
       </div>
     </div>

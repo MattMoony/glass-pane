@@ -49,6 +49,14 @@ class Organization extends Organ implements organization.Organization {
   }
 
   /**
+   * Updates the organization.
+   * @returns A promise that resolves when the organization has been updated.
+   */
+  public async update (): Promise<void> {
+    await organization.update(this.id, this.name, this.bio, this.established, this.dissolved);
+  }
+
+  /**
    * Gets an organization by its ID.
    * @param id The ID of the organization to get.
    * @returns A promise that resolves to the organization with the given ID, or null if no such organization exists.

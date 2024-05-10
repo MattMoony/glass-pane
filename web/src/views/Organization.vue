@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
-import { useRoute, type RouteLocationNormalized } from 'vue-router';
+import { useRoute, useRouter, type RouteLocationNormalized, type Router } from 'vue-router';
 
 import Organization from '../models/Organization';
 
@@ -9,9 +9,11 @@ import OrganizationBanner from '@/components/OrganizationBanner.vue';
 import OrganizationDetails from '@/components/OrganizationDetails.vue';
 import OrganizationNetwork from '@/components/OrganizationNetwork.vue';
 
+const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
 const oid: ComputedRef<number> = computed(() => +route.params.oid);
 const organization: Ref<Organization | null> = ref(null);
+const editing: Ref<boolean> = ref(Object.keys(route.query).includes('edit'));
 
 watch(oid, async (newOid: number) => {
   organization.value = await Organization.get(newOid);
@@ -19,14 +21,21 @@ watch(oid, async (newOid: number) => {
 </script>
 
 <template>
-  <OrganPage :organ="organization">
+  <OrganPage 
+    :organ="organization"
+    :edit="editing"
+    @edit="st => { editing = st; organization && router.push(`/o/${organization.id}${editing ? '?edit' : ''}`) }"
+  >
     <template #left>
       <OrganizationBanner
         :organization="organization"
+        :edit="editing"
+        @change="async (newOrganization) => await newOrganization.update()"
       />
       <div class="organization-details gp-scroll">
         <OrganizationDetails 
           :organization="organization"
+          :edit="editing"
         />
       </div>
     </template>

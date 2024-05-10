@@ -69,8 +69,8 @@ export const update = async (req: Request, res: Response): Promise<void> => {
  
   if (req.body.bio) organization.bio = req.body.bio;
   if (req.body.name) organization.name = req.body.name;
-  if (req.body.established) organization.established = req.body.established;
-  if (req.body.dissolved) organization.dissolved = req.body.dissolved;
+  if (req.body.established) organization.established = new Date(req.body.established);
+  if (req.body.dissolved) organization.dissolved = new Date(req.body.dissolved);
  
   await organization.update();
   res.send({ 'success': true, 'organization': organization.json(), });
