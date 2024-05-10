@@ -80,6 +80,7 @@ onClickOutside(container, () => {
     <div 
       v-if="open && hasSuggestions"
       class="suggestions gp-scroll"
+      @click="query = ''"
     >
       <slot name="suggestions"></slot>
     </div>

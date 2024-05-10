@@ -42,6 +42,7 @@ const memberships: Ref<Membership[]> = ref([]);
 const members: Ref<Membership[]> = ref([]);
 const newSource: Ref<string> = ref('');
 const newMembership: Ref<Membership|null> = ref(null);
+const newMember: Ref<Membership|null> = ref(null);
 
 const addSource = async () => {
   if (!newSource.value.trim()) return;
@@ -97,6 +98,25 @@ const removeMembership = async (membership: Membership) => {
     m.role.id === membership.role.id &&
     m.since === membership.since);
   memberships.value.splice(index);
+  props.organization._vref = Math.floor(Math.random() * 1000);
+};
+
+const addMember = async () => {
+  if (!props.organization || !newMember.value || newMember.value.role.id < 0) return;
+  await newMember.value.create([ 'none', ]);
+  members.value.push(newMember.value);
+  newMember.value = null;
+  props.organization._vref = Math.floor(Math.random() * 1000);
+};
+
+const removeMember = async (member: Membership) => {
+  await member.remove();
+  const index = members.value.findIndex(m => 
+    m.organ.id === member.organ.id && 
+    m.organization.id === member.organization.id &&
+    m.role.id === member.role.id &&
+    m.since === member.since);
+  members.value.splice(index);
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -226,25 +246,81 @@ watch(() => props.organization?.bio, async () => {
     </div>
     <div v-if="!hideMembers" class="members">
       <h2>Members</h2>
-      <div v-if="members && members.length">
-        <RouterLink
-          class="connection-wrapper"
-          v-for="member in members"
-          :key="member.organ.id"
-          :to="
-            member.organ instanceof Person
-            ? `/p/${member.organ.id}`
-            : `/o/${member.organ.id}`
-          "
-        >
-          <MembershipInfo
-            :membership="member"
-            organization-members
-          />
-        </RouterLink>
-      </div>
-      <div v-else>
-        <i>No known members.</i>
+      <div>
+        <template v-if="members && members.length">
+          <template v-if="!edit">
+            <RouterLink
+              class="connection-wrapper"
+              v-for="member in members"
+              :key="member.organ.id"
+              :to="
+                member.organ instanceof Person
+                ? `/p/${member.organ.id}`
+                : `/o/${member.organ.id}`
+              "
+            >
+              <MembershipInfo
+                :membership="member"
+                organization-members
+              />
+            </RouterLink>
+          </template>
+          <template v-else>
+            <div 
+              v-for="member in members" 
+              :key="member.organization.id"
+            >
+              <MembershipInfo
+                :membership="member"
+                organization-members
+                edit
+                @change="async () => await member.update()"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeMember(member)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
+        </template>
+        <template v-else-if="!edit">
+          <i>No known members.</i>
+        </template>
+        <template v-if="edit">
+          <h3>New Member</h3>
+          <template v-if="!newMember">
+            <SelectSearchNew
+              @select="organ => {
+                if (organization)
+                  newMember = new Membership(organ, organization, new Role(-1, ''), new Date());
+              }"
+            />
+          </template>
+          <template v-else>
+            <MembershipInfo
+              :membership="newMember"
+              organization-members
+              edit
+              create
+            />
+            <div class="button-wrapper">
+              <button
+                @click="newMember = null"
+              >
+                <font-awesome-icon icon="times" />
+                Cancel
+              </button>
+              <button
+                @click="addMember"
+              >
+                <font-awesome-icon icon="plus" />
+                Add
+              </button>
+            </div>
+          </template>
+        </template>
       </div>
     </div>
     <div class="sources">
@@ -348,7 +424,8 @@ h2 + div {
   outline: none;
 }
 
-.edit .memberships .button-wrapper {
+.edit .memberships .button-wrapper,
+.edit .members .button-wrapper {
   display: flex;
   justify-content: stretch;
   align-items: center;
@@ -356,7 +433,8 @@ h2 + div {
   margin-top: .4em;
 }
 
-.edit .memberships button {
+.edit .memberships button,
+.edit .members button {
   width: 100%;
 }
 </style>
