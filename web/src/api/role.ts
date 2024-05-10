@@ -47,7 +47,7 @@ export const create = async (name: string): Promise<RoleResponse> => {
  * @returns A promise that resolves to the response from the API.
  */
 export const search = async (name: string): Promise<RolesResponse> => {
-  return await jreq(`${API}/role/search?name=${name}`) as RolesResponse;
+  return await jreq(`${API}/role?q=${name}`) as RolesResponse;
 };
 
 /**

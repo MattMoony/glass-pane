@@ -61,6 +61,22 @@ class Membership {
     return `${this.organ} is a ${this.role} of ${this.organization}`;
   }
 
+  /**
+   * Creates a new membership.
+   * @param sources The sources for the membership.
+   * @returns A promise that resolves when the membership is created.
+   */
+  public async create (sources: string[]): Promise<void> {
+    await organ.memberships.add(
+      sources,
+      this.organ,
+      this.organization,
+      this.role,
+      this.since,
+      this.until
+    );
+  }
+
   // TODO: could add a function for getting all memberships
   // TODO: of a specific organ in a specific organization
   /**

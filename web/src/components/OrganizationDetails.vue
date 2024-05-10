@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, watch } from 'vue';
+import { type Ref, ref, watch, popScopeId } from 'vue';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 
@@ -8,8 +8,10 @@ import Organ from '@/models/Organ';
 import Person from '@/models/Person';
 import Organization from '../models/Organization';
 import Membership from '@/models/Membership';
+import Role from '@/models/Role';
 
 import MembershipInfo from './MembershipInfo.vue';
+import SelectSearchNew from './SelectSearchNew.vue';
 
 const props = defineProps<{
   /**
@@ -39,6 +41,7 @@ const sources: Ref<OrganSource[]> = ref([]);
 const memberships: Ref<Membership[]> = ref([]);
 const members: Ref<Membership[]> = ref([]);
 const newSource: Ref<string> = ref('');
+const newMembership: Ref<Membership|null> = ref(null);
 
 const addSource = async () => {
   if (!newSource.value.trim()) return;
@@ -76,6 +79,13 @@ const removeSource = async (source: OrganSource) => {
       props.updatedSources.splice(index, 1);
     }
   }
+};
+
+const addMembership = async () => {
+  if (!props.organization || !newMembership.value || newMembership.value.role.id < 0) return;
+  await newMembership.value.create([ 'none', ]);
+  memberships.value.push(newMembership.value);
+  newMembership.value = null;
 };
 
 watch(() => props.organization, async (newOrganization: Organization|null) => {
@@ -125,20 +135,67 @@ watch(() => props.organization?.bio, async () => {
     <div v-if="!hideMemberships" class="memberships">
       <h2>Memberships</h2>
       <div v-if="memberships && memberships.length">
-        <RouterLink
-          class="connection-wrapper"
-          v-for="membership in memberships"
-          :key="membership.organization.id"
-          :to="`/o/${membership.organization.id}`"
-        >
-          <MembershipInfo
-            :membership="membership"
-            organ-membership
-          />
-        </RouterLink>
+        <template v-if="!edit">
+          <RouterLink
+            class="connection-wrapper"
+            v-for="membership in memberships"
+            :key="membership.organization.id"
+            :to="`/o/${membership.organization.id}`"
+          >
+            <MembershipInfo
+              :membership="membership"
+              organ-membership
+            />
+          </RouterLink>
+        </template>
+        <template v-else>
+          <div 
+            v-for="membership in memberships" 
+            :key="membership.organization.id"
+          >
+            <MembershipInfo
+              :membership="membership"
+              organ-membership
+            />
+          </div>
+        </template>
+      </div>
+      <div v-else-if="!edit">
+        <i>No known memberships.</i>
       </div>
       <div v-else>
-        <i>No known memberships.</i>
+        <h3>New Membership</h3>
+        <template v-if="!newMembership">
+          <SelectSearchNew
+            type="organization"
+            @select="org => {
+              if (organization)
+                newMembership = new Membership(organization, org as Organization, new Role(-1, ''), new Date());
+            }"
+          />
+        </template>
+        <template v-else>
+          <MembershipInfo
+            :membership="newMembership"
+            organ-membership
+            edit
+            create
+          />
+          <div class="button-wrapper">
+            <button
+              @click="newMembership = null"
+            >
+              <font-awesome-icon icon="times" />
+              Cancel
+            </button>
+            <button
+              @click="addMembership"
+            >
+              <font-awesome-icon icon="plus" />
+              Add
+            </button>
+          </div>
+        </template>
       </div>
     </div>
     <div v-if="!hideMembers" class="members">
@@ -263,6 +320,18 @@ h2 + div {
 .edit input:focus,
 .edit button:focus {
   outline: none;
+}
+
+.edit .memberships .button-wrapper {
+  display: flex;
+  justify-content: stretch;
+  align-items: center;
+  gap: .4em;
+  margin-top: .4em;
+}
+
+.edit .memberships button {
+  width: 100%;
 }
 </style>
 

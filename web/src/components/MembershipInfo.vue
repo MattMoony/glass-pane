@@ -3,6 +3,8 @@ import Person from '../models/Person';
 import Organization from '../models/Organization';
 import Membership from '../models/Membership';
 
+import RoleSelect from './RoleSelect.vue';
+
 const props = defineProps<{
   /**
    * The membership to display in the details.
@@ -16,13 +18,21 @@ const props = defineProps<{
    * Whether to show from the organization's perspective.
    */
   organizationMembers?: boolean;
+  /**
+   * Whether to allow editing the membership.
+   */
+  edit?: boolean;
+  /**
+   * Whether to use this for creating a new membership.
+   */
+  create?: boolean;
 }>();
 
 </script>
 
 <template>
   <div 
-    class="membership-info"
+    :class="['membership-info', edit ? 'edit' : '']"
     v-if="membership"  
   >
     <div 
@@ -49,9 +59,16 @@ const props = defineProps<{
           }}
           :
         </span>
-        <span class="role">
+        <span class="role" v-if="!create">
           {{ membership.role.name }}
         </span>
+        <RoleSelect
+          v-else
+          @select="role => {
+            if (membership)
+              membership.role = role;
+          }"
+        />
         <span 
           v-if="!organizationMembers"
           class="organization"
@@ -61,13 +78,41 @@ const props = defineProps<{
         </span>
       </h3>
       <div class="dates">
-        <span class="start">
+        <span 
+          class="start"
+          v-if="!create"
+        >
           {{ new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(membership.since) }}
         </span>
+        <input
+          v-else
+          type="date"
+          :value="membership.since ? membership.since.toISOString().split('T')[0] : ''"
+          @change="e => {
+            const d = new Date((e.target as HTMLInputElement).value);
+            if (!isNaN(d.getTime()) && membership) {
+              membership.since = d;
+            }
+          }"
+        />
         -
-        <span class="end">
+        <span 
+          class="end"
+          v-if="!edit"
+        >
           {{ membership.until ? membership.until : 'Present' }}
         </span>
+        <input
+          v-else
+          type="date"
+          :value="membership.until ? membership.until.toISOString().split('T')[0] : ''"
+          @change="e => {
+            const d = new Date((e.target as HTMLInputElement).value);
+            if (!isNaN(d.getTime()) && membership) {
+              membership.until = d;
+            }
+          }"
+        />
       </div>
     </div>
     <div class="pic">
@@ -116,5 +161,12 @@ const props = defineProps<{
 
 .pic img {
   height: 4em;
+}
+
+.edit input {
+  padding: .5em;
+  background: var(--color-background-soft);
+  color: var(--color-text);
+  border: none;
 }
 </style>

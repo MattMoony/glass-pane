@@ -9,6 +9,11 @@ import Organization from '../models/Organization';
 import PersonBanner from './PersonBanner.vue';
 import OrganizationBanner from './OrganizationBanner.vue';
 
+enum SearchType {
+  PERSON = 'person',
+  ORGANIZATION = 'organization',
+}
+
 const props = defineProps<{
   /**
    * The query string to display in the search bar.
@@ -18,6 +23,10 @@ const props = defineProps<{
    * The result to display in the search bar.
    */
   initResult?: Organ;
+  /**
+   * The type of search results to display.
+   */
+  type?: string;
 }>();
 const emits = defineEmits<{
   /**
@@ -46,8 +55,8 @@ watch(query, async () => {
   if (query.value.trim().length < QUERY_MINLEN) return;
   window.clearTimeout(timeout.value);
   timeout.value = window.setTimeout(async () => {
-    const people = await Person.search(query.value.trim());
-    const orgs = await Organization.search(query.value.trim());
+    const people = !props.type || !Object.values(SearchType).includes(props.type as SearchType) || props.type === SearchType.PERSON ? await Person.search(query.value.trim()) : [];
+    const orgs = !props.type || !Object.values(SearchType).includes(props.type as SearchType) || props.type === SearchType.ORGANIZATION ? await Organization.search(query.value.trim()) : [];
     suggestions.value = (people as Organ[]).concat(orgs);
     open.value = true;
   }, SEARCH_TIMEOUT);

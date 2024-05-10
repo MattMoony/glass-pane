@@ -144,6 +144,13 @@ export interface OrganMembershipsResponse extends APIResponse {
 }
 
 /**
+ * Represents the response from the API containing a membership.
+ */
+export interface MembershipResponse extends APIResponse {
+  membership?: Membership;
+}
+
+/**
  * Creates a new organ.
  * @param bio The biography of the organ.
  * @returns A promise that resolves to the response containing the new organ.
@@ -275,6 +282,37 @@ export const memberships = async (oid: number): Promise<OrganMembershipsResponse
     });
   }
   return res;
+};
+
+/**
+ * Adds a membership to an organ.
+ * @param sources The sources for the membership.
+ * @param organ The organ to add the membership to.
+ * @param organization The organization that the organ is a member of.
+ * @param role The role that the organ has in the organization.
+ * @param since The date that the organ became a member of the organization.
+ * @param until The date that the organ stopped being a member of the organization.
+ * @returns A promise that resolves to the response containing the new membership.
+ */
+memberships.add = async (
+  sources: string[],
+  organ: Organ, 
+  organization: Organization, 
+  role: Role, 
+  since: Date, 
+  until?: Date
+): Promise<MembershipResponse> => {
+  return await jreq(`${API}/organ/${organ.id}/memberships`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      sources,
+      organization: organization.id, 
+      role: role.id, 
+      since, 
+      until, 
+    }),
+  }) as MembershipResponse;
 };
 
 export { sources };
