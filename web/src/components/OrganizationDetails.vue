@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { type Ref, ref, watch } from 'vue';
+import { markdown } from '@codemirror/lang-markdown';
+import { oneDark } from '@codemirror/theme-one-dark';
 
 import type { OrganSource } from '@/api/organ';
 import Organ from '@/models/Organ';
@@ -14,32 +16,99 @@ const props = defineProps<{
    * The organization to display.
    */
   organization: Organization|null;
+  /**
+   * Whether to allow editing the person.
+   */
+  edit?: boolean;
+  /**
+   * Whether to hide memberships.
+   */
+  hideMemberships?: boolean;
+  /**
+   * Whether to hide members.
+   */
+  hideMembers?: boolean;
+  /**
+   * If you want to receive updated sources.
+   */
+  updatedSources?: OrganSource[];
 }>();
 
 const bio: Ref<string|undefined> = ref(undefined);
 const sources: Ref<OrganSource[]> = ref([]);
 const memberships: Ref<Membership[]> = ref([]);
 const members: Ref<Membership[]> = ref([]);
+const newSource: Ref<string> = ref('');
 
 watch(() => props.organization, async (newOrganization: Organization|null) => {
   if (!newOrganization) return;
   bio.value = await newOrganization.bioHTML();
   sources.value = await newOrganization.sources.get();
-  memberships.value = await Membership.get(new Organ(newOrganization.id, newOrganization.bio));
-  members.value = await Membership.get(newOrganization);
+  if (!props.hideMemberships)
+    memberships.value = await Membership.get(new Organ(newOrganization.id, newOrganization.bio));
+  if (!props.hideMembers)
+    members.value = await Membership.get(newOrganization);
 }, { immediate: true });
+
+const addSource = async () => {
+  if (!newSource.value.trim()) return;
+  if (!props.updatedSources) {
+    const source = await props.organization?.sources.add(newSource.value);
+    if (source) {
+      sources.value.push(source);
+      newSource.value = '';
+    }
+  } else {
+    props.updatedSources.push({ sid: -props.updatedSources.length, url: newSource.value, });
+    newSource.value = '';
+  }
+};
+
+const updateSource = async (source: OrganSource) => {
+  if (!source.url.trim()) return;
+  if (!props.updatedSources) {
+    await props.organization?.sources.update(source.sid, source.url);
+  } else {
+    const index = props.updatedSources.findIndex(s => s.sid === source.sid);
+    if (index >= 0) {
+      props.updatedSources[index].url = source.url;
+    }
+  }
+};
+
+const removeSource = async (source: OrganSource) => {
+  if (!props.updatedSources) {
+    await props.organization?.sources.remove(source.sid);
+    sources.value = sources.value.filter(s => s.sid !== source.sid);
+  } else {
+    const index = props.updatedSources.findIndex(s => s.sid === source.sid);
+    if (index >= 0) {
+      props.updatedSources.splice(index, 1);
+    }
+  }
+};
 </script>
 
 <template>
-  <section v-if="organization">
+  <section v-if="organization" :class="[edit ? 'edit' : '',]">
     <div class="bio">
       <h2>Biography</h2>
       <div
+        v-if="!edit"
         class="md-bio"
         v-dompurify-html="bio"
       ></div>
+      <div
+        v-else
+        class="md-bio"
+      >
+        <codemirror 
+          v-model="organization.bio"
+          :extensions="[markdown(), oneDark,]"
+        />
+      </div>
     </div>
-    <div class="memberships">
+    <div v-if="!hideMemberships" class="memberships">
       <h2>Memberships</h2>
       <div v-if="memberships && memberships.length">
         <RouterLink
@@ -58,7 +127,7 @@ watch(() => props.organization, async (newOrganization: Organization|null) => {
         <i>No known memberships.</i>
       </div>
     </div>
-    <div class="members">
+    <div v-if="!hideMembers" class="members">
       <h2>Members</h2>
       <div v-if="members && members.length">
         <RouterLink
@@ -83,15 +152,36 @@ watch(() => props.organization, async (newOrganization: Organization|null) => {
     </div>
     <div class="sources">
       <h2>Sources</h2>
-      <div v-if="sources && sources.length">
+      <div>
         <ul>
-          <li v-for="source in sources" :key="source.sid">
-            <a :href="source.url">{{ source.url }}</a>
+          <li v-for="source in updatedSources||sources" :key="source.sid">
+            <a 
+              v-if="!edit"
+              :href="source.url" 
+              target="_blank"
+            >{{ source.url }}</a>
+            <div v-else>
+              <input v-model="source.url" />
+              <button @click="updateSource(source)">
+                <font-awesome-icon icon="save" />
+              </button>
+              <button @click="removeSource(source)">
+                <font-awesome-icon icon="trash" />
+              </button>
+            </div>
+          </li>
+          <li v-if="edit">
+            <div>
+              <input 
+                v-model="newSource"
+                @keyup="e => e.key === 'Enter' && addSource()"
+              />
+              <button @click="addSource">
+                <font-awesome-icon icon="plus" />
+              </button>
+            </div>
           </li>
         </ul>
-      </div>
-      <div v-else>
-        <i>No sources found.</i>
       </div>
     </div>
   </section>
@@ -132,6 +222,33 @@ h2 + div {
 
 .sources a {
   color: var(--color-text);
+}
+
+.edit li > div {
+  display: flex;
+  justify-content: stretch;
+  align-items: center;
+  gap: .3em;
+}
+
+.edit input,
+.edit button {
+  width: 100%;
+  padding: .5em;
+  margin-bottom: .5em;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.edit button {
+  width: auto;
+  cursor: pointer;
+}
+
+.edit input:focus,
+.edit button:focus {
+  outline: none;
 }
 </style>
 

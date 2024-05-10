@@ -22,6 +22,10 @@ const props = defineProps<{
    * Whether to show the banner in an extra small size.
    */
   extraSmall?: boolean;
+  /**
+   * Whether to allow editing the organization.
+   */
+  edit?: boolean;
 }>();
 
 // mock for now
@@ -51,6 +55,7 @@ const socials: Ref<{[name: string]: string[]}> = ref({
     :showSocials="props.socials"
     :small="props.small"
     :extraSmall="props.extraSmall"
+    :edit="props.edit"
   />
 </template>
 

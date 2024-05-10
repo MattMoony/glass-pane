@@ -45,7 +45,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   }
   const established = req.body.established ? new Date(req.body.established) : undefined;
   const dissolved = req.body.dissolved ? new Date(req.body.dissolved) : undefined;
-  const organization = await Organization.create(req.body.name, established, dissolved, req.body.bio);
+  const organization = await Organization.create(req.body.name, req.body.bio||'', established, dissolved);
   res.send({ 'success': true, 'organization': organization });
 };
 

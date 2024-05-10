@@ -282,7 +282,11 @@ const removeImage = () => {
         class="banner-image-upload"
       >
         <img
-          :src="image ? image : '/person.png'" 
+          :src="image 
+            ? image 
+            : props.organ instanceof Person
+            ? '/person.webp'
+            : '/corp.webp'" 
           :alt="props.name ? props.name : 'Organ image'"
         />
         <input

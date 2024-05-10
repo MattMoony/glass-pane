@@ -75,8 +75,8 @@ export const getPic = async (req: Request, res: Response): Promise<void> => {
     res.sendFile(`${process.env.DATA_DIR}/${organ.id}.jpg`);
   else {
     const person = await Person.get(organ.id);
-    if (person) res.sendFile(`${process.env.DATA_DIR}/default-person.png`);
-    else res.sendFile(`${process.env.DATA_DIR}/default-organization.png`);
+    if (person) res.sendFile(`${process.env.DATA_DIR}/default-person.webp`);
+    else res.sendFile(`${process.env.DATA_DIR}/default-organization.webp`);
   }
 };
 

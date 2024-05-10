@@ -137,23 +137,24 @@ class Organization extends Organ {
   /**
    * Creates a new organization.
    * @param name The name of the organization.
+   * @param bio The bio of the organization.
    * @param established The date the organization was established.
    * @param dissolved The date the organization was dissolved.
    * @returns A promise that resolves with the new organization.
    */
-  public static async create (name: string, established?: Date, dissolved?: Date, bio?: string): Promise<Organization>;
-  public static async create (v?: string, v2?: Date, v3?: Date, v4?: string): Promise<Organ|Organization> {
+  public static async create (name: string, bio: string, established?: Date, dissolved?: Date): Promise<Organization>;
+  public static async create (v?: string, v2?: string, v3?: Date, v4?: Date): Promise<Organ|Organization> {
     if (typeof v === 'undefined') return await super.create();
     if (typeof v === 'string' && typeof v2 === 'undefined') return await super.create(v);
-    if (typeof v === 'string' && v2 instanceof Date && v3 instanceof Date && typeof v4 === 'string') {
-      const organ = v4 ? await Organ.create(v4) : await super.create();
+    if (typeof v === 'string' && typeof v2 === 'string') {
+      const organ = v4 ? await Organ.create(v2) : await super.create();
       const client = await pool.connect();
       const res = await client.query(
         'INSERT INTO organization (oid, name, established, dissolved) VALUES ($1, $2, $3, $4) RETURNING oid',
-        [organ.id, v, v2, v3]
+        [organ.id, v, v3, v4]
       );
       client.release();
-      return new Organization(organ.id, organ.bio, v, v2, v3);
+      return new Organization(organ.id, organ.bio, v, v3, v4);
     }
     throw new Error('Invalid creation type');
   }

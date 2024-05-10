@@ -26,6 +26,7 @@ const createPerson = async () => {
   for (const source of sources.value) {
     await newPerson.sources.add(source.url);
   }
+  // TODO: upload image as well
   router.push(`/p/${newPerson.id}`);
 };
 </script>
