@@ -26,7 +26,7 @@ const props = defineProps<{
     v-if="membership"  
   >
     <div 
-      v-if="!organMembership"
+      v-if="!organMembership && !organizationMembers"
       class="pic"
     >
       <img
@@ -52,11 +52,11 @@ const props = defineProps<{
         <span class="role">
           {{ membership.role.name }}
         </span>
-        @
         <span 
           v-if="!organizationMembers"
           class="organization"
         >
+          @
           {{ membership.organization.name }}
         </span>
       </h3>

@@ -142,7 +142,7 @@ const removeSource = async (source: OrganSource) => {
         >
           <MembershipInfo
             :membership="member"
-            organization-membership
+            organization-members
           />
         </RouterLink>
       </div>
