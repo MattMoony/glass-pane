@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref } from 'vue';
+import { type Ref, ref, watch } from 'vue';
 
 import Organ from '../models/Organ';
 import Person from '@/models/Person';
@@ -59,6 +59,12 @@ const props = defineProps<{
     pic?: File;
   }
 }>();
+const emits = defineEmits<{
+  /**
+   * Emitted when the organ has been updated.
+   */
+  (e: 'change', organ: Organ): void;
+}>();
 
 const image: Ref<string|undefined> = ref(undefined);
 const imageInput: Ref<HTMLInputElement|null> = ref(null);
@@ -98,6 +104,8 @@ const updateImage = (event: Event) => {
     };
     if (props.updated !== undefined)
       props.updated.pic = input.files[0];
+    else if (props.organ)
+      props.organ.pic.set(input.files[0]);
     reader.readAsDataURL(input.files[0]);
   }
 };
@@ -107,7 +115,15 @@ const removeImage = () => {
   imageInput.value!.value = '';
   if (props.updated !== undefined)
     props.updated.pic = undefined;
+  else if (props.organ)
+    props.organ.pic.remove();
 };
+
+watch(() => props.organ, (newOrgan) => {
+  if (newOrgan) {
+    image.value = newOrgan.pic.src();
+  }
+}, { immediate: true, });
 </script>
 
 <template>
@@ -151,6 +167,7 @@ const removeImage = () => {
             placeholder="First name" 
             maxlength="128"
             required
+            @change="() => organ && $emit('change', organ)"
           />
           <input 
             type="text" 
@@ -158,6 +175,7 @@ const removeImage = () => {
             placeholder="Last name" 
             maxlength="128"
             required
+            @change="() => organ && $emit('change', organ)"
           />
         </div>
         <div
@@ -169,6 +187,8 @@ const removeImage = () => {
             v-model="organ.name" 
             placeholder="Organization name" 
             maxlength="128"
+            required
+            @change="() => organ && $emit('change', organ)"
           />  
         </div>
       </template>
@@ -196,7 +216,14 @@ const removeImage = () => {
               <input 
                 type="date" 
                 placeholder="Birthdate" 
-                @change="e => (organ as Person).birthdate = new Date((e.target as HTMLInputElement).value)"
+                :value="organ.birthdate ? organ.birthdate.toISOString().split('T')[0] : ''"
+                @change="e => {
+                  const d = new Date((e.target as HTMLInputElement).value);
+                  if (!isNaN(d.getTime())) {
+                    (organ as Person).birthdate = d;
+                    organ && $emit('change', organ);
+                  }
+                }"
               />
             </div>
             <div>
@@ -204,7 +231,14 @@ const removeImage = () => {
               <input 
                 type="date" 
                 placeholder="Deathdate" 
-                @change="e => (organ as Person).deathdate = new Date((e.target as HTMLInputElement).value)"
+                :value="organ.deathdate ? organ.deathdate.toISOString().split('T')[0] : ''"
+                @change="e => {
+                  const d = new Date((e.target as HTMLInputElement).value);
+                  if (!isNaN(d.getTime())) {
+                    (organ as Person).deathdate = d;
+                    organ && $emit('change', organ);
+                  }
+                }"
               />
             </div>
           </div>
@@ -217,7 +251,14 @@ const removeImage = () => {
               <input 
                 type="date" 
                 placeholder="Foundation date" 
-                @change="e => (organ as Organization).established = new Date((e.target as HTMLInputElement).value)"
+                :value="organ.established ? organ.established.toISOString().split('T')[0] : ''"
+                @change="e => {
+                  const d = new Date((e.target as HTMLInputElement).value);
+                  if (!isNaN(d.getTime())) {
+                    (organ as Organization).established = d;
+                    organ && $emit('change', organ);
+                  }
+                }"
               />
             </div>
             <div>
@@ -225,7 +266,14 @@ const removeImage = () => {
               <input 
                 type="date"  
                 placeholder="Dissolution date" 
-                @change="e => (organ as Organization).dissolved = new Date((e.target as HTMLInputElement).value)"
+                :value="organ.dissolved ? organ.dissolved.toISOString().split('T')[0] : ''"
+                @change="e => {
+                  const d = new Date((e.target as HTMLInputElement).value);
+                  if (!isNaN(d.getTime())) {
+                    (organ as Organization).dissolved = d;
+                    organ && $emit('change', organ);
+                  }
+                }"
               />
             </div>
           </div>

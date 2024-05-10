@@ -176,6 +176,21 @@ export const get = async (pid: number): Promise<PersonResponse> => {
   return res;
 }
 
+export const update = async (
+  pid: number,
+  firstname: string,
+  lastname: string,
+  bio: string,
+  birthdate?: Date,
+  deathdate?: Date
+): Promise<PersonResponse> => {
+  return await jreq(`${API}/person/${pid}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ firstname, lastname, bio, birthdate, deathdate }),
+  }) as PersonResponse;
+}
+
 /**
  * Searches for people by their names.
  * @param query The query to search for.

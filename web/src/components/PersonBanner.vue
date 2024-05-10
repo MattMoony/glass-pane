@@ -37,6 +37,12 @@ const props = defineProps<{
     pic?: File;
   }
 }>();
+const emits = defineEmits<{
+  /**
+   * Emitted when the person changes.
+   */
+  (e: 'change', person: Person): void;
+}>();
 
 // mock for now
 const socials: Ref<{[name: string]: string[]}> = ref({
@@ -67,6 +73,7 @@ const socials: Ref<{[name: string]: string[]}> = ref({
     :extraSmall="props.extraSmall"
     :edit="props.edit"
     :updated="props.updated"
+    @change="newPerson => $emit('change', newPerson as Person)"
   />
 </template>
 

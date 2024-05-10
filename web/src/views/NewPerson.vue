@@ -9,9 +9,11 @@ import PersonNetworkNew from '@/components/PersonNetworkNew.vue';
 import PersonBanner from '@/components/PersonBanner.vue';
 import PersonDetails from '@/components/PersonDetails.vue';
 
+const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
 const pid: ComputedRef<number> = computed(() => +route.params.pid);
 const person: Ref<Person | null> = ref(null);
+const editing: Ref<boolean> = ref(Object.keys(route.query).includes('edit'));
 
 watch(pid, async (newPid: number) => {
   person.value = await Person.get(newPid);
@@ -19,12 +21,21 @@ watch(pid, async (newPid: number) => {
 </script>
 
 <template>
-  <OrganPage :organ="person">
+  <OrganPage 
+    :organ="person" 
+    :edit="editing"
+    @edit="st => { editing = st; person && router.push(`/p/${person.id}${editing ? '?edit' : ''}`) }"
+  >
     <template #left>
-      <PersonBanner :person="person" />
+      <PersonBanner 
+        :person="person" 
+        :edit="editing"
+        @change="async (newPerson) => await newPerson.update()"
+      />
       <div class="person-details gp-scroll">
         <PersonDetails 
-          :person="person" 
+          :person="person"
+          :edit="editing"
         />
       </div>
     </template>

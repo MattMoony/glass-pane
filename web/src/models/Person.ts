@@ -324,6 +324,14 @@ class Person extends Organ implements person.Person {
   }
 
   /**
+   * Updates the person.
+   * @returns A promise that resolves when the person is updated.
+   */
+  public async update (): Promise<void> {
+    await person.update(this.id, this.firstname, this.lastname, this.bio, this.birthdate, this.deathdate);
+  }
+
+  /**
    * Gets a person by their ID.
    * @param id The ID of the person to get.
    * @returns A promise that resolves to the person with the given ID, or null if no such person exists.

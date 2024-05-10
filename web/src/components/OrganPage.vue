@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+import { ref, type Ref } from 'vue';
 import Organ from '../models/Organ';
 
 import NavBarNew from './NavBarNew.vue';
@@ -9,8 +10,19 @@ const props = defineProps<{
    * The organ to display.
    */
   organ: Organ|null;
+  /**
+   * Whether to launch in edit mode.
+   */
+  edit?: boolean;
+}>();
+const emits = defineEmits<{
+  /**
+   * Emitted when the user wants to edit the organ.
+   */
+  (e: 'edit', status: boolean): void;
 }>();
 
+const editing: Ref<boolean> = ref(Boolean(props.edit));
 </script>
 
 <template>
@@ -20,6 +32,16 @@ const props = defineProps<{
     />
     <article>
       <div class="controls">
+        <button title="Edit" @click="() => { editing = !editing; $emit('edit', editing); }">
+          <template v-if="!editing">
+            <font-awesome-icon icon="edit" />
+            Edit
+          </template>
+          <template v-else>
+            <font-awesome-icon icon="times" />
+            Done
+          </template>
+        </button>
       </div>
       <section class="slots">
         <div class="left-slot">
@@ -49,6 +71,25 @@ article {
   flex-direction: column;
   justify-content: stretch;
   align-items: stretch;
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: .5em;
+  gap: 1em;
+  border-bottom: 4px solid var(--color-border);
+}
+
+.controls button {
+  padding: .2em;
+  border-radius: 50%;
+  font-size: 1em;
+  background-color: transparent;
+  color: var(--color-text);
+  border: none;
+  cursor: pointer;
 }
 
 .slots {

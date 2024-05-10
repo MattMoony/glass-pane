@@ -43,22 +43,6 @@ const friends: Ref<Relation[]> = ref([]);
 const memberships: Ref<Membership[]> = ref([]);
 const newSource: Ref<string> = ref('');
 
-watch(() => props.person, async (newPerson: Person|null) => {
-  if (!newPerson) return;
-  bio.value = await newPerson.bioHTML();
-  sources.value = await newPerson.sources.get();
-  if (!props.hideRelations) {
-    parents.value = await newPerson.parents.get();
-    children.value = await newPerson.children.get();
-    romantic.value = await newPerson.romantic.get();
-    friends.value = await newPerson.friends.get();
-  }
-  if (!props.hideMemberships) {
-    memberships.value = await Membership.get(newPerson);
-  }
-  props.updatedSources?.splice(0, props.updatedSources.length, ...sources.value);
-}, { immediate: true });
-
 const addSource = async () => {
   if (!newSource.value.trim()) return;
   if (!props.updatedSources) {
@@ -96,6 +80,27 @@ const removeSource = async (source: OrganSource) => {
     }
   }
 };
+
+watch(() => props.person, async (newPerson: Person|null) => {
+  if (!newPerson) return;
+  bio.value = await newPerson.bioHTML();
+  sources.value = await newPerson.sources.get();
+  if (!props.hideRelations) {
+    parents.value = await newPerson.parents.get();
+    children.value = await newPerson.children.get();
+    romantic.value = await newPerson.romantic.get();
+    friends.value = await newPerson.friends.get();
+  }
+  if (!props.hideMemberships) {
+    memberships.value = await Membership.get(newPerson);
+  }
+  props.updatedSources?.splice(0, props.updatedSources.length, ...sources.value);
+}, { immediate: true });
+
+watch(() => props.person?.bio, async () => {
+  if (!props.person) return;
+  bio.value = await props.person.bioHTML();
+});
 </script>
 
 <template>
@@ -114,6 +119,15 @@ const removeSource = async (source: OrganSource) => {
         <codemirror 
           v-model="person.bio"
           :extensions="[markdown(), oneDark,]"
+          @keydown="(e: KeyboardEvent) => {
+            if (e.key === 's' && e.ctrlKey) {
+              console.log(e.key, e.ctrlKey, e.metaKey, e.shiftKey, e.altKey);
+              e.preventDefault();
+              (async () => person && await person.update())();
+              return false;
+            }
+          }"
+          @blur="async () => person && await person.update()"
         />
       </div>
     </div>
