@@ -31,3 +31,8 @@ coverage
 
 # Python stuff
 __pycache__
+venv/
+
+# Import data stuff
+db/data/organizations
+db/data/people

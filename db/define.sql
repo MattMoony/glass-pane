@@ -1,16 +1,21 @@
 -- ====================================================================================================================================================== --
 
-GRANT               CONNECT
-ON                  DATABASE glasspane
-TO                  glasspane;
-
-GRANT               SELECT, INSERT, UPDATE, DELETE 
-ON                  ALL TABLES IN SCHEMA public
-TO                  glasspane;
-
-GRANT               USAGE, SELECT
-ON                  ALL SEQUENCES IN SCHEMA public
-TO                  glasspane;
+DROP TABLE business_turnover_source;
+DROP TABLE business_turnover;
+DROP TABLE relation_source;
+DROP TABLE relation;
+DROP TABLE membership_source;
+DROP TABLE membership;
+DROP TABLE relation_type;
+DROP TABLE person;
+DROP TABLE location;
+DROP TABLE role;
+DROP TABLE currency;
+DROP TABLE business;
+DROP TABLE nation;
+DROP TABLE organization;
+DROP TABLE organ_source;
+DROP TABLE organ;
 
 -- ====================================================================================================================================================== --
 
@@ -161,3 +166,17 @@ INSERT INTO     relation_type (rtid, name)
 VALUES          (1, 'parent'),
                 (2, 'romantic'),
                 (3, 'friend');
+
+-- ====================================================================================================================================================== --
+
+GRANT               CONNECT
+ON                  DATABASE glasspane
+TO                  glasspane;
+
+GRANT               SELECT, INSERT, UPDATE, DELETE 
+ON                  ALL TABLES IN SCHEMA public
+TO                  glasspane;
+
+GRANT               USAGE, SELECT
+ON                  ALL SEQUENCES IN SCHEMA public
+TO                  glasspane;
