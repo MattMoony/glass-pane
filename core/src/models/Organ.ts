@@ -3,6 +3,8 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 
 import OrganSource from './OrganSource';
+import SocialsPlatforms from './SocialsPlatforms';
+import Socials from './Socials';
 
 /**
  * Represents a member of an organ. That member
@@ -43,8 +45,16 @@ class Organ {
    * @returns A promise that resolves with the added source.
    */
   public async add (source: string): Promise<OrganSource>;
-  public async add (v: string): Promise<OrganSource> {
+  /**
+   * Adds a social media account to the organ.
+   * @param platform The platform of the account.
+   * @param url The URL of the account.
+   * @returns A promise that resolves with the added source.
+   */
+  public async add (platform: SocialsPlatforms, url: string): Promise<Socials>;
+  public async add (v: string|SocialsPlatforms, v2?: string): Promise<OrganSource|Socials> {
     if (typeof v === 'string') return OrganSource.create(this, v);
+    else if (typeof v === 'number') return Socials.create(this, v, v2 as string);
     throw new Error('Invalid addition type');
   }
 
@@ -59,8 +69,15 @@ class Organ {
    * @returns A promise that resolves when the source has been updated.
    */
   public async update (source: OrganSource): Promise<void>;
-  public update (v?: OrganSource): Promise<void> {
+  /**
+   * Updates the social media account for the organ.
+   * @param socials The social media account to update.
+   * @returns A promise that resolves when the social media accounts have been updated.
+   */
+  public async update (socials: Socials): Promise<void>;
+  public update (v?: OrganSource|Socials): Promise<void> {
     if (v instanceof OrganSource) return v.update();
+    else if (v instanceof Socials) return v.update();
     return fsPromises.writeFile(`${process.env.DATA_DIR}/${this.id}.md`, this.bio);
   }
 
@@ -75,8 +92,15 @@ class Organ {
    * @returns A promise that resolves when the source has been removed.
    */
   public async remove (source: OrganSource): Promise<void>;
-  public async remove (v?: OrganSource): Promise<void> {
+  /**
+   * Removes a social media account from the organ.
+   * @param socials The social media account to remove.
+   * @returns A promise that resolves when the social media account has been removed.
+   */
+  public async remove (socials: Socials): Promise<void>;
+  public async remove (v?: OrganSource|Socials): Promise<void> {
     if (v instanceof OrganSource) return v.remove();
+    else if (v instanceof Socials) return v.remove();
     const client = await pool.connect();
     await client.query('DELETE FROM organ WHERE oid = $1', [this.id]);
     client.release();
@@ -91,6 +115,17 @@ class Organ {
     const res = await client.query('SELECT sid, url FROM organ_source WHERE organ = $1', [this.id]);
     client.release();
     return res.rows.map(row => new OrganSource(+row.sid, row.url));
+  }
+
+  /**
+   * Returns all social media accounts for the organ.
+   * @returns A promise that resolves with all social media accounts for the organ.
+   */
+  public async socials (): Promise<Socials[]> {
+    const client = await pool.connect();
+    const res = await client.query('SELECT sid, platform, url FROM socials WHERE organ = $1', [this.id]);
+    client.release();
+    return res.rows.map(row => new Socials(+row.sid, row.platform, row.url));
   }
 
   /**

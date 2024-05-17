@@ -11,18 +11,31 @@ import Person from './Person';
  * Represents a membership in an organization.
  */
 class Membership {
+  public id: number;
   public organ: Organ;
   public organization: Organization;
   public role: Role;
   public since: Date;
   public until?: Date;
 
-  public constructor (organ: Organ, organization: Organization, role: Role, since: Date, until?: Date) {
-    this.organ = organ;
-    this.organization = organization;
-    this.role = role;
-    this.since = since;
-    this.until = until;
+  public constructor (organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
+  public constructor (id: number, organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
+  public constructor (v: Organ|number, v2?: Organ|Organization, v3?: Organization|Role, v4?: Role|Date, v5?: Date, v6?: Date) {
+    if (typeof v === 'number') {
+      this.id = v;
+      this.organ = v2 as Organ;
+      this.organization = v3 as Organization;
+      this.role = v4 as Role;
+      this.since = v5 as Date;
+      this.until = v6;
+    } else {
+      this.id = -1;
+      this.organ = v as Organ;
+      this.organization = v2 as Organization;
+      this.role = v3 as Role;
+      this.since = v4 as Date;
+      this.until = v5;
+    }
   }
 
   /**
@@ -147,6 +160,7 @@ class Membership {
     return membership;
   }
 
+  public static async get (id: number): Promise<Membership|null>;
   /**
    * Gets all memberships of an organ.
    * @param organ The organ to get memberships of.
@@ -168,7 +182,7 @@ class Membership {
    * @returns A promise that resolves with the membership, or null if it doesn't exist.
    */
   public static async get (organ: Organ, organization: Organization, role: Role, since: Date): Promise<Membership|null>;
-  public static async get (v: Organ|Organization, v2?: Organization, v3?: Role, v4?: Date): Promise<Membership|Membership[]|null> {
+  public static async get (v: number|Organ|Organization, v2?: Organization, v3?: Role, v4?: Date): Promise<Membership|Membership[]|null> {
     if (v instanceof Organization) {
       const client = await pool.connect();
       const res = await client.query(
@@ -178,14 +192,14 @@ class Membership {
       client.release();
       const memberships = [];
       for (const row of res.rows) {
-        let organ: Person|Organization|null = await Person.get(row.organ);
+        let organ: Organ|null = await Person.get(row.organ) as Organ|null;
         if (!organ)
-          organ = await Organization.get(row.organ);
+          organ = await Organization.get(row.organ) as Organ|null;
         if (!organ)
           continue;
         const role = await Role.get(row.role);
         if (!organ || !role) continue;
-        memberships.push(new Membership(organ, v, role, row.since, row.until));
+        memberships.push(new Membership(row.mid, organ, v, role, row.since, row.until));
       }
       return memberships;
     } else if (v instanceof Organ && !v2 && !v3 && !v4) {
@@ -200,9 +214,27 @@ class Membership {
         const organization = await Organization.get(row.organization);
         const role = await Role.get(row.role);
         if (!organization || !role) continue;
-        memberships.push(new Membership(v, organization, role, row.since, row.until));
+        memberships.push(new Membership(row.mid, v, organization, role, row.since, row.until));
       }
       return memberships;
+    } else if (typeof v === 'number') {
+      const client = await pool.connect();
+      const res = await client.query(
+        'SELECT organ, organization, role, since, until FROM membership WHERE mid = $1',
+        [v]
+      );
+      client.release();
+      if (res.rows.length === 0) return null;
+      const row = res.rows[0];
+      let organ: Organ|null = await Person.get(row.organ) as Organ|null;
+      if (!organ)
+        organ = await Organization.get(row.organ) as Organ|null;
+      if (!organ)
+        return null;
+      const organization = await Organization.get(row.organization);
+      const role = await Role.get(row.role);
+      if (!organization || !role) return null;
+      return new Membership(v, organ, organization, role, row.since, row.until);
     }
     if (!(v instanceof Organ) || !(v2 instanceof Organization) || !(v3 instanceof Role) || !(v4 instanceof Date))
       throw new Error('Invalid argument types');
@@ -213,7 +245,7 @@ class Membership {
     );
     client.release();
     if (res.rows.length === 0) return null;
-    return new Membership(v, v2, v3, v4, res.rows[0].until);
+    return new Membership(res.rows[0].mid, v, v2, v3, v4, res.rows[0].until);
   }
 }
 

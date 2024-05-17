@@ -5,6 +5,8 @@ import OrganSource from './OrganSource';
 import RelationType from './RelationshipType';
 import Relation from './Relation';
 import RelationSource from './RelationSource';
+import Socials from './Socials';
+import SocialsPlatforms from './SocialsPlatforms';
 
 /**
  * Represents a natural person.
@@ -52,15 +54,23 @@ class Person extends Organ {
    */
   public async add (source: string): Promise<OrganSource>;
   /**
+   * Adds a social media account to the organ.
+   * @param platform The platform of the account.
+   * @param url The URL of the account.
+   * @returns A promise that resolves with the added source.
+   */
+  public async add (platform: SocialsPlatforms, url: string): Promise<Socials>;
+  /**
    * Add a relation to this person.
    * @param {Relation} relation The relation to add.
    * @param {string[]} sources The sources of the relation.
    * @returns {Promise<void>} A promise that resolves when the relation is added.
    */
   public async add (relation: Relation, sources: string[]): Promise<void>;
-  public async add (v: Relation|string, v2?: string[]): Promise<void|OrganSource> {
+  public async add (v: Relation|string|SocialsPlatforms, v2?: string|string[]): Promise<void|OrganSource|Socials> {
     if (v instanceof Relation && typeof v2 === 'object') return await v.create(v2);
     if (typeof v === 'string') return await super.add(v);
+    if (typeof v === 'number' && typeof v2 === 'string') return await super.add(v, v2);
     throw new Error('Invalid argument type');
   }
 

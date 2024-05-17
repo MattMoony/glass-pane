@@ -237,8 +237,7 @@ VALUES          (1, 'other'),
                 (9, 'tiktok'),
                 (10, 'linkedin'),
                 (11, 'xing'),
-                (12, 'website'),
-                (13, 'wikipedia');
+                (12, 'website');
 
 INSERT INTO     currency (cid, name, symbol)
 VALUES          (1, 'Euro', '€'),

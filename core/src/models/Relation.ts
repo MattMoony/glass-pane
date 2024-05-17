@@ -8,18 +8,31 @@ import RelationSource from './RelationSource';
  * Represents a relation between two persons.
  */
 class Relation {
+  id: number;
   type: RelationType;
   from: Person;
   to: Person;
   since: Date;
   until?: Date;
 
-  public constructor (type: RelationType, from: Person, to: Person, since: Date, until?: Date) {
-    this.type = type;
-    this.from = from;
-    this.to = to;
-    this.since = since;
-    this.until = until;
+  public constructor (type: RelationType, from: Person, to: Person, since: Date, until?: Date);
+  public constructor (id: number, type: RelationType, from: Person, to: Person, since: Date, until?: Date);
+  public constructor (v: RelationType|number, v2?: RelationType|Person, v3?: Person, v4?: Person|Date, v5?: Date, v6?: Date) {
+    if (typeof v === 'number') {
+      this.id = v;
+      this.type = v2 as RelationType;
+      this.from = v3 as Person;
+      this.to = v4 as Person;
+      this.since = v5 as Date;
+      this.until = v6;
+    } else {
+      this.id = -1;
+      this.type = v as RelationType;
+      this.from = v2 as Person;
+      this.to = v3 as Person;
+      this.since = v4 as Date;
+      this.until = v5;
+    }
   }
 
   /**
@@ -29,7 +42,11 @@ class Relation {
    */
   public json (abbrev?: boolean): Object {
     return {
-      ...(!abbrev ? {type: RelationType[this.type].toLowerCase(), from: this.from.json(),} : {}),
+      ...(
+        !abbrev 
+        ? {type: RelationType[this.type].toLowerCase(), from: this.from.json(),} 
+        : {}
+      ),
       to: this.to.json(),
       since: this.since.toISOString(),
       until: this.until?.toISOString(),
@@ -134,31 +151,45 @@ class Relation {
 
   /**
    * Get a relation from the database.
+   * @param {number} id The ID of the relation.
+   * @returns {Promise<Relation|null>} A promise that resolves with the relation, or null if not found.
+   */
+  public static async get (id: number): Promise<Relation|null>;
+  /**
+   * Get a relation from the database.
    * @param {Person} person The first person in the relation.
    * @param {Person} relative The second person in the relation.
    * @param {Date} since The date the relation started.
    * @returns {Promise<Relation|null>} A promise that resolves with the relation, or null if not found.
    */
-  public static async get (person: Person, relative: Person, since: Date): Promise<Relation|null> {
-    // TODO: I think I should really work on / update this schema, idk about this... lmao
-    const client = await pool.connect();
-    const res = await client.query(
-      'SELECT * FROM relation WHERE (person = $1 AND relative = $2) AND since = $3',
-      [person.id, relative.id, since],
-    );
-    if (res.rows.length === 1) {
+  public static async get (person: Person, relative: Person, since: Date): Promise<Relation|null>;
+  public static async get (v1: number|Person, v2?: Person, v3?: Date): Promise<Relation|null> {
+    if (v1 instanceof Person && v2 instanceof Person && v3 instanceof Date) {
+      // TODO: I think I should really work on / update this schema, idk about this... lmao
+      const client = await pool.connect();
+      const res = await client.query(
+        'SELECT * FROM relation WHERE (person = $1 AND relative = $2) AND since = $3',
+        [v1.id, v2.id, v3],
+      );
+      if (res.rows.length === 1) {
+        client.release();
+        return new Relation(res.rows[0].rid, res.rows[0].relation, v1, v2, v3, res.rows[0].until);
+      }
+      const res2 = await client.query(
+        'SELECT * FROM relation WHERE (person = $2 AND relative = $1) AND since = $3',
+        [v1.id, v2.id, v3],
+      );
       client.release();
-      return new Relation(res.rows[0].relation, person, relative, since, res.rows[0].until);
+      if (res2.rows.length === 0) return null;
+      return new Relation(res.rows[0].rid, res.rows[0].relation, v2, v1, v3, res2.rows[0].until);
+    } else if (typeof v1 === 'number') {
+      const client = await pool.connect();
+      const res = await client.query('SELECT * FROM relation WHERE rid = $1', [v1]);
     }
-    const res2 = await client.query(
-      'SELECT * FROM relation WHERE (person = $2 AND relative = $1) AND since = $3',
-      [person.id, relative.id, since],
-    );
-    client.release();
-    if (res2.rows.length === 0) return null;
-    return new Relation(res.rows[0].relation, relative, person, since, res2.rows[0].until);
+    throw new Error('Invalid argument type');
   }
 
+  public static async sources (id: number): Promise<RelationSource[]>;
   /**
    * Get all sources for this relation.
    * @param {Person} person The first person in the relation.
@@ -166,19 +197,19 @@ class Relation {
    * @param {Date} since The date the relation started.
    * @returns {Promise<RelationSource[]>} A promise that resolves with the sources of the relation.
    */
-  public static async sources (person: Person, relative: Person, since: Date): Promise<RelationSource[]> {
+  public static async sources (person: Person, relative: Person, since: Date): Promise<RelationSource[]>;
+  public static async sources (v1: number|Person, v2?: Person, v3?: Date): Promise<RelationSource[]> {
+    if (v1 instanceof Person && v2 instanceof Person && v3 instanceof Date) {
+      const res = await Relation.get(v1, v2, v3);
+      if (res === null) return [];
+      v1 = res.id;
+    }
     const client = await pool.connect();
     const res = await client.query(
       `SELECT   sid, url
       FROM      relation_source
-      WHERE     (person = $1
-                AND relative = $2
-                AND since = $3)
-                OR
-                (person = $2
-                AND relative = $1
-                AND since = $3)`,
-      [person.id, relative.id, since],
+      WHERE     rid = $1`,
+      [v1],
     );
     client.release();
     if (res.rows.length === 0) return [];

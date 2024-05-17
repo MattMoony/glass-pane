@@ -4,6 +4,8 @@ import Organ from './Organ';
 import OrganSource from './OrganSource';
 import Membership from './Membership';
 import MembershipSource from './MembershipSource';
+import SocialsPlatforms from './SocialsPlatforms';
+import Socials from './Socials';
 
 /**
  * Represents an organization - i.e. a grouping of several
@@ -50,13 +52,21 @@ class Organization extends Organ {
    */
   public async add (source: string): Promise<OrganSource>;
   /**
+   * Adds a social media account to the organ.
+   * @param platform The platform of the account.
+   * @param url The URL of the account.
+   * @returns A promise that resolves with the added source.
+   */
+  public async add (platform: SocialsPlatforms, url: string): Promise<Socials>;
+  /**
    * Adds a membership to the organization.
    * @param membership The membership to add.
    * @returns A promise that resolves with the new membership.
    */
   public async add (membership: Membership, sources: string[]): Promise<void>;
-  public async add (v: string|Membership, v2?: string[]): Promise<void|OrganSource> {
+  public async add (v: string|SocialsPlatforms|Membership, v2?: string|string[]): Promise<void|OrganSource|Socials> {
     if (typeof v === 'string') return await super.add(v);
+    if (typeof v === 'number' && typeof v2 === 'string') return await super.add(v, v2);
     if (v instanceof Membership && typeof v2 === 'object') return await v.create(v2);
     throw new Error('Invalid argument type');
   }
