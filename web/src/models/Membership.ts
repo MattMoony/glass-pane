@@ -11,6 +11,10 @@ import Role from './Role';
  */
 class Membership {
   /**
+   * The unique identifier of the membership.
+   */
+  public id: number;
+  /**
    * The organ that is a member of the organization.
    */
   public organ: Organ;
@@ -31,12 +35,24 @@ class Membership {
    */
   public until?: Date;
 
-  public constructor (organ: Organ, organization: Organization, role: Role, since: Date, until?: Date) {
-    this.organ = organ;
-    this.organization = organization;
-    this.role = role;
-    this.since = since;
-    this.until = until;
+  public constructor (organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
+  public constructor (id: number, organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
+  public constructor (id: number|Organ, organ: Organ|Organization, organization: Organization|Role, role: Role|Date, since: Date, until?: Date) {
+    if (typeof id === 'number') {
+      this.id = id;
+      this.organ = organ as Organ;
+      this.organization = organization as Organization;
+      this.role = role as Role;
+      this.since = since;
+      this.until = until;
+    } else {
+      this.id = -1;
+      this.organ = id as Organ;
+      this.organization = organ as Organization;
+      this.role = organization as Role;
+      this.since = role as Date;
+      this.until = since;
+    }
   }
 
   /**
@@ -45,6 +61,7 @@ class Membership {
    */
   public json (): organ.Membership {
     return {
+      id: this.id,
       organ: this.organ.json(),
       organization: this.organization.json(),
       role: this.role.json(),

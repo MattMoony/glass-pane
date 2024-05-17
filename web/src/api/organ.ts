@@ -32,33 +32,11 @@ export interface OrganSource {
   url: string;
 }
 
-/**
- * Represents a membership of a specific organ in an organization.
- */
-export interface OrganMembership {
+export interface AbstractMembership {
   /**
-   * The organization that the organ is a member of.
+   * The ID of the membership. This is unique across all memberships.
    */
-  organization: Organization;
-  /**
-   * The role that the organ has in the organization.
-   */
-  role: Role;
-  /**
-   * The date that the organ became a member of the organization.
-   */
-  since: Date;
-  /**
-   * The date that the organ stopped being a member of the organization.
-   */
-  until?: Date;
-}
-
-export interface OrganizationMember {
-  /**
-   * The organ that is a member of the organization.
-   */
-  organ: Organ;
+  id: number;
   /**
    * The role that the person has in the organization.
    */
@@ -71,6 +49,23 @@ export interface OrganizationMember {
    * The date that the person stopped being a member of the organization.
    */
   until?: Date;
+}
+
+/**
+ * Represents a membership of a specific organ in an organization.
+ */
+export interface OrganMembership extends AbstractMembership {
+  /**
+   * The organization that the organ is a member of.
+   */
+  organization: Organization;
+}
+
+export interface OrganizationMember extends AbstractMembership {
+  /**
+   * The organ that is a member of the organization.
+   */
+  organ: Organ;
 }
 
 /**

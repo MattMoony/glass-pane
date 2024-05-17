@@ -52,6 +52,10 @@ export interface PersonRelation {
  */
 export interface Relation {
   /**
+   * The ID of the relation. This is unique across all relations.
+   */
+  id: number;
+  /**
    * The person that the relation is from.
    */
   from: Person;

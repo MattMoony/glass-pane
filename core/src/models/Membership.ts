@@ -44,6 +44,7 @@ class Membership {
    */
   public json (): Object {
     return {
+      id: this.id,
       organ: this.organ.json(),
       organization: this.organization.json(),
       role: this.role.json(),
@@ -67,8 +68,8 @@ class Membership {
    */
   public async create (sources: string[]): Promise<void> {
     const client = await pool.connect();
-    await client.query(
-      'INSERT INTO membership (organ, organization, role, since, until) VALUES ($1, $2, $3, $4, $5)',
+    const res = await client.query(
+      'INSERT INTO membership (organ, organization, role, since, until) VALUES ($1, $2, $3, $4, $5) RETURNING mid',
       [this.organ.id, this.organization.id, this.role.id, this.since, this.until]
     );
     for (const source of sources) {
@@ -78,6 +79,8 @@ class Membership {
       );
     }
     client.release();
+    if (!res) return;
+    this.id = +res.rows[0].mid;
   }
 
   /**
@@ -186,7 +189,7 @@ class Membership {
     if (v instanceof Organization) {
       const client = await pool.connect();
       const res = await client.query(
-        'SELECT organ, role, since, until FROM membership WHERE organization = $1',
+        'SELECT mid, organ, role, since, until FROM membership WHERE organization = $1',
         [v.id]
       );
       client.release();
@@ -199,13 +202,13 @@ class Membership {
           continue;
         const role = await Role.get(row.role);
         if (!organ || !role) continue;
-        memberships.push(new Membership(row.mid, organ, v, role, row.since, row.until));
+        memberships.push(new Membership(+row.mid, organ, v, role, row.since, row.until));
       }
       return memberships;
     } else if (v instanceof Organ && !v2 && !v3 && !v4) {
       const client = await pool.connect();
       const res = await client.query(
-        'SELECT organization, role, since, until FROM membership WHERE organ = $1',
+        'SELECT mid, organization, role, since, until FROM membership WHERE organ = $1',
         [v.id]
       );
       client.release();
@@ -214,7 +217,7 @@ class Membership {
         const organization = await Organization.get(row.organization);
         const role = await Role.get(row.role);
         if (!organization || !role) continue;
-        memberships.push(new Membership(row.mid, v, organization, role, row.since, row.until));
+        memberships.push(new Membership(+row.mid, v, organization, role, row.since, row.until));
       }
       return memberships;
     } else if (typeof v === 'number') {
@@ -245,7 +248,7 @@ class Membership {
     );
     client.release();
     if (res.rows.length === 0) return null;
-    return new Membership(res.rows[0].mid, v, v2, v3, v4, res.rows[0].until);
+    return new Membership(+res.rows[0].mid, v, v2, v3, v4, res.rows[0].until);
   }
 }
 

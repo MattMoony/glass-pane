@@ -214,7 +214,11 @@ export const updateMembership = async (req: Request, res: Response): Promise<voi
   }
   const since = new Date(req.body.since);
   const until = req.body.until ? new Date(req.body.until) : undefined;
-  const membership = new Membership(organ, organization, role, since, until);
+  const membership = await Membership.get(organ, organization, role, since);
+  if (!membership) {
+    res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
+    return;
+  }
   try {
     await membership.update();
     res.send({ 'success': true });
@@ -242,7 +246,11 @@ export const removeMembership = async (req: Request, res: Response): Promise<voi
   }
   const since = new Date(req.body.since);
   try {
-    const membership = new Membership(organ, organization, role, since, undefined);
+    const membership = await Membership.get(organ, organization, role, since);
+    if (!membership) {
+      res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
+      return;
+    }
     await membership.remove();
     res.send({ 'success': true });
   } catch {

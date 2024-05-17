@@ -42,6 +42,7 @@ class Relation {
    */
   public json (abbrev?: boolean): Object {
     return {
+      id: this.id,
       ...(
         !abbrev 
         ? {type: RelationType[this.type].toLowerCase(), from: this.from.json(),} 
@@ -173,7 +174,7 @@ class Relation {
       );
       if (res.rows.length === 1) {
         client.release();
-        return new Relation(res.rows[0].rid, res.rows[0].relation, v1, v2, v3, res.rows[0].until);
+        return new Relation(+res.rows[0].rid, res.rows[0].relation, v1, v2, v3, res.rows[0].until);
       }
       const res2 = await client.query(
         'SELECT * FROM relation WHERE (person = $2 AND relative = $1) AND since = $3',
@@ -181,10 +182,22 @@ class Relation {
       );
       client.release();
       if (res2.rows.length === 0) return null;
-      return new Relation(res.rows[0].rid, res.rows[0].relation, v2, v1, v3, res2.rows[0].until);
+      return new Relation(+res.rows[0].rid, res.rows[0].relation, v2, v1, v3, res2.rows[0].until);
     } else if (typeof v1 === 'number') {
       const client = await pool.connect();
       const res = await client.query('SELECT * FROM relation WHERE rid = $1', [v1]);
+      if (res.rows.length === 0) return null;
+      const from = await Person.get(res.rows[0].person);
+      const to = await Person.get(res.rows[0].relative);
+      if (!from || !to) return null;
+      return new Relation(
+        +res.rows[0].rid, 
+        res.rows[0].relation, 
+        from,
+        to, 
+        res.rows[0].since, 
+        res.rows[0].until
+      );
     }
     throw new Error('Invalid argument type');
   }

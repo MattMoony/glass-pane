@@ -6,6 +6,10 @@ import RelationType from './RelationTypes';
  */
 class Relation {
   /**
+   * The unique identifier of the relation.
+   */
+  public id: number;
+  /**
    * The type of the relation.
    */
   public type: RelationType;
@@ -22,11 +26,22 @@ class Relation {
    */
   public until?: Date;
 
-  public constructor (type: RelationType, other: Person, since: Date, until?: Date) {
-    this.type = type;
-    this.other = other;
-    this.since = since;
-    this.until = until;
+  public constructor (type: RelationType, other: Person, since: Date, until?: Date);
+  public constructor (id: number, type: RelationType, other: Person, since: Date, until?: Date);
+  public constructor (id: number|RelationType, type: RelationType|Person, other: Person|Date, since: Date, until?: Date) {
+    if (typeof id === 'number') {
+      this.id = id;
+      this.type = type as RelationType;
+      this.other = other as Person;
+      this.since = since;
+      this.until = until;
+    } else {
+      this.id = -1;
+      this.type = id as RelationType;
+      this.other = type as Person;
+      this.since = other as Date;
+      this.until = since;
+    }
   }
 }
 
