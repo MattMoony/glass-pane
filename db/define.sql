@@ -6,15 +6,21 @@ DROP TABLE relation_source;
 DROP TABLE relation;
 DROP TABLE membership_source;
 DROP TABLE membership;
+DROP TABLE organ_source;
+DROP TABLE event_source;
+DROP TABLE event_participant;
+DROP TABLE event;
+DROP TABLE socials_follower;
+DROP TABLE socials;
+DROP TABLE socials_platforms;
 DROP TABLE relation_type;
 DROP TABLE person;
-DROP TABLE location;
 DROP TABLE role;
 DROP TABLE currency;
 DROP TABLE business;
 DROP TABLE nation;
 DROP TABLE organization;
-DROP TABLE organ_source;
+DROP TABLE location;
 DROP TABLE organ;
 
 -- ====================================================================================================================================================== --
@@ -25,12 +31,12 @@ CREATE TABLE organ (
     PRIMARY KEY     (oid)
 );
 
-CREATE TABLE organ_source (
-    sid             BIGSERIAL,
-    organ           BIGINT              REFERENCES organ(oid),
-    url             TEXT                NOT NULL,
+CREATE TABLE location (
+    lid             BIGSERIAL,
+    name            VARCHAR(256)        NOT NULL,
+    coords          POINT,
 
-    PRIMARY KEY     (sid)
+    PRIMARY KEY     (lid)
 );
 
 CREATE TABLE organization (
@@ -38,12 +44,14 @@ CREATE TABLE organization (
     name            VARCHAR(128)        NOT NULL,
     established     DATE,
     dissolved       DATE,
+    location        BIGINT              REFERENCES location(lid),
 
     PRIMARY KEY     (oid)
 );
 
 CREATE TABLE nation (
     nid             BIGINT              REFERENCES organization(oid),
+    location        BIGINT              REFERENCES location(lid),
 
     PRIMARY KEY     (nid)
 );
@@ -57,7 +65,7 @@ CREATE TABLE business (
 CREATE TABLE currency (
     cid             BIGSERIAL,
     name            VARCHAR(64)         NOT NULL,
-    symbol          VARCHAR(2)          NOT NULL,
+    symbol          VARCHAR(3)          NOT NULL,
 
     PRIMARY KEY     (cid)
 );
@@ -67,14 +75,6 @@ CREATE TABLE role (
     name            VARCHAR(128)        NOT NULL,
 
     PRIMARY KEY     (rid)
-);
-
-CREATE TABLE location (
-    lid             BIGINT              REFERENCES organ(oid),
-    name            VARCHAR(128)        NOT NULL,
-    coords          POINT,
-
-    PRIMARY KEY     (lid)
 );
 
 CREATE TABLE person (
@@ -96,67 +96,125 @@ CREATE TABLE relation_type (
     PRIMARY KEY     (rtid)
 );
 
+CREATE TABLE event (
+    eid             BIGSERIAL,
+    name            VARCHAR(128)        NOT NULL,
+    date            DATE,
+    location        BIGINT              REFERENCES location(lid),
+
+    PRIMARY KEY     (eid)
+);
+
 -- ====================================================================================================================================================== --
 
-CREATE TABLE membership (
+CREATE TABLE event_participant (
+    pid             BIGSERIAL,
+    event           BIGINT              REFERENCES event(eid) NOT NULL,
+    organ           BIGINT              REFERENCES organ(oid) NOT NULL,
+    role            BIGINT              REFERENCES role(rid) NOT NULL,
+
+    PRIMARY KEY     (pid)
+);
+
+CREATE TABLE event_source (
+    sid             BIGSERIAL,
+    eid             BIGINT              REFERENCES event(eid) NOT NULL,
+    url             TEXT                NOT NULL,
+
+    PRIMARY KEY     (sid)
+);
+
+CREATE TABLE organ_source (
+    sid             BIGSERIAL,
     organ           BIGINT              REFERENCES organ(oid),
-    organization    BIGINT              REFERENCES organization(oid),
-    role            BIGINT              REFERENCES role(rid),
+    url             TEXT                NOT NULL,
+
+    PRIMARY KEY     (sid)
+);
+
+CREATE TABLE socials_platforms (
+    ostid           BIGSERIAL,
+    name            VARCHAR(32)         NOT NULL,
+
+    PRIMARY KEY     (ostid)
+);
+
+CREATE TABLE socials (
+    sid             BIGSERIAL,
+    organ           BIGINT              REFERENCES organ(oid),
+    url             TEXT                NOT NULL,
+    platform        BIGINT              REFERENCES socials_platforms(ostid),
+
+    PRIMARY KEY     (sid)
+);
+
+CREATE TABLE socials_follower (
+    fid             BIGSERIAL,
+    follower        BIGINT              REFERENCES socials(sid) NOT NULL,
+    following       BIGINT              REFERENCES socials(sid) NOT NULL,
+    since           DATE,
+    until           DATE,
+
+    PRIMARY KEY     (fid)
+);
+
+CREATE TABLE membership (
+    mid             BIGSERIAL,
+    organ           BIGINT              REFERENCES organ(oid) NOT NULL,
+    organization    BIGINT              REFERENCES organization(oid) NOT NULL,
+    role            BIGINT              REFERENCES role(rid) NOT NULL,
     since           DATE,
     until           DATE,
     
-    PRIMARY KEY     (organ, organization, role, since)
+    PRIMARY KEY     (mid)
 );
 
 CREATE TABLE membership_source (
     sid             BIGSERIAL,
-    organ           BIGINT,
-    organization    BIGINT,
-    role            BIGINT,
+    mid             BIGINT              REFERENCES membership(mid) NOT NULL,
     since           DATE,
     url             TEXT                NOT NULL,
 
-    FOREIGN KEY     (organ, organization, role, since) REFERENCES membership(organ, organization, role, since),
     PRIMARY KEY     (sid)
 );
 
 CREATE TABLE relation (
+    rid             BIGSERIAL,
     person          BIGINT              REFERENCES person(pid),
     relative        BIGINT              REFERENCES person(pid),
     relation        BIGINT              REFERENCES relation_type(rtid),
     since           DATE,
     until           DATE,
 
-    PRIMARY KEY     (person, relative, since)
+    PRIMARY KEY     (rid)
 );
 
 CREATE TABLE relation_source (
     sid             BIGSERIAL,
+    rid             BIGINT              REFERENCES relation(rid) NOT NULL,
     person          BIGINT,
     relative        BIGINT,
     since           DATE,
     url             TEXT                NOT NULL,
 
-    FOREIGN KEY     (person, relative, since) REFERENCES relation(person, relative, since),
     PRIMARY KEY     (sid)
 );
 
 CREATE TABLE business_turnover (
+    tid             BIGSERIAL,
     business        BIGINT              REFERENCES business(bid),
-    byear           INTEGER,
+    byear           INTEGER             NOT NULL,
     turnover        DOUBLE PRECISION    NOT NULL,
     currency    	BIGINT              REFERENCES currency(cid) NOT NULL,
 
-    PRIMARY KEY     (business, byear)
+    PRIMARY KEY     (tid)
 );
 
 CREATE TABLE business_turnover_source (
     sid             BIGSERIAL,
-    business        BIGINT,
-    byear           INTEGER,
+    tid             BIGINT              REFERENCES business_turnover(tid) NOT NULL,
     url             TEXT                NOT NULL,
 
-    FOREIGN KEY     (business, byear) REFERENCES business_turnover(business, byear),
     PRIMARY KEY     (sid)
 );
 
@@ -166,6 +224,44 @@ INSERT INTO     relation_type (rtid, name)
 VALUES          (1, 'parent'),
                 (2, 'romantic'),
                 (3, 'friend');
+
+INSERT INTO     socials_platforms (ostid, name)
+VALUES          (1, 'other'),
+                (2, 'email'),
+                (3, 'phone'),
+                (4, 'facebook'),
+                (5, 'instagram'),
+                (6, 'twitter'),
+                (7, 'telegram'),
+                (8, 'youtube'),
+                (9, 'tiktok'),
+                (10, 'linkedin'),
+                (11, 'xing'),
+                (12, 'website'),
+                (13, 'wikipedia');
+
+INSERT INTO     currency (cid, name, symbol)
+VALUES          (1, 'Euro', '€'),
+                (2, 'US Dollar', '$'),
+                (3, 'British Pound', '£'),
+                (4, 'Swiss Franc', 'CHF'),
+                (5, 'Japanese Yen', '¥'),
+                (6, 'Chinese Yuan', '¥'),
+                (7, 'Russian Ruble', '₽'),
+                (8, 'Indian Rupee', '₹'),
+                (9, 'Brazilian Real', 'R$'),
+                (10, 'South African Rand', 'R'),
+                (11, 'Australian Dollar', '$'),
+                (12, 'Canadian Dollar', '$'),
+                (13, 'New Zealand Dollar', '$'),
+                (14, 'Swedish Krona', 'kr'),
+                (15, 'Norwegian Krone', 'kr'),
+                (16, 'Danish Krone', 'kr'),
+                (17, 'Czech Koruna', 'Kč'),
+                (18, 'Polish Złoty', 'zł'),
+                (19, 'Hungarian Forint', 'Ft'),
+                (20, 'Turkish Lira', '₺'),
+                (21, 'Ukrainian Hryvnia', '₴');
 
 -- ====================================================================================================================================================== --
 
