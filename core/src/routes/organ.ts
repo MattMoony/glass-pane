@@ -18,6 +18,11 @@ router.get('/:oid/pic', controller.parseOid, controller.getPic);
 router.put('/:oid/pic', controller.parseOid, controller.setPic);
 router.delete('/:oid/pic', controller.parseOid, controller.removePic);
 
+router.get('/:oid/socials', controller.parseOid, controller.getSocials);
+router.post('/:oid/socials', requireBody({ platform: { type: 'number', }, url: { type: 'string', }, }), controller.parseOid, controller.addSocials);
+router.patch('/:oid/socials/:sid', requireBody({ url: { type: 'string', }, }), controller.parseOid, controller.updateSocials);
+router.delete('/:oid/socials/:sid', controller.parseOid, controller.removeSocials);
+
 router.get('/:oid/sources', controller.parseOid, controller.getSources);
 router.post('/:oid/sources', requireBody({ url: { type: 'string', }, }), controller.parseOid, controller.addSource);
 router.patch('/:oid/sources/:sid', requireBody({ url: { type: 'string', } }), controller.parseOid, controller.updateSource);

@@ -70,6 +70,18 @@ class Socials {
     client.release();
     return new Socials(+res.rows[0].sid, platform, url);
   }
+
+  /**
+   * Gets a social media account from the database.
+   * @param id The ID of the social media account.
+   * @returns A promise that resolves with the social media account.
+   */
+  public static async get (id: number): Promise<Socials> {
+    const client = await pool.connect();
+    const res = await client.query('SELECT platform, url FROM socials WHERE sid = $1', [id]);
+    client.release();
+    return new Socials(id, +res.rows[0].platform, res.rows[0].url);
+  }
 }
 
 export default Socials;

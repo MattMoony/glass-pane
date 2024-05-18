@@ -36,6 +36,7 @@ watch(pid, async (newPid: number) => {
       <PersonBanner 
         :person="person" 
         :edit="editing"
+        show-socials
         @change="async (newPerson) => await newPerson.update()"
       />
       <div class="person-details gp-scroll">

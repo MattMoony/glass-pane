@@ -4,6 +4,7 @@ import { type Ref, ref, watch } from 'vue';
 import Organ from '../models/Organ';
 import Person from '@/models/Person';
 import Organization from '@/models/Organization';
+import SocialsPlatform from '@/models/SocialsPlatform';
 
 import PopDropDown from './PopDropDown.vue';
 
@@ -88,12 +89,8 @@ const copyLink = (link: string) => {
   navigator.clipboard.writeText(link);
 };
 
+const socials: Ref<{[name: string]: string[]}> = ref({});	
 const socialsShown: Ref<{[name: string]: boolean}> = ref({});
-if (props.socials) {
-  Object.keys(props.socials).forEach((name) => {
-    socialsShown.value[name] = false;
-  });
-}
 
 const updateImage = (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -123,9 +120,21 @@ const removeImage = () => {
 
 watch(
   () => [ props.organ, props.organ?._vref, ], 
-  (e) => {
+  async () => {
     if (props.organ && props.organ.id > 0) {
       image.value = props.organ.pic.src();
+      const rawSocials = await props.organ.socials.get();
+      socials.value = {};
+      for (const social of rawSocials) {
+        const platform = SocialsPlatform[social.platform].toLowerCase();
+        if (socials.value[platform])
+          socials.value[platform].push(social.url);
+        else
+          socials.value[platform] = [social.url,];
+      }
+      for (const key in socials.value) {
+        socialsShown.value[key] = false;
+      }
     }
   }, 
   { immediate: true, }
@@ -285,9 +294,9 @@ watch(
           </div>
         </template>
       </div>
-      <div v-if="props.showSocials && props.socials" class="banner-socials">
+      <div v-if="props.showSocials && socials && Object.keys(socials).length" class="banner-socials">
         <template 
-          v-for="name in Object.keys(props.socials)"
+          v-for="name in Object.keys(socials)"
           :key="name"
         >
           <font-awesome-icon 
@@ -307,7 +316,7 @@ watch(
             :shown="socialsShown[name]"
           >
             <div
-              v-for="link in props.socials[name]"
+              v-for="link in socials[name]"
               :key="link"
               class="banner-socials-link"
             >
@@ -317,8 +326,8 @@ watch(
                 @click="() => copyLink(link)"
               />
               <a 
-                :href="link"
                 _target="blank"
+                :href="link"
               >{{ link }}</a>
             </div>
           </PopDropDown>

@@ -125,7 +125,7 @@ class Organ {
     const client = await pool.connect();
     const res = await client.query('SELECT sid, platform, url FROM socials WHERE organ = $1', [this.id]);
     client.release();
-    return res.rows.map(row => new Socials(+row.sid, row.platform, row.url));
+    return res.rows.map(row => new Socials(+row.sid, +row.platform, row.url));
   }
 
   /**

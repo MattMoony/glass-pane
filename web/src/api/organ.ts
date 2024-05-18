@@ -19,6 +19,24 @@ export interface Organ {
 }
 
 /**
+ * Represents a social media account for an organ.
+ */
+export interface OrganSocials {
+  /**
+   * The ID of the social media account. This is unique across all accounts.
+   */
+  id: number;
+  /**
+   * The platform of the account.
+   */
+  platform: number;
+  /**
+   * The URL of the account.
+   */
+  url: string;
+}
+
+/**
  * Represents a source for an organ.
  */
 export interface OrganSource {
@@ -132,6 +150,20 @@ export interface OrganSourceResponse extends APIResponse {
 }
 
 /**
+ * Represents the response from the API containing multiple social media accounts
+ */
+export interface OrganSocialsResponse extends APIResponse {
+  socials: OrganSocials[];
+}
+
+/**
+ * Represents the response from the API containing a social media account.
+ */
+export interface OrganSocialsSingleResponse extends APIResponse {
+  social?: OrganSocials;
+}
+
+/**
  * Represents the response from the API containing multiple memberships
  */
 export interface OrganMembershipsResponse extends APIResponse {
@@ -209,6 +241,58 @@ pic.remove = async (oid: number): Promise<APIResponse> => {
   return await jreq(`${API}/organ/${oid}/pic`, {
     method: 'DELETE',
   });
+};
+
+/**
+ * Gets an organ's social media accounts.
+ * @param oid The ID of the organ to get the social media accounts of.
+ * @returns A promise that resolves to the response containing the social media accounts.
+ */
+export const socials = async (oid: number): Promise<OrganSocialsResponse> => {
+  return await jreq(`${API}/organ/${oid}/socials`) as OrganSocialsResponse;
+}
+
+/**
+ * Adds a social media account to an organ.
+ * @param oid The ID of the organ to add the social media account to.
+ * @param platform The platform of the account.
+ * @param url The URL of the account.
+ * @returns A promise that resolves to the response containing the new social media account.
+ */
+socials.add = async (oid: number, platform: number, url: string): Promise<OrganSocialsSingleResponse> => {
+  return await jreq(`${API}/organ/${oid}/socials`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ platform, url }),
+  }) as OrganSocialsSingleResponse;
+};
+
+/**
+ * Updates a social media account for an organ.
+ * @param oid The ID of the organ that the account belongs to.
+ * @param sid The ID of the account to update.
+ * @param platform The new platform of the account.
+ * @param url The new URL of the account.
+ * @returns A promise that resolves to the response from the API.
+ */
+socials.update = async (oid: number, sid: number, platform: number, url: string): Promise<APIResponse> => {
+  return await jreq(`${API}/organ/${oid}/socials/${sid}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ platform, url }),
+  }) as APIResponse;
+};
+
+/**
+ * Removes a social media account from an organ.
+ * @param oid The ID of the organ that the account belongs to.
+ * @param sid The ID of the account to remove.
+ * @returns A promise that resolves to the response from the API.
+ */
+socials.remove = async (oid: number, sid: number): Promise<APIResponse> => {
+  return await jreq(`${API}/organ/${oid}/socials/${sid}`, {
+    method: 'DELETE',
+  }) as APIResponse;
 };
 
 /**

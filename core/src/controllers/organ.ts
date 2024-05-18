@@ -9,6 +9,7 @@ import Membership from '../models/Membership';
 import Role from '../models/Role';
 import Organization from '../models/Organization';
 import Person from '../models/Person';
+import Socials from '../models/Socials';
 
 /**
  * Parses the organ ID from the request parameters to
@@ -109,6 +110,62 @@ export const removePic = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
   if (fs.existsSync(`${process.env.DATA_DIR}/${organ.id}.jpg`))
     fs.unlinkSync(`${process.env.DATA_DIR}/${organ.id}.jpg`);
+  res.send({ 'success': true });
+};
+
+/**
+ * Gets the social media accounts of the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const getSocials = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  const socials = await organ.socials();
+  res.send({ 'success': true, 'socials': socials });
+};
+
+/**
+ * Adds a social media account to the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const addSocials = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  const platform = parseInt(req.body.platform);
+  const url = req.body.url;
+  const social = await organ.add(platform, url);
+  res.send({ 'success': true, social });
+};
+
+/**
+ * Updates a social media account of the target organ.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.organ`).
+ */
+export const updateSocials = async (req: Request, res: Response): Promise<void> => {
+  const organ = res.locals.organ as Organ;
+  const social = await Socials.get(parseInt(req.params.sid));
+  if (!social) {
+    res.send({ 'success': false, 'msg': 'social not found' });
+    return;
+  }
+  social.url = req.body.url;
+  await social.update();
+  res.send({ 'success': true });
+};
+
+/**
+ * Removes a social media account from the target organ.
+ * @param req The request object.
+ * @param res The response object.
+ */
+export const removeSocials = async (req: Request, res: Response): Promise<void> => {
+  const social = await Socials.get(parseInt(req.params.sid));
+  if (!social) {
+    res.send({ 'success': false, 'msg': 'social not found' });
+    return;
+  }
+  await social.remove();
   res.send({ 'success': true });
 };
 

@@ -4,6 +4,7 @@ import * as person from '@/api/person';
 import * as organization from '@/api/organization';
 import { marked } from 'marked';
 import { reactive, ref, type Ref } from 'vue';
+import type SocialsPlatforms from './SocialsPlatform';
 
 /**
  * Represents a member of an organization. That member
@@ -53,6 +54,39 @@ class Organ implements organ.Organ {
   };
 
   /**
+   * The social media profiles of the organ. These are
+   * URLs that are associated with the organ.
+   */
+  public socials: {
+    /**
+     * Gets the social media profiles of the organ.
+     * @returns A promise that resolves to the social media profiles of the organ.
+     */
+    get: () => Promise<organ.OrganSocials[]>;
+    /**
+     * Adds a social media profile to the organ.
+     * @param platform The platform of the social media profile.
+     * @param url The URL of the social media profile.
+     * @returns A promise that resolves when the social media profile is added.
+     */
+    add: (platform: SocialsPlatforms, url: string) => Promise<organ.OrganSocials|null>;
+    /**
+     * Updates a social media profile of the organ.
+     * @param sid The ID of the social media profile to update.
+     * @param platform The new platform of the social media profile.
+     * @param url The new URL of the social media profile.
+     * @returns A promise that resolves when the social media profile is updated.
+     */
+    update: (sid: number, platform: SocialsPlatforms, url: string) => Promise<void>;
+    /**
+     * Removes a social media profile of the organ.
+     * @param sid The ID of the social media profile to remove.
+     * @returns A promise that resolves when the social media profile is removed.
+     */
+    remove: (sid: number) => Promise<void>;
+  };
+
+  /**
    * The sources of the organ. These are URLs that are
    * associated with the organ.
    */
@@ -98,6 +132,23 @@ class Organ implements organ.Organ {
       remove: async () => {
         await organ.pic.remove(this.id);
         this.triggerChange();
+      },
+    };
+
+    this.socials = {
+      get: async () => {
+        const res = await organ.socials(this.id);
+        return res.socials ? res.socials : [];
+      },
+      add: async (platform: SocialsPlatforms, url: string) => {
+        const res = await organ.socials.add(this.id, platform, url);
+        return res.social ? { id: res.social.id, platform, url } : null;
+      },
+      update: async (sid: number, platform: SocialsPlatforms, url: string) => {
+        await organ.socials.update(this.id, sid, platform, url);
+      },
+      remove: async (sid: number) => {
+        await organ.socials.remove(this.id, sid);
       },
     };
 
