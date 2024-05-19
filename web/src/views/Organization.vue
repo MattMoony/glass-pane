@@ -39,6 +39,7 @@ watch(oid, async (newOid: number) => {
       <OrganizationBanner
         :organization="organization"
         :edit="editing"
+        show-socials
         @change="async (newOrganization) => await newOrganization.update()"
       />
       <div class="organization-details gp-scroll">

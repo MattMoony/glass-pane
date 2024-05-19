@@ -3,12 +3,14 @@ import { type Ref, ref, watch, popScopeId } from 'vue';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 
-import type { OrganSource } from '@/api/organ';
+import type { OrganSource, OrganSocials } from '@/api/organ';
 import Organ from '@/models/Organ';
 import Person from '@/models/Person';
 import Organization from '../models/Organization';
 import Membership from '@/models/Membership';
 import Role from '@/models/Role';
+import SocialsPlatform, { icons } from '@/models/SocialsPlatform';
+import * as lib from '@/lib/socials';
 
 import MembershipInfo from './MembershipInfo.vue';
 import SelectSearchNew from './SelectSearchNew.vue';
@@ -38,9 +40,11 @@ const props = defineProps<{
 
 const bio: Ref<string|undefined> = ref(undefined);
 const sources: Ref<OrganSource[]> = ref([]);
+const socials: Ref<OrganSocials[]> = ref([]);
 const memberships: Ref<Membership[]> = ref([]);
 const members: Ref<Membership[]> = ref([]);
 const newSource: Ref<string> = ref('');
+const newSocial: Ref<OrganSocials> = ref({ id: -1, platform: SocialsPlatform.OTHER, url: '', });
 const newMembership: Ref<Membership|null> = ref(null);
 const newMember: Ref<Membership|null> = ref(null);
 
@@ -80,6 +84,26 @@ const removeSource = async (source: OrganSource) => {
       props.updatedSources.splice(index, 1);
     }
   }
+};
+
+const addSocial = async () => {
+  if (!newSocial.value.url.trim()) return;
+  const social = await props.organization?.socials.add(+newSocial.value.platform, newSocial.value.url);
+  if (social) {
+    socials.value.push(social);
+    newSocial.value = { id: -1, platform: SocialsPlatform.OTHER, url: '', };
+  }
+};
+
+const updateSocial = async (social: OrganSocials) => {
+  if (!social.url.trim()) return;
+  social.platform = +social.platform;
+  await props.organization?.socials.update(social.id, social.platform, social.url);
+};
+
+const removeSocial = async (social: OrganSocials) => {
+  await props.organization?.socials.remove(social.id);
+  socials.value = socials.value.filter(s => s.id !== social.id);
 };
 
 const addMembership = async () => {
@@ -357,6 +381,45 @@ watch(() => props.organization?.bio, async () => {
         </ul>
       </div>
     </div>
+    <div v-if="edit" class="socials">
+      <h2>Socials</h2>
+      <div>
+        <ul>
+          <li v-for="social in socials" :key="social.id">
+            <div>
+              <input v-model="social.url" />
+              <button @click="updateSocial(social)">
+                <font-awesome-icon icon="save" />
+              </button>
+              <button @click="removeSocial(social)">
+                <font-awesome-icon icon="trash" />
+              </button>
+            </div>
+          </li>
+          <li>
+            <div>
+              <select
+                v-model="newSocial.platform"
+              >
+                <option 
+                  v-for="icon in Object.keys(icons)" 
+                  :value="icon"
+                >
+                  {{ icons[icon].title }}
+                </option>
+              </select>
+              <input 
+                v-model="newSocial.url" 
+                @keyup="e => e.key === 'Enter' ? addSocial() : (newSocial.platform = lib.recognize_platform(newSocial.url))"
+              />
+              <button @click="addSocial">
+                <font-awesome-icon icon="plus" />
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -389,11 +452,13 @@ h2 + div {
   text-decoration: none;
 }
 
-.sources ul {
+.sources ul,
+.socials ul {
   padding: 0 1.2em;
 }
 
-.sources a {
+.sources a,
+.socials a {
   color: var(--color-text);
 }
 
@@ -405,7 +470,8 @@ h2 + div {
 }
 
 .edit input,
-.edit button {
+.edit button,
+.edit select {
   width: 100%;
   padding: .5em;
   margin-bottom: .5em;
@@ -419,8 +485,13 @@ h2 + div {
   cursor: pointer;
 }
 
+.edit select {
+  width: auto;
+}
+
 .edit input:focus,
-.edit button:focus {
+.edit button:focus,
+.edit select:focus {
   outline: none;
 }
 
