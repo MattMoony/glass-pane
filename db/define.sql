@@ -9,6 +9,7 @@ DROP TABLE membership;
 DROP TABLE organ_source;
 DROP TABLE event_source;
 DROP TABLE event_participant;
+DROP TABLE organ_tag;
 DROP TABLE event;
 DROP TABLE socials_follower;
 DROP TABLE socials;
@@ -21,6 +22,7 @@ DROP TABLE business;
 DROP TABLE nation;
 DROP TABLE organization;
 DROP TABLE location;
+DROP TABLE tag;
 DROP TABLE organ;
 
 -- ====================================================================================================================================================== --
@@ -29,6 +31,13 @@ CREATE TABLE organ (
     oid             BIGSERIAL,
 
     PRIMARY KEY     (oid)
+);
+
+CREATE TABLE tag (
+    tid             BIGSERIAL,
+    name            VARCHAR(128)        NOT NULL,
+
+    PRIMARY KEY     (tid)
 );
 
 CREATE TABLE location (
@@ -106,6 +115,13 @@ CREATE TABLE event (
 );
 
 -- ====================================================================================================================================================== --
+
+CREATE TABLE organ_tag (
+    tid             BIGINT              REFERENCES tag(tid) NOT NULL,
+    organ           BIGINT              REFERENCES organ(oid) NOT NULL,
+
+    PRIMARY KEY     (tid, organ)
+);
 
 CREATE TABLE event_participant (
     pid             BIGSERIAL,
