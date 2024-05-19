@@ -294,9 +294,9 @@ watch(
           </div>
         </template>
       </div>
-      <div v-if="props.showSocials && socials && Object.keys(socials).length" class="banner-socials">
+      <div v-if="!edit && props.showSocials && socials && Object.keys(socials).length" class="banner-socials">
         <template 
-          v-for="name in Object.keys(socials)"
+          v-for="name in Object.keys(icons).filter(key => socials[key])"
           :key="name"
         >
           <font-awesome-icon 

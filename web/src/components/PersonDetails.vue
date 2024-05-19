@@ -3,13 +3,15 @@ import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 
-import type { OrganSource } from '@/api/organ';
+import type { OrganSocials, OrganSource } from '@/api/organ';
 import Person from '../models/Person';
 import Relation from '@/models/Relation';
 import RelationType from '@/models/RelationTypes';
 import Membership from '@/models/Membership';
 import Role from '@/models/Role';
+import SocialsPlatform, { icons } from '@/models/SocialsPlatform';
 import type Organization from '@/models/Organization';
+import * as lib from '@/lib/socials';
 
 import PersonBanner from './PersonBanner.vue';
 import MembershipInfo from './MembershipInfo.vue';
@@ -41,12 +43,14 @@ const props = defineProps<{
 
 const bio: Ref<string|undefined> = ref(undefined);
 const sources: Ref<OrganSource[]> = ref([]);
+const socials: Ref<OrganSocials[]> = ref([]);
 const parents: Ref<Relation[]> = ref([]);
 const romantic: Ref<Relation[]> = ref([]);
 const children: Ref<Relation[]> = ref([]);
 const friends: Ref<Relation[]> = ref([]);
 const memberships: Ref<Membership[]> = ref([]);
 const newSource: Ref<string> = ref('');
+const newSocial: Ref<OrganSocials> = ref({ id: -1, platform: SocialsPlatform.OTHER, url: '', });
 const newParent: Ref<Relation|null> = ref(null);
 const newRomantic: Ref<Relation|null> = ref(null);
 const newChild: Ref<Relation|null> = ref(null);
@@ -89,6 +93,25 @@ const removeSource = async (source: OrganSource) => {
       props.updatedSources.splice(index, 1);
     }
   }
+};
+
+const addSocial = async () => {
+  if (!newSocial.value.url.trim()) return;
+  const res = await props.person?.socials.add(+newSocial.value.platform, newSocial.value.url);
+  if (!res) return;
+  socials.value.push(res);
+  newSocial.value = { id: -1, platform: SocialsPlatform.OTHER, url: '', };
+};
+
+const updateSocial = async (social: OrganSocials) => {
+  if (!social.url.trim()) return;
+  social.platform = +social.platform;
+  await props.person?.socials.update(social.id, social.platform, social.url);
+};
+
+const removeSocial = async (social: OrganSocials) => {
+  await props.person?.socials.remove(social.id);
+  socials.value = socials.value.filter(s => s.id !== social.id);
 };
 
 const addMembership = async () => {
@@ -183,6 +206,7 @@ watch(() => props.person, async (newPerson: Person|null) => {
   if (!newPerson) return;
   bio.value = await newPerson.bioHTML();
   sources.value = await newPerson.sources.get();
+  socials.value = await newPerson.socials.get();
   if (!props.hideRelations) {
     parents.value = await newPerson.parents.get();
     children.value = await newPerson.children.get();
@@ -604,6 +628,45 @@ watch(() => props.person?.bio, async () => {
         </ul>
       </div>
     </div>
+    <div v-if="edit" class="socials">
+      <h2>Socials</h2>
+      <div>
+        <ul>
+          <li v-for="social in socials" :key="social.id">
+            <div>
+              <input v-model="social.url" />
+              <button @click="updateSocial(social)">
+                <font-awesome-icon icon="save" />
+              </button>
+              <button @click="removeSocial(social)">
+                <font-awesome-icon icon="trash" />
+              </button>
+            </div>
+          </li>
+          <li>
+            <div>
+              <select
+                v-model="newSocial.platform"
+              >
+                <option 
+                  v-for="icon in Object.keys(icons)" 
+                  :value="icon"
+                >
+                  {{ icons[icon].title }}
+                </option>
+              </select>
+              <input 
+                v-model="newSocial.url" 
+                @keyup="e => e.key === 'Enter' ? addSocial() : (newSocial.platform = lib.recognize_platform(newSocial.url))"
+              />
+              <button @click="addSocial">
+                <font-awesome-icon icon="plus" />
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -647,11 +710,13 @@ h2 + div {
   text-decoration: none;
 }
 
-.sources ul {
+.sources ul,
+.socials ul {
   padding: 0 1.2em;
 }
 
-.sources a {
+.sources a,
+.socials a {
   color: var(--color-text);
 }
 
@@ -663,7 +728,8 @@ h2 + div {
 }
 
 .edit input,
-.edit button {
+.edit button,
+.edit select {
   width: 100%;
   padding: .5em;
   margin-bottom: .5em;
@@ -677,8 +743,13 @@ h2 + div {
   cursor: pointer;
 }
 
+.edit select {
+  width: auto;
+}
+
 .edit input:focus,
-.edit button:focus {
+.edit button:focus,
+.edit select:focus {
   outline: none;
 }
 
