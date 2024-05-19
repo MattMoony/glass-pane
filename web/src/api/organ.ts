@@ -178,6 +178,13 @@ export interface MembershipResponse extends APIResponse {
 }
 
 /**
+ * Represents the response from the API containing a bio picture.
+ */
+export interface BioPicResponse extends APIResponse {
+  url?: string;
+}
+
+/**
  * Creates a new organ.
  * @param bio The biography of the organ.
  * @returns A promise that resolves to the response containing the new organ.
@@ -206,6 +213,21 @@ export const get = async (oid: number): Promise<OrganResponse> => {
  */
 export const search = async (query: string): Promise<OrgansResponse> => {
   return await jreq(`${API}/organ?q=${query}`) as OrgansResponse;
+};
+
+/**
+ * Uploads a picture for the bio of an organ.
+ * @param oid The ID of the organ to upload the picture for.
+ * @param pic The picture to upload.
+ * @returns A promise that resolves to the response from the API.
+ */
+export const uploadBioPic = async (oid: number, pic: Blob): Promise<BioPicResponse> => {
+  const formData = new FormData();
+  formData.append('pic', pic);
+  return await jreq(`${API}/organ/${oid}/biopic`, {
+    method: 'POST',
+    body: formData,
+  }) as BioPicResponse;
 };
 
 /**

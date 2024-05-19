@@ -14,6 +14,9 @@ router.get('/', requireQuery({ q: { type: 'string', }, }), controller.search);
 router.post('/', requireBody({ bio: { type: 'string', optional: true, }, }), controller.create);
 router.get('/:oid', controller.parseOid, controller.get);
 
+router.post('/:oid/biopic', controller.parseOid, controller.uploadBioPic);
+router.get('/:oid/biopic/:uuid', controller.parseOid, controller.getBioPic);
+
 router.get('/:oid/pic', controller.parseOid, controller.getPic);
 router.put('/:oid/pic', controller.parseOid, controller.setPic);
 router.delete('/:oid/pic', controller.parseOid, controller.removePic);
