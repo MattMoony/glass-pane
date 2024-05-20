@@ -31,7 +31,7 @@ passport.use(new Strategy({
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(cors({ origin: 'http://localhost:5173', credentials: true, }));
+app.use(cors({ origin: [ 'http://localhost:5173', 'https://watchthe.top', ], credentials: true, }));
 app.use(fileUpload());
 
 app.use('/api/search/', searchRouter);
