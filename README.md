@@ -18,11 +18,8 @@
 
 Here are some preview images of what the page will look like eventually - however, keep in mind that this project is still undergoing major development (even though I kinda started working on this a long time ago).
 
-![Search Page](images/preview2.png)
-***Image 1:** The main search page*
-
-![Info Page](images/preview.png)
-***Image 2:** The info page of a person/business with their relations*
+![Preview](images/preview.gif)
+***Image 1:** The search & person/organization info page.*
 
 ## ERD
 
@@ -31,6 +28,7 @@ Also, here is the *Entity Relationship Diagram* of the database behind this proj
 **Also ...** I'll probably still change this in the future, as I'm not really happy about many things here, but... I'll stick with it for now :poop:. I mean, I just want to have something that works for now - I can always fix stuff later... right?!
 
 ![ERD](images/erd_datagrip.png)
+***Image 2:** ER-diagram of the current database schema.*
 
 ## Feature Ideas
 
