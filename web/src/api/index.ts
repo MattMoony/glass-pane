@@ -17,8 +17,8 @@ export interface APIResponse {
  * @param args The arguments to pass to fetch.
  * @returns The response from the API.
  */
-export const jreq = async (...args: any[]): Promise<APIResponse> => {
-  const res = await fetch(...args);
+export const jreq = async (url: string, ...args: any[]): Promise<APIResponse> => {
+  const res = await fetch(url, ...args);
   if (!res.ok) return { success: false, msg: res.statusText, };
   return await res.json();
 };

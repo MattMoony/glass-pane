@@ -31,6 +31,7 @@ watch(oid, async (newOid: number) => {
         // way to get the behaviour I want?
         // TODO: maybe look at this again later
         if (!st)
+          // @ts-ignore ... it's kinda necessary to do it like this idk
           organization._vref = Math.floor(Math.random() * 1000);
       }
     }"

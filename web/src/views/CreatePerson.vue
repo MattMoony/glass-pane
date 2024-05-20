@@ -10,6 +10,7 @@ import PersonBanner from '@/components/PersonBanner.vue';
 import PersonDetails from '@/components/PersonDetails.vue';
 
 const router: Router = useRouter();
+// @ts-ignore
 const person: Ref<Person> = ref(new Person(-1, '', '', ''));
 const sources: Ref<OrganSource[]> = ref([]);
 const bannerUpdated = ref({ pic: undefined, });

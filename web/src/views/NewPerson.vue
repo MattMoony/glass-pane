@@ -28,6 +28,7 @@ watch(pid, async (newPid: number) => {
       if (person) {
         router.push(`/p/${person.id}${st ? '?edit' : ''}`);
         if (!st)
+          // @ts-ignore ... also kinda necessary to do it like this, idk...
           person._vref = Math.floor(Math.random() * 1000);
       }
     }"

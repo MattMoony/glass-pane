@@ -10,6 +10,7 @@ import OrganizationBanner from '@/components/OrganizationBanner.vue';
 import OrganizationDetails from '@/components/OrganizationDetails.vue';
 
 const router: Router = useRouter();
+// @ts-ignore
 const organization: Ref<Organization> = ref(new Organization(-1, '', ''));
 const sources: Ref<OrganSource[]> = ref([]);
 const bannerUpdated = ref({ pic: undefined, });

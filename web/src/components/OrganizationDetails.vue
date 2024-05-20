@@ -111,6 +111,7 @@ const addMembership = async () => {
   await newMembership.value.create([ 'none', ]);
   memberships.value.push(newMembership.value);
   newMembership.value = null;
+  // @ts-ignore
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -122,6 +123,7 @@ const removeMembership = async (membership: Membership) => {
     m.role.id === membership.role.id &&
     m.since === membership.since);
   memberships.value.splice(index, 1);
+  // @ts-ignore
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -130,6 +132,7 @@ const addMember = async () => {
   await newMember.value.create([ 'none', ]);
   members.value.push(newMember.value);
   newMember.value = null;
+  // @ts-ignore
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -141,6 +144,7 @@ const removeMember = async (member: Membership) => {
     m.role.id === member.role.id &&
     m.since === member.since);
   members.value.splice(index, 1);
+  // @ts-ignore
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 

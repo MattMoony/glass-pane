@@ -13,6 +13,7 @@ import Relation from '../models/Relation';
 import Membership from '../models/Membership';
 import RelationType, { COLORS } from '../models/RelationTypes';
 
+// @ts-ignore
 import BounceLoader from 'vue-spinner/src/BounceLoader.vue';
 
 const router = useRouter();

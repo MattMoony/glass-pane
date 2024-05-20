@@ -122,6 +122,7 @@ const addMembership = async () => {
   await newMembership.value.create([ 'none', ]);
   memberships.value.push(newMembership.value);
   newMembership.value = null;
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -133,6 +134,7 @@ const removeMembership = async (membership: Membership) => {
     m.role.id === membership.role.id &&
     m.since === membership.since);
   memberships.value.splice(index, 1);
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -142,6 +144,7 @@ const addParent = async () => {
   await props.person.relations.add(newParent.value, [ 'none', ]);
   parents.value.push(newParent.value);
   newParent.value = null;
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -151,6 +154,7 @@ const removeParent = async (parent: Relation) => {
   parents.value = parents.value.filter(p => 
     p.other.id !== parent.other.id ||
     p.since !== parent.since);
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -159,15 +163,17 @@ const addRomantic = async () => {
   await props.person.relations.add(newRomantic.value, [ 'none', ]);
   romantic.value.push(newRomantic.value);
   newRomantic.value = null;
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
-const removeRomantic = async (romantic: Relation) => {
+const removeRomantic = async (interest: Relation) => {
   if (!props.person) return;
-  await props.person.relations.remove(romantic);
+  await props.person.relations.remove(interest);
   romantic.value = romantic.value.filter(r => 
-    r.other.id !== romantic.other.id ||
-    r.since !== romantic.since);
+    r.other.id !== interest.other.id ||
+    r.since !== interest.since);
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -176,6 +182,7 @@ const addChild = async () => {
   await props.person.relations.add(newChild.value, [ 'none', ]);
   children.value.push(newChild.value);
   newChild.value = null;
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -185,6 +192,7 @@ const removeChild = async (child: Relation) => {
   children.value = children.value.filter(c => 
     c.other.id !== child.other.id ||
     c.since !== child.since);
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -193,6 +201,7 @@ const addFriend = async () => {
   await props.person.relations.add(newFriend.value, [ 'none', ]);
   friends.value.push(newFriend.value);
   newFriend.value = null;
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -202,6 +211,7 @@ const removeFriend = async (friend: Relation) => {
   friends.value = friends.value.filter(f => 
     f.other.id !== friend.other.id ||
     f.since !== friend.since);
+  // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
@@ -223,8 +233,13 @@ const bioKeyDown = (e: KeyboardEvent) => {
       if (!blob.size) return;
       const res = await uploadBioPic(props.person.id, blob);
       if (!res.success) return;
+      // @ts-ignore
       bioEditorView.value.dispatch({
-        changes: { from: bioEditorView.value.state.selection.ranges[0].anchor, insert: `![](${API}${res.url})`, }
+        changes: { 
+          // @ts-ignore
+          from: bioEditorView.value.state.selection.ranges[0].anchor, 
+          insert: `![](${API}${res.url})`, 
+        }
       })
     })();
   }
