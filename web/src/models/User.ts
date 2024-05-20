@@ -12,15 +12,10 @@ class User implements auth.User {
    * The user's username.
    */
   public username: string;
-  /**
-   * The user's token.
-   */
-  public token: string;
 
-  constructor(id: number, username: string, token: string) {
+  constructor(id: number, username: string) {
     this.id = id;
     this.username = username;
-    this.token = token;
   }
 
   /**
@@ -31,7 +26,6 @@ class User implements auth.User {
     return {
       id: this.id,
       username: this.username,
-      token: this.token,
     };
   }
 
@@ -40,7 +34,7 @@ class User implements auth.User {
    * @returns A promise that resolves to true if the user is authenticated, false otherwise.
    */
   public async authenticated (): Promise<boolean> {
-    return this.token !== null && (await auth.status(this.token)).success;
+    return (await auth.status()).success;
   }
 
   /**
@@ -52,9 +46,7 @@ class User implements auth.User {
   public static async login (username: string, password: string): Promise<User|null> {
     const res = await auth.login(username, password);
     if (!res.user) return null;
-    const user = new User(res.user.id, res.user.username, res.user.token);
-    // TODO: change auth to use HTTP-only cookies in future
-    localStorage.setItem('user', JSON.stringify(user.json()));
+    const user = new User(res.user.id, res.user.username);
     return user;
   }
 
@@ -64,7 +56,7 @@ class User implements auth.User {
    * @returns A promise that resolves to the user.
    */
   public static fromJSON (json: auth.User): User {
-    return new User(json.id, json.username, json.token);
+    return new User(json.id, json.username);
   }
 }
 

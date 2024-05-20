@@ -4,7 +4,7 @@ import type { APIResponse } from './index';
 /**
  * Represents a user.
  */
-export interface BriefUser {
+export interface User {
   /**
    * The user's ID.
    */
@@ -16,29 +16,9 @@ export interface BriefUser {
 };
 
 /**
- * Represents a user.
- */
-export interface User extends BriefUser {
-  /**
-   * The user's token.
-   */
-  token: string;
-};
-
-/**
  * The response from the status endpoint.
  */
 export interface StatusResponse extends APIResponse {
-  /**
-   * The user.
-   */
-  user?: BriefUser;
-};
-
-/**
- * The response from the login endpoint.
- */
-export interface LoginResponse extends APIResponse {
   /**
    * The user.
    */
@@ -47,14 +27,11 @@ export interface LoginResponse extends APIResponse {
 
 /**
  * Gets the status of the user.
- * @param token The user's token.
  * @returns The response from the status endpoint.
  */
-export const status = async (token: string): Promise<StatusResponse> => {
+export const status = async (): Promise<StatusResponse> => {
   return await jreq(`${API}/auth/status`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    credentials: 'include',
   }) as StatusResponse;
 };
 
@@ -64,10 +41,11 @@ export const status = async (token: string): Promise<StatusResponse> => {
  * @param password The user's password.
  * @returns The response from the login endpoint.
  */
-export const login = async (username: string, password: string): Promise<LoginResponse> => {
+export const login = async (username: string, password: string): Promise<StatusResponse> => {
   return await jreq(`${API}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', },
     body: JSON.stringify({ username, password }),
-  }) as LoginResponse;
+    credentials: 'include',
+  }) as StatusResponse;
 };

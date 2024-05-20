@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import fs from 'fs';
 import fileUpload from 'express-fileupload';
 import passport from 'passport';
@@ -21,7 +22,7 @@ const app: Express = express();
 if (!fs.existsSync(process.env.DATA_DIR!)) fs.mkdirSync(process.env.DATA_DIR!);
 
 passport.use(new Strategy({
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: (req) => req && req.cookies ? req.cookies.gptkn : null,
   secretOrKey: process.env.JWT_SECRET!,
   algorithms: ['HS256'],
 }, (payload, done) => {
@@ -29,7 +30,8 @@ passport.use(new Strategy({
 }));
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({ origin: 'http://localhost:5173', credentials: true, }));
 app.use(fileUpload());
 
 app.use('/api/search/', searchRouter);
