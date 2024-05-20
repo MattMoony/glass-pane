@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import * as controller from '../controllers/person';
 import { requireBody, requireQuery } from '../middleware';
+import { requireAuth } from '../middleware/auth';
 
 const router: Router = Router();
 
-router.post('/', 
+router.post('/',
+  requireAuth,
   requireBody({
     firstname: { type: 'string', },
     lastname: { type: 'string', },
@@ -18,6 +20,7 @@ router.get('/', requireQuery({ q: { type: 'string', }, }), controller.search);
 router.get('/:pid', controller.parsePid, controller.get);
 router.get('/:pid/name', controller.parsePid, controller.getName);
 router.patch('/:pid', 
+  requireAuth,
   requireBody({
     firstname: { type: 'string', optional: true, },
     lastname: { type: 'string', optional: true, },
@@ -28,13 +31,14 @@ router.patch('/:pid',
   controller.parsePid, 
   controller.update
 );
-router.delete('/:pid', controller.parsePid, controller.remove);
+router.delete('/:pid', requireAuth, controller.parsePid, controller.remove);
 
 router.get('/:pid/pic', controller.parsePid, controller.getPic);
-router.post('/:pid/pic', controller.parsePid, controller.setPic);
-router.delete('/:pid/pic', controller.parsePid, controller.removePic);
+router.post('/:pid/pic', requireAuth, controller.parsePid, controller.setPic);
+router.delete('/:pid/pic', requireAuth, controller.parsePid, controller.removePic);
 
 router.post('/:pid/relation', 
+  requireAuth,
   requireBody({
     type: { type: 'number', },
     other: { type: 'number', },
@@ -46,6 +50,7 @@ router.post('/:pid/relation',
   controller.addRelation
 );
 router.patch('/:pid/relation', 
+  requireAuth,
   requireBody({
     type: { type: 'number', },
     other: { type: 'number', },
@@ -56,6 +61,7 @@ router.patch('/:pid/relation',
   controller.updateRelation
 );
 router.delete('/:pid/relation', 
+  requireAuth,
   requireBody({
     type: { type: 'number', },
     other: { type: 'number', },
@@ -78,6 +84,7 @@ router.get('/:pid/relation/sources',
   controller.getRelationSources
 );
 router.post('/:pid/relation/sources', 
+  requireAuth,
   requireBody({
     other: { type: 'number', },
     since: { type: 'string', },
@@ -87,12 +94,13 @@ router.post('/:pid/relation/sources',
   controller.addRelationSource
 );
 router.patch('/:pid/relation/sources/:sid', 
+  requireAuth,
   requireBody({
     url: { type: 'string', },
   }), 
   controller.parsePid, 
   controller.updateRelationSource
 );
-router.delete('/:pid/relation/sources/:sid', controller.parsePid, controller.removeRelationSource);
+router.delete('/:pid/relation/sources/:sid', requireAuth, controller.parsePid, controller.removeRelationSource);
 
 export default router;

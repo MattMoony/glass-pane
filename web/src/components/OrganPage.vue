@@ -4,6 +4,7 @@ import { ref, watch, type Ref } from 'vue';
 import Organ from '../models/Organ';
 
 import NavBarNew from './NavBarNew.vue';
+import { useUserStore } from '@/stores/user';
 
 const props = defineProps<{
   /**
@@ -23,6 +24,8 @@ const emits = defineEmits<{
 }>();
 
 const editing: Ref<boolean> = ref(Boolean(props.edit));
+const user = useUserStore();
+
 watch(() => props.edit, (newEdit: boolean) => {
   editing.value = newEdit;
 }, { immediate: true });
@@ -34,7 +37,7 @@ watch(() => props.edit, (newEdit: boolean) => {
       :result="organ ? organ : undefined"
     />
     <article>
-      <div class="controls">
+      <div class="controls" v-if="user.user">
         <button title="Edit" @click="() => { editing = !editing; $emit('edit', editing); }">
           <template v-if="!editing">
             <font-awesome-icon icon="edit" />

@@ -38,6 +38,7 @@ export const create = async (name: string): Promise<RoleResponse> => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name }),
+    credentials: 'include',
   }) as RoleResponse;
 };
 
@@ -70,6 +71,7 @@ export const update = async (rid: number, name: string): Promise<RoleResponse> =
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name }),
+    credentials: 'include',
   }) as RoleResponse;
 };
 
@@ -81,5 +83,6 @@ export const update = async (rid: number, name: string): Promise<RoleResponse> =
 export const remove = async (rid: number): Promise<APIResponse> => {
   return await jreq(`${API}/role/${rid}`, {
     method: 'DELETE',
+    credentials: 'include',
   }) as APIResponse;
 };

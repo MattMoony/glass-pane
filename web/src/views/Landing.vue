@@ -19,18 +19,28 @@ const user = useUserStore();
       <SearchBarNew />
     </div>
     <div class="tools">
-      <router-link to="/p">
-        <button>
-          <font-awesome-icon :icon="['fas', 'plus']" />
-          New Person
-        </button>
-      </router-link>
-      <router-link to="/o">
-        <button>
-          <font-awesome-icon :icon="['fas', 'plus']" />
-          New Organization
-        </button>
-      </router-link>
+      <template v-if="user.user">
+        <router-link to="/p">
+          <button>
+            <font-awesome-icon :icon="['fas', 'plus']" />
+            New Person
+          </button>
+        </router-link>
+        <router-link to="/o">
+          <button>
+            <font-awesome-icon :icon="['fas', 'plus']" />
+            New Organization
+          </button>
+        </router-link>
+      </template>
+      <template v-else>
+        <router-link to="/login">
+          <button>
+            <font-awesome-icon :icon="['fas', 'sign-in-alt']" />
+            Login
+          </button>
+        </router-link>
+      </template>
     </div>
   </div>
 </template>

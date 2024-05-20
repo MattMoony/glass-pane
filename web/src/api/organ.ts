@@ -194,6 +194,7 @@ export const create = async (bio: string): Promise<OrganResponse> => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ bio }),
+    credentials: 'include',
   }) as OrganResponse;
 };
 
@@ -227,6 +228,7 @@ export const uploadBioPic = async (oid: number, pic: Blob): Promise<BioPicRespon
   return await jreq(`${API}/organ/${oid}/biopic`, {
     method: 'POST',
     body: formData,
+    credentials: 'include',
   }) as BioPicResponse;
 };
 
@@ -251,6 +253,7 @@ pic.set = async (oid: number, pic: Blob): Promise<APIResponse> => {
   return await jreq(`${API}/organ/${oid}/pic`, {
     method: 'PUT',
     body: formData,
+    credentials: 'include',
   });
 };
 
@@ -262,6 +265,7 @@ pic.set = async (oid: number, pic: Blob): Promise<APIResponse> => {
 pic.remove = async (oid: number): Promise<APIResponse> => {
   return await jreq(`${API}/organ/${oid}/pic`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 };
 
@@ -286,6 +290,7 @@ socials.add = async (oid: number, platform: number, url: string): Promise<OrganS
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ platform, url }),
+    credentials: 'include',
   }) as OrganSocialsSingleResponse;
 };
 
@@ -302,6 +307,7 @@ socials.update = async (oid: number, sid: number, platform: number, url: string)
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ platform, url }),
+    credentials: 'include',
   }) as APIResponse;
 };
 
@@ -314,6 +320,7 @@ socials.update = async (oid: number, sid: number, platform: number, url: string)
 socials.remove = async (oid: number, sid: number): Promise<APIResponse> => {
   return await jreq(`${API}/organ/${oid}/socials/${sid}`, {
     method: 'DELETE',
+    credentials: 'include',
   }) as APIResponse;
 };
 
@@ -337,6 +344,7 @@ sources.add = async (oid: number, url: string): Promise<OrganSourceResponse> => 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url }),
+    credentials: 'include',
   }) as OrganSourceResponse;
 };
 
@@ -352,6 +360,7 @@ sources.update = async (oid: number, sid: number, url: string): Promise<APIRespo
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url }),
+    credentials: 'include',
   }) as APIResponse;
 };
 
@@ -364,6 +373,7 @@ sources.update = async (oid: number, sid: number, url: string): Promise<APIRespo
 sources.remove = async (oid: number, sid: number): Promise<APIResponse> => {
   return await jreq(`${API}/organ/${oid}/sources/${sid}`, {
     method: 'DELETE',
+    credentials: 'include',
   }) as APIResponse;
 };
 
@@ -413,6 +423,7 @@ memberships.add = async (
       since, 
       until, 
     }),
+    credentials: 'include',
   }) as MembershipResponse;
 };
 
@@ -435,6 +446,7 @@ memberships.update = async (
       since,
       until,
     }),
+    credentials: 'include',
   }) as APIResponse;
 };
 
@@ -455,6 +467,7 @@ memberships.remove = async (
       role: role.id,
       since,
     }),
+    credentials: 'include',
   }) as APIResponse;
 };
 

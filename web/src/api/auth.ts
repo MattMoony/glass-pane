@@ -31,6 +31,7 @@ export interface StatusResponse extends APIResponse {
  */
 export const status = async (): Promise<StatusResponse> => {
   return await jreq(`${API}/auth/status`, {
+    // TODO: look at this stuff again - especially, when properly hosting
     credentials: 'include',
   }) as StatusResponse;
 };

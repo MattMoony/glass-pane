@@ -163,6 +163,7 @@ export const create = async (
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ firstname, lastname, bio, birthdate, deathdate, }),
+    credentials: 'include',
   }) as PersonResponse;
 }
 
@@ -192,6 +193,7 @@ export const update = async (
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ firstname, lastname, bio, birthdate, deathdate }),
+    credentials: 'include',
   }) as PersonResponse;
 }
 
@@ -300,6 +302,7 @@ export const rel = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, other, since, until, sources, }),
+      credentials: 'include',
     });
   },
 
@@ -317,6 +320,7 @@ export const rel = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, other, since, until }),
+      credentials: 'include',
     });
   },
 
@@ -333,6 +337,7 @@ export const rel = {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type, other, since, }),
+      credentials: 'include',
     });
   },
 };
@@ -361,6 +366,7 @@ rel_sources.add = async (pid: number, other: number, since: Date, url: string): 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ other, since, url }),
+    credentials: 'include',
   }) as RelationSourceResponse;
 }
 
@@ -376,6 +382,7 @@ rel_sources.update = async (pid: number, sid: number, url: string): Promise<APIR
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url }),
+    credentials: 'include',
   });
 }
 
@@ -388,5 +395,6 @@ rel_sources.update = async (pid: number, sid: number, url: string): Promise<APIR
 rel_sources.remove = async (pid: number, sid: number): Promise<APIResponse> => {
   return await jreq(`${API}/person/${pid}/relation/sources/${sid}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
 }

@@ -64,6 +64,7 @@ export const create = async (
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, bio, established, dissolved }),
+    credentials: 'include',
   }) as OrganizationResponse;
 };
 
@@ -115,6 +116,7 @@ export const update = async (
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, bio, established, dissolved }),
+    credentials: 'include',
   }) as OrganizationResponse;
 };
 
@@ -124,7 +126,7 @@ export const update = async (
  * @returns The response from the API.
  */
 export const remove = async (oid: number): Promise<APIResponse> => {
-  return await jreq(`${API}/organization/${oid}`, { method: 'DELETE' }) as APIResponse;
+  return await jreq(`${API}/organization/${oid}`, { method: 'DELETE', credentials: 'include', }) as APIResponse;
 };
 
 export const members = async (oid: number): Promise<OrganizationMembersResponse> => {

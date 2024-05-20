@@ -39,6 +39,7 @@ import {
   faGlobe,
   faHashtag,
   faCopy,
+  faSignInAlt,
 } from '@fortawesome/free-solid-svg-icons'
 
 import VNetworkGraph from 'v-network-graph'
@@ -93,6 +94,7 @@ library.add(
   faTiktok,
   faXing,
   faCopy,
+  faSignInAlt,
 )
 app.component('font-awesome-icon', FontAwesomeIcon)
 

@@ -22,7 +22,7 @@ export const login = async (req: Request, res: Response) => {
   if (!user) return res.send({ 'success': false, 'msg': 'invalid username or password' });
   const auth = await user.auth(req.body.password);
   if (!auth) return res.send({ 'success': false, 'msg': 'invalid username or password' });
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, { expiresIn: '1d', });
   res.cookie('gptkn', token, { httpOnly: true, sameSite: 'strict', });
   res.send({ 'success': true, 'user': { ...user.json(), }, });
 };
