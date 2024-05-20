@@ -24,8 +24,17 @@ DROP TABLE organization;
 DROP TABLE location;
 DROP TABLE tag;
 DROP TABLE organ;
+DROP TABLE users;
 
 -- ====================================================================================================================================================== --
+
+CREATE TABLE users (
+    uid             BIGSERIAL,
+    username        VARCHAR(32)        UNIQUE NOT NULL,
+    password        VARCHAR(161)       NOT NULL,
+
+    PRIMARY KEY     (uid)
+);
 
 CREATE TABLE organ (
     oid             BIGSERIAL,

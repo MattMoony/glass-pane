@@ -213,7 +213,6 @@ const bioKeyDown = (e: KeyboardEvent) => {
     return false;
   }
   else if (e.key === 'v' && e.ctrlKey) {
-    console.log('pasting');
     (async () => {
       if (!props.person) return;
       const raw: ClipboardItem[] = await navigator.clipboard.read();

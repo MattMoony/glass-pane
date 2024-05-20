@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Organ from '../models/Organ';
+import { useUserStore } from '@/stores/user';
 
 import SearchBarNew from './SearchBarNew.vue';
 
@@ -13,6 +14,8 @@ const props = defineProps<{
    */
   result?: Organ;
 }>();
+
+const user = useUserStore();
 </script>
 
 <template>
@@ -27,6 +30,9 @@ const props = defineProps<{
       />
     </form>
     <div class="social">
+      <div v-if="user.user" class="user">
+        {{ user.user.username }}
+      </div>
       <a href="//github.com/MattMoony/glass-pane">
         <font-awesome-icon icon="fa-brands fa-github" />
       </a>
@@ -64,6 +70,16 @@ form {
   border-left: 2px solid var(--color-border);
   padding-left: 1em;
   margin-left: 1em;
+}
+
+.social .user {
+  font-size: 1em;
+  background-color: var(--color-background-mute);
+  border-radius: 0.5em;
+  padding: 0.25em 0.5em;
+  margin-right: 1em;
+  cursor: default;
+  user-select: none;
 }
 
 .social a {
