@@ -128,4 +128,26 @@ article {
   justify-content: stretch;
   align-items: stretch;
 }
+
+@media only screen and (max-width: 600px) {
+  main {
+    min-height: 100vh;
+  }
+
+  .slots {
+    flex-direction: column-reverse;
+  }
+
+  .slots .left-slot {
+    padding: 1em;
+    flex-basis: auto;
+    max-width: 100vw;
+  }
+
+  .slots .right-slot {
+    border-left: none;
+    border-bottom: 2px solid var(--color-border);
+    min-height: 40vh;
+  }
+}
 </style>

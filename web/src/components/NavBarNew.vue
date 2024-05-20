@@ -87,4 +87,15 @@ form {
   color: var(--color-text);
   text-decoration: none;
 }
+
+@media only screen and (max-width: 600px) {
+  nav {
+    height: 6rem;
+    align-items: center;
+  }
+
+  .logo {
+    max-height: 3rem;
+  }
+}
 </style>

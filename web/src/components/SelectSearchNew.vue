@@ -224,4 +224,13 @@ onClickOutside(container, () => {
 .suggestion.organization .suggestion-type {
   background-color: var(--color-organization);
 }
+
+@media only screen and (max-width: 600px) {
+  .bar {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: .5em;
+  }
+}
 </style>
