@@ -64,4 +64,11 @@ watch(oid, async (newOid: number) => {
   overflow-y: auto;
   padding: 1.5em;
 }
+
+@media only screen and (max-width: 600px) {
+  .organization-details {
+    padding: 1em;
+    overflow: unset;
+  }
+}
 </style>
