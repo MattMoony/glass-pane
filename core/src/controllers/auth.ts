@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import User from '../models/user';
+import User from '../models/User';
 
 /**
  * Checks the status of the current user.

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import passport from 'passport';
 
-import User from '../models/user';
+import User from '../models/User';
 
 export const requireAuth = (req: Request, res: Response, next: Function) => {
   passport.authenticate('jwt', { session: false }, async (err: any, token: any) => {
