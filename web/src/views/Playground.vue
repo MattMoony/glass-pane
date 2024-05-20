@@ -5,8 +5,8 @@ import { ref } from 'vue';
 import Person from '@/models/Person';
 import Organization from '@/models/Organization';
 
-import PersonBanner from '@/components/PersonBanner.vue';
-import PersonNetworkNew from '@/components/PersonNetworkNew.vue';
+import PersonBanner from '@/components/info/person/PersonBanner.vue';
+import PersonNetworkNew from '@/components/map/person/PersonNetworkNew.vue';
 
 const person = ref<Person | null>(null);
 

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-
 import { ref, watch, type Ref } from 'vue';
-import Organ from '../models/Organ';
 
-import NavBarNew from './NavBarNew.vue';
+import Organ from '@/models/Organ';
 import { useUserStore } from '@/stores/user';
+
+import NavBar from '@/components/NavBar.vue';
 
 const props = defineProps<{
   /**
@@ -33,7 +33,7 @@ watch(() => props.edit, (newEdit: boolean) => {
 
 <template>
   <main>
-    <NavBarNew 
+    <NavBar 
       :result="organ ? organ : undefined"
     />
     <article>

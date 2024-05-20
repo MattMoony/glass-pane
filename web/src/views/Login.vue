@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import User from '@/models/User';
 import { useUserStore } from '@/stores/user';
 
-import NavBarNew from '@/components/NavBarNew.vue';
+import NavBar from '@/components/NavBar.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -23,7 +23,7 @@ const signIn = async (e: Event) => {
 
 <template>
   <main>
-    <NavBarNew />
+    <NavBar />
     <article class="gp-scroll">
       <section>
         <h1>Login</h1>

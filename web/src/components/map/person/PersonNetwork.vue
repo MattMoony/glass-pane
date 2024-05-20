@@ -2,11 +2,11 @@
 import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
 
-import Person from '../models/Person';
-import Relation from '../models/Relation';
+import Person from '@/models/Person';
+import Relation from '@/models/Relation';
 import Membership from '@/models/Membership';
 
-import OrganNetwork from '@/components/OrganNetwork.vue';
+import OrganNetwork from '@/components/map/OrganNetwork.vue';
 
 const props = defineProps<{
   /**

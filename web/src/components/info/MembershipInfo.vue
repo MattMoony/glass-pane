@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Person from '../models/Person';
-import Organization from '../models/Organization';
-import Membership from '../models/Membership';
+import Person from '@/models/Person';
+import Organization from '@/models/Organization';
+import Membership from '@/models/Membership';
 
-import RoleSelect from './RoleSelect.vue';
+import RoleSelect from '@/components/RoleSelect.vue';
 
 const props = defineProps<{
   /**

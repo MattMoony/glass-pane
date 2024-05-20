@@ -2,12 +2,12 @@
 import { ref, watch, type Ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
-import Organ from '../models/Organ';
-import Person from '../models/Person';
-import Organization from '../models/Organization';
+import Organ from '@/models/Organ';
+import Person from '@/models/Person';
+import Organization from '@/models/Organization';
 
-import PersonBanner from './PersonBanner.vue';
-import OrganizationBanner from './OrganizationBanner.vue';
+import PersonBanner from '@/components/info/person/PersonBanner.vue';
+import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
 
 enum SearchType {
   PERSON = 'person',

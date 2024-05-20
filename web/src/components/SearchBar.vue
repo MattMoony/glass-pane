@@ -5,7 +5,7 @@ import Organ from '../models/Organ';
 import Person from '../models/Person';
 import Organization from '../models/Organization';
 
-import SelectSearchNew from './SelectSearchNew.vue';
+import SelectSearch from '@/components/SelectSearch.vue';
 
 const props = defineProps<{
   /**
@@ -29,7 +29,7 @@ const onSelect = (organ: Organ) => {
 </script>
 
 <template>
-  <SelectSearchNew
+  <SelectSearch
     :qry="props.qry"
     :init-result="props.result"
     @select="onSelect"

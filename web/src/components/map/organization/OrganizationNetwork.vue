@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
-import { useRouter } from 'vue-router';
 
-import Organ from '../models/Organ';
+import Organ from '@/models/Organ';
 import Organization from '@/models/Organization';
 import Membership from '@/models/Membership';
 
-import OrganNetwork from '@/components/OrganNetwork.vue';
+import OrganNetwork from '@/components/map/OrganNetwork.vue';
 
 const props = defineProps<{
   /**

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue';
 
-import Person from '../models/Person';
+import Organization from '@/models/Organization';
 
-import OrganBanner from './OrganBanner.vue';
+import OrganBanner from '@/components/info/OrganBanner.vue';
 
 const props = defineProps<{
   /**
-   * The person to display in the banner.
+   * The organization to display in the banner.
    */
-  person: Person|null;
+  organization: Organization|null;
   /**
    * Whether to show social media links.
    */
@@ -23,7 +23,7 @@ const props = defineProps<{
    */
   extraSmall?: boolean;
   /**
-   * Whether to allow editing the person.
+   * Whether to allow editing the organization.
    */
   edit?: boolean;
   /**
@@ -39,9 +39,9 @@ const props = defineProps<{
 }>();
 const emits = defineEmits<{
   /**
-   * Emitted when the person changes.
+   * Emitted when the organization changes.
    */
-  (e: 'change', person: Person): void;
+  (e: 'change', organization: Organization): void;
 }>();
 
 // mock for now
@@ -63,17 +63,17 @@ const socials: Ref<{[name: string]: string[]}> = ref({
 
 <template>
   <OrganBanner
-    :organ="person"
-    :name="person ? person.firstname + ' ' + person.lastname : ''"
-    :from="person?.birthdate"
-    :to="person?.deathdate"
+    :organ="organization"
+    :name="organization ? organization.name : ''"
+    :from="organization?.established"
+    :to="organization?.dissolved"
     :socials="socials"
     :showSocials="props.socials"
     :small="props.small"
     :extraSmall="props.extraSmall"
     :edit="props.edit"
     :updated="props.updated"
-    @change="newPerson => $emit('change', newPerson as Person)"
+    @change="newOrganization => emits('change', newOrganization as Organization)"
   />
 </template>
 

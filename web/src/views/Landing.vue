@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
 
-import SearchBarNew from '@/components/SearchBarNew.vue';
+import SearchBar from '@/components/SearchBar.vue';
 
 const user = useUserStore();
 </script>
@@ -16,7 +16,7 @@ const user = useUserStore();
       What are you looking for, <span class="username">{{ user.user.username }}</span>?
     </p>
     <div class="bar-container">
-      <SearchBarNew />
+      <SearchBar />
     </div>
     <div class="tools">
       <template v-if="user.user">

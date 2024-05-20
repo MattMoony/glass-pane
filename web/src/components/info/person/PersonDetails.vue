@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch, type ComputedRef, type Ref } from 'vue';
+import { ref, shallowRef, watch, type Ref } from 'vue';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 
 import { API } from '@/api';
 import { uploadBioPic, type OrganSocials, type OrganSource } from '@/api/organ';
-import Person from '../models/Person';
+import * as lib from '@/lib/socials';
+import Person from '@/models/Person';
+import type Organization from '@/models/Organization';
 import Relation from '@/models/Relation';
 import RelationType from '@/models/RelationTypes';
-import Membership from '@/models/Membership';
 import Role from '@/models/Role';
+import Membership from '@/models/Membership';
 import SocialsPlatform, { icons } from '@/models/SocialsPlatform';
-import type Organization from '@/models/Organization';
-import * as lib from '@/lib/socials';
 
-import PersonBanner from './PersonBanner.vue';
-import MembershipInfo from './MembershipInfo.vue';
-import SelectSearchNew from './SelectSearchNew.vue';
-import RelationInfo from './RelationInfo.vue';
+import MembershipInfo from '@/components/info/MembershipInfo.vue';
+import RelationInfo from '@/components/info/RelationInfo.vue';
+import SelectSearch from '@/components/SelectSearch.vue';
 
 const props = defineProps<{
   /**
@@ -344,7 +343,7 @@ watch(() => props.person?.bio, async () => {
         <template v-if="edit">
           <h3>New Membership</h3>
           <template v-if="!newMembership">
-            <SelectSearchNew
+            <SelectSearch
               type="organization"
               @select="org => {
                 if (person)
@@ -416,7 +415,7 @@ watch(() => props.person?.bio, async () => {
         <template v-if="edit">
           <h4>New Parent</h4>
           <template v-if="!newParent">
-            <SelectSearchNew
+            <SelectSearch
               type="person"
               @select="organ => {
                 if (organ)
@@ -482,7 +481,7 @@ watch(() => props.person?.bio, async () => {
         <template v-if="edit">
           <h4>New Partner</h4>
           <template v-if="!newRomantic">
-            <SelectSearchNew
+            <SelectSearch
               type="person"
               @select="organ => {
                 if (organ)
@@ -548,7 +547,7 @@ watch(() => props.person?.bio, async () => {
         <template v-if="edit">
           <h4>New Child</h4>
           <template v-if="!newChild">
-            <SelectSearchNew
+            <SelectSearch
               type="person"
               @select="organ => {
                 if (organ)
@@ -614,7 +613,7 @@ watch(() => props.person?.bio, async () => {
         <template v-if="edit">
           <h4>New Friend</h4>
           <template v-if="!newFriend">
-            <SelectSearchNew
+            <SelectSearch
               type="person"
               @select="organ => {
                 if (organ)

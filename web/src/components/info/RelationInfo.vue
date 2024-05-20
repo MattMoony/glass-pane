@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import Person from '../models/Person';
-import Relation from '../models/Relation';
-import RelationType from '../models/RelationTypes';
+import Relation from '@/models/Relation';
+import RelationType from '@/models/RelationTypes';
 
 const props = defineProps<{
   /**

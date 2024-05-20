@@ -2,7 +2,7 @@
 import Organ from '../models/Organ';
 import { useUserStore } from '@/stores/user';
 
-import SearchBarNew from './SearchBarNew.vue';
+import SearchBar from '@/components/SearchBar.vue';
 
 const props = defineProps<{
   /**
@@ -24,7 +24,7 @@ const user = useUserStore();
       <img class="logo" src="/pane.png" alt="Glass Pane Logo" />
     </RouterLink>
     <form>
-      <SearchBarNew
+      <SearchBar
         :qry="props.qry"
         :result="props.result"
       />

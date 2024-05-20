@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import * as vNG from 'v-network-graph';
 import { ForceLayout } from 'v-network-graph/lib/force-layout';
 import type { ForceNodeDatum, ForceEdgeDatum } from 'v-network-graph/lib/force-layout';
 
-import Organ from '../models/Organ';
-import Person from '../models/Person';
-import Organization from '../models/Organization';
-import Relation from '../models/Relation';
-import Membership from '../models/Membership';
-import RelationType, { COLORS } from '../models/RelationTypes';
+import Organ from '@/models/Organ';
+import Person from '@/models/Person';
+import Organization from '@/models/Organization';
+import Relation from '@/models/Relation';
+import Membership from '@/models/Membership';
+import RelationType, { COLORS } from '@/models/RelationTypes';
 
 // @ts-ignore
 import BounceLoader from 'vue-spinner/src/BounceLoader.vue';

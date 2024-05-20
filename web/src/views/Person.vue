@@ -4,10 +4,10 @@ import { useRoute, useRouter, type RouteLocationNormalized, type Router } from '
 
 import Person from '@/models/Person';
 
-import OrganPage from '@/components/OrganPage.vue';
-import PersonNetworkNew from '@/components/PersonNetworkNew.vue';
-import PersonBanner from '@/components/PersonBanner.vue';
-import PersonDetails from '@/components/PersonDetails.vue';
+import OrganPage from '@/components/info/OrganPage.vue';
+import PersonNetwork from '@/components/map/person/PersonNetwork.vue';
+import PersonBanner from '@/components/info/person/PersonBanner.vue';
+import PersonDetails from '@/components/info/person/PersonDetails.vue';
 
 const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
@@ -48,7 +48,7 @@ watch(pid, async (newPid: number) => {
       </div>
     </template>
     <template #right>
-      <PersonNetworkNew 
+      <PersonNetwork 
         :person="person" 
         show-memberships
       />

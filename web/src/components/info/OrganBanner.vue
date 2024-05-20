@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { type Ref, ref, watch } from 'vue';
 
-import Organ from '../models/Organ';
+import Organ from '@/models/Organ';
 import Person from '@/models/Person';
 import Organization from '@/models/Organization';
 import SocialsPlatform from '@/models/SocialsPlatform';
 
-import PopDropDown from './PopDropDown.vue';
+import PopDropDown from '@/components/PopDropDown.vue';
 
 const props = defineProps<{
   /**

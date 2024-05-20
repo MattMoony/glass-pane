@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { type Ref, ref, watch, popScopeId } from 'vue';
+import { type Ref, ref, watch } from 'vue';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 
 import type { OrganSource, OrganSocials } from '@/api/organ';
+import * as lib from '@/lib/socials';
 import Organ from '@/models/Organ';
 import Person from '@/models/Person';
-import Organization from '../models/Organization';
-import Membership from '@/models/Membership';
+import Organization from '@/models/Organization';
 import Role from '@/models/Role';
+import Membership from '@/models/Membership';
 import SocialsPlatform, { icons } from '@/models/SocialsPlatform';
-import * as lib from '@/lib/socials';
 
-import MembershipInfo from './MembershipInfo.vue';
-import SelectSearchNew from './SelectSearchNew.vue';
+import MembershipInfo from '@/components/info/MembershipInfo.vue';
+import SelectSearch from '@/components/SelectSearch.vue';
 
 const props = defineProps<{
   /**
@@ -244,7 +244,7 @@ watch(() => props.organization?.bio, async () => {
         <template v-if="edit">
           <h3>New Membership</h3>
           <template v-if="!newMembership">
-            <SelectSearchNew
+            <SelectSearch
               type="organization"
               @select="org => {
                 if (organization)
@@ -324,7 +324,7 @@ watch(() => props.organization?.bio, async () => {
         <template v-if="edit">
           <h3>New Member</h3>
           <template v-if="!newMember">
-            <SelectSearchNew
+            <SelectSearch
               @select="organ => {
                 if (organization)
                   newMember = new Membership(organ, organization, new Role(-1, ''), new Date());

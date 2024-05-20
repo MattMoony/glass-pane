@@ -2,12 +2,12 @@
 import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import { useRoute, useRouter, type RouteLocationNormalized, type Router } from 'vue-router';
 
-import Organization from '../models/Organization';
+import Organization from '@/models/Organization';
 
-import OrganPage from '@/components/OrganPage.vue';
-import OrganizationBanner from '@/components/OrganizationBanner.vue';
-import OrganizationDetails from '@/components/OrganizationDetails.vue';
-import OrganizationNetwork from '@/components/OrganizationNetwork.vue';
+import OrganPage from '@/components/info/OrganPage.vue';
+import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
+import OrganizationDetails from '@/components/info/organization/OrganizationDetails.vue';
+import OrganizationNetwork from '@/components/map/organization/OrganizationNetwork.vue';
 
 const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
