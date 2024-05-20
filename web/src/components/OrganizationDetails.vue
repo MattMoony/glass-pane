@@ -25,6 +25,11 @@ const props = defineProps<{
    */
   edit?: boolean;
   /**
+   * If creating a new organization,
+   * don't show the option to add socials.
+   */
+  create?: boolean;
+  /**
    * Whether to hide memberships.
    */
   hideMemberships?: boolean;
@@ -385,7 +390,7 @@ watch(() => props.organization?.bio, async () => {
         </ul>
       </div>
     </div>
-    <div v-if="edit" class="socials">
+    <div v-if="edit && !create" class="socials">
       <h2>Socials</h2>
       <div>
         <ul>

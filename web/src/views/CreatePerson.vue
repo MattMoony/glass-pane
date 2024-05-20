@@ -47,6 +47,7 @@ const createPerson = async () => {
         <PersonDetails
           :person="person"
           edit
+          create
           hide-relations
           hide-memberships
           :updated-sources="sources"

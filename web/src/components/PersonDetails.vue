@@ -29,6 +29,11 @@ const props = defineProps<{
    */
   edit?: boolean;
   /**
+   * If creating a new person,
+   * don't show the option to add socials.
+   */
+  create?: boolean;
+  /**
    * Whether to hide relations.
    */
   hideRelations?: boolean;
@@ -671,7 +676,7 @@ watch(() => props.person?.bio, async () => {
         </ul>
       </div>
     </div>
-    <div v-if="edit" class="socials">
+    <div v-if="edit && !create" class="socials">
       <h2>Socials</h2>
       <div>
         <ul>

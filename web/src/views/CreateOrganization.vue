@@ -46,6 +46,7 @@ const createOrganization = async () => {
         <OrganizationDetails
           :organization="organization"
           edit
+          create
           hide-memberships
           hide-members
           :updated-sources="sources"
