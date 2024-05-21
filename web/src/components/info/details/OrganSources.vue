@@ -68,7 +68,7 @@ watch(() => props.organ, async () => {
 
 <template>
   <div class="sources">
-    <ul>
+    <ul v-if="edit || (sources && sources.length)">
       <li v-for="source in updatedSources||sources" :key="source.sid">
         <a 
           v-if="!edit"
@@ -97,6 +97,7 @@ watch(() => props.organ, async () => {
         </div>
       </li>
     </ul>
+    <i v-else>No sources yet.</i>
   </div>
 </template>
 

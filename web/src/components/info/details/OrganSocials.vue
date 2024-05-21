@@ -47,7 +47,7 @@ watch(() => props.organ, async () => {
 
 <template>
   <div class="socials">
-    <ul>
+    <ul v-if="edit || (socials && socials.length)">
       <li v-for="social in socials" :key="social.id">
         <a 
           v-if="!edit"
@@ -90,6 +90,7 @@ watch(() => props.organ, async () => {
         </div>
       </li>
     </ul>
+    <i v-else>No known social media accounts.</i>
   </div>
 </template>
 

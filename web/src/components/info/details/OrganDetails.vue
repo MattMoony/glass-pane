@@ -62,7 +62,7 @@ const bioSaving = ref(false);
       />
     </div>
     <div>
-      <h2>Socials</h2>
+      <h2>Social Media</h2>
       <OrganSocials
         #socials
         :organ="organ"
