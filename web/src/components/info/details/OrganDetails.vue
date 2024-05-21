@@ -5,6 +5,8 @@ import Organ from '@/models/Organ';
 
 import OrganBio from '@/components/info/details/OrganBio.vue';
 import OrganMemberships from '@/components/info/details/OrganMemberships.vue';
+import OrganSources from '@/components/info/details/OrganSources.vue';
+import OrganSocials from '@/components/info/details/OrganSocials.vue'
 
 const props = defineProps<{
   /**
@@ -51,6 +53,22 @@ const bioSaving = ref(false);
       v-for="(_, name) in slots" 
       :name="name"
     />
+    <div>
+      <h2>Sources</h2>
+      <OrganSources
+        #sources
+        :organ="organ"
+        :edit="edit"
+      />
+    </div>
+    <div>
+      <h2>Socials</h2>
+      <OrganSocials
+        #socials
+        :organ="organ"
+        :edit="edit"
+      />
+    </div>
   </section>
 </template>
 

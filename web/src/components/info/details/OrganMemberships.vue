@@ -13,7 +13,7 @@ const props = defineProps<{
   /**
    * The organ whose bio to display.
    */
-  organ: Organ;
+  organ: Organ|null;
   /**
    * Whether to display in edit mode.
    */
@@ -44,8 +44,8 @@ const removeMembership = async (membership: Membership) => {
   props.person._vref = Math.floor(Math.random() * 1000);
 };
 
-watch(() => props.organ, async (newOrgan: Organ|null) => {
-  if (!newOrgan) return;
+watch(() => props.organ, async () => {
+  if (!props.organ) return;
   memberships.value = await Membership.get(new Organ(props.organ.id, props.organ.bio));
 }, { immediate: true });
 </script>
@@ -126,5 +126,27 @@ watch(() => props.organ, async (newOrgan: Organ|null) => {
 .memberships * {
   text-decoration: none;
   color: inherit;
+}
+
+button {
+  width: 100%;
+  padding: .5em;
+  margin-bottom: .5em;
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+button:focus {
+  outline: none
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: stretch;
+  align-items: center;
+  gap: .4em;
+  margin-top: .4em;
 }
 </style>
