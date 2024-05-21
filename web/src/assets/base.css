@@ -20,6 +20,12 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+
+  --color-note: rgb(54,114,192);
+  --color-tip: rgb(35,134,54);
+  --color-important: rgb(92,71,135);
+  --color-warning: rgb(186,136,33);
+  --color-caution: rgb(189,65,61);
 }
 
 /* semantic color variables for this project */
@@ -63,7 +69,6 @@
   box-sizing: border-box;
   margin: 0;
   position: relative;
-  font-weight: normal;
 }
 
 body {

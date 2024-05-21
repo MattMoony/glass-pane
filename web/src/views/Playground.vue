@@ -6,12 +6,13 @@ import Person from '@/models/Person';
 import Organization from '@/models/Organization';
 
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
-import PersonNetworkNew from '@/components/map/person/PersonNetworkNew.vue';
+import PersonNetworkNew from '@/components/map/person/PersonNetwork.vue';
+import OrganDetails from '@/components/info/details/OrganDetails.vue';
 
 const person = ref<Person | null>(null);
 
 (async () => {
-  const p = await Person.get(35);
+  const p = await Person.get(1);
   person.value = p;
 })();
 
@@ -26,6 +27,7 @@ window.Organization = Organization;
       <input 
         type="text"
         placeholder="person id"
+        value="1"
         @keyup="async (e) => {
           const p = await Person.get(parseInt((e.target! as HTMLInputElement).value));
           person = p;
@@ -39,11 +41,17 @@ window.Organization = Organization;
         socials
       />
     </div>
-    <div class="netw-wrapper">
+    <!-- <div class="netw-wrapper">
       <PersonNetworkNew
         :person="person"
         show-memberships
       />
+    </div> -->
+    <div class="details-wrapper gp-scroll">
+      <OrganDetails
+        :organ="person"
+      >
+      </OrganDetails>
     </div>
   </div>
 </template>
@@ -84,5 +92,16 @@ window.Organization = Organization;
 .netw-wrapper {
   flex-grow: 1;
   flex-basis: 0;
+}
+
+.details-wrapper {
+  flex-grow: 1;
+  flex-basis: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  overflow: auto;
+  padding: 1em;
 }
 </style>

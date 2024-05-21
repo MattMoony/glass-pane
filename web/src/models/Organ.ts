@@ -2,7 +2,7 @@ import { API } from '@/api';
 import * as organ from '@/api/organ';
 import * as person from '@/api/person';
 import * as organization from '@/api/organization';
-import { marked } from 'marked';
+import { marked } from '@/lib/markdown';
 import { reactive, ref, type Ref } from 'vue';
 import type SocialsPlatforms from './SocialsPlatform';
 
@@ -208,6 +208,13 @@ class Organ implements organ.Organ {
    */
   public toString (): string {
     return `Organ#${this.id}`;
+  }
+
+  /**
+   * Updates the organ.
+   * @returns A promise that resolves when the organ is updated.
+   */
+  public async update (): Promise<void> {
   }
 
   /**
