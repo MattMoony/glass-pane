@@ -64,7 +64,7 @@ watch(pid, async (newPid: number) => {
   padding: 1.5em;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 800px) {
   .person-details {
     padding: 1em;
     overflow: unset;

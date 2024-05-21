@@ -66,7 +66,7 @@ watch(oid, async (newOid: number) => {
   padding: 1.5em;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 800px) {
   .organization-details {
     padding: 1em;
     overflow: unset;

@@ -49,7 +49,7 @@ watch(() => props.edit, (newEdit: boolean) => {
           </template>
         </button>
       </div>
-      <section class="slots">
+      <section class="slots gp-scroll">
         <div class="left-slot">
           <slot name="left"></slot>
         </div>
@@ -129,7 +129,7 @@ article {
   align-items: stretch;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 800px) {
   main {
     min-height: 100vh;
   }
