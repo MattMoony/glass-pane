@@ -9,13 +9,18 @@ import PersonBanner from '@/components/info/person/PersonBanner.vue';
 import PersonNetworkNew from '@/components/map/person/PersonNetwork.vue';
 import OrganDetails from '@/components/info/details/OrganDetails.vue';
 import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
+import OrganizationDetails from '@/components/info/details/organization/OrganizationDetails.vue';
+import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
 
 const person = ref<Person | null>(null);
+const organization = ref<Organization | null>(null);
 const edit = ref(false);
 
 (async () => {
-  const p = await Person.get(1);
-  person.value = p;
+  // const p = await Person.get(1);
+  // person.value = p;
+  const o = await Organization.get(4);
+  organization.value = o;
 })();
 
 window.Person = Person;
@@ -29,18 +34,25 @@ window.Organization = Organization;
       <input 
         type="text"
         placeholder="person id"
-        value="1"
+        value="4"
         @keyup="async (e) => {
-          const p = await Person.get(parseInt((e.target! as HTMLInputElement).value));
-          person = p;
+          // const p = await Person.get(parseInt((e.target! as HTMLInputElement).value));
+          // person = p;
+          const o = await Organization.get(parseInt((e.target! as HTMLInputElement).value));
+          organization = o;
         }"
         autofocus
       />
       <input type="button" :value="edit ? 'Stop' : 'Edit'" @click="edit=!edit" />
     </div>
     <div>
-      <PersonBanner 
+      <!-- <PersonBanner 
         :person="person" 
+        socials
+        :edit="edit"
+      /> -->
+      <OrganizationBanner
+        :organization="organization"
         socials
         :edit="edit"
       />
@@ -52,11 +64,15 @@ window.Organization = Organization;
       />
     </div> -->
     <div class="details-wrapper gp-scroll">
-      <PersonDetails
+      <!-- <PersonDetails
         :person="person"
         :edit="edit"
       >
-      </PersonDetails>
+      </PersonDetails> -->
+      <OrganizationDetails
+        :organization="organization"
+        :edit="edit"
+      />
     </div>
   </div>
 </template>

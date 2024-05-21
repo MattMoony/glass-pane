@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type Person from '@/models/Person';
+import Organization from '@/models/Organization';
 
 import OrganDetails from '@/components/info/details/OrganDetails.vue';
-import PersonRelations from './PersonRelations.vue';
+import OrganizationMembers from './OrganizationMembers.vue';
 
 const props = defineProps<{
   /**
-   * The person to display.
+   * The organization to display.
    */
-  person: Person|null;
+  organization: Organization|null;
   /**
    * Whether to display in edit mode.
    */
@@ -30,27 +30,27 @@ const props = defineProps<{
    */
   hideSocials?: boolean;
   /**
-   * Hide the relations?
+   * Hide the members?
    */
-  hideRelations?: boolean;
+  hideMembers?: boolean;
 }>();
 </script>
 
 <template>
   <OrganDetails
-    v-if="person"
-    :organ="person"
+    v-if="organization"
+    :organ="organization"
     :edit="edit"
     :hide-bio="hideBio"
     :hide-memberships="hideMemberships"
     :hide-sources="hideSources"
     :hide-socials="hideSocials"
   >
-    <template #relations v-if="!hideRelations">
+    <template #members v-if="!hideMembers">
       <div>
-        <h2>Relations</h2>
-        <PersonRelations
-          :person="person"
+        <h2>Members</h2>
+        <OrganizationMembers
+          :organization="organization"
           :edit="edit"
         />
       </div>
