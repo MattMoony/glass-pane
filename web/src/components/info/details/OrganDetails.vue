@@ -17,6 +17,22 @@ const props = defineProps<{
    * Whether to display in edit mode.
    */
   edit?: boolean;
+  /**
+   * Hide the bio?
+   */
+  hideBio?: boolean;
+  /**
+   * Hide the memberships?
+   */
+  hideMemberships?: boolean;
+  /**
+   * Hide the sources?
+   */
+  hideSources?: boolean;
+  /**
+   * Hide the socials?
+   */
+  hideSocials?: boolean;
 }>();
 
 const slots = useSlots();
@@ -26,7 +42,7 @@ const bioSaving = ref(false);
 
 <template>
   <section v-if="organ" :class="[edit ? 'edit' : '']">
-    <div>
+    <div v-if="!hideBio">
       <h2>
         Biography
         <span class="bio-saving" v-if="bioSaving">
@@ -41,7 +57,7 @@ const bioSaving = ref(false);
         @end-saving="bioSaving = false"
       />
     </div>
-    <div>
+    <div v-if="!hideMemberships">
       <h2>Memberships</h2>
       <OrganMemberships
         #memberships
@@ -53,7 +69,7 @@ const bioSaving = ref(false);
       v-for="(_, name) in slots" 
       :name="name"
     />
-    <div>
+    <div v-if="!hideSources">
       <h2>Sources</h2>
       <OrganSources
         #sources
@@ -61,7 +77,7 @@ const bioSaving = ref(false);
         :edit="edit"
       />
     </div>
-    <div>
+    <div v-if="!hideSocials">
       <h2>Social Media</h2>
       <OrganSocials
         #socials

@@ -8,6 +8,7 @@ import Organization from '@/models/Organization';
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
 import PersonNetworkNew from '@/components/map/person/PersonNetwork.vue';
 import OrganDetails from '@/components/info/details/OrganDetails.vue';
+import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 
 const person = ref<Person | null>(null);
 const edit = ref(false);
@@ -51,11 +52,11 @@ window.Organization = Organization;
       />
     </div> -->
     <div class="details-wrapper gp-scroll">
-      <OrganDetails
-        :organ="person"
+      <PersonDetails
+        :person="person"
         :edit="edit"
       >
-      </OrganDetails>
+      </PersonDetails>
     </div>
   </div>
 </template>
