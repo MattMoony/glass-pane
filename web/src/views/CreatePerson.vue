@@ -7,7 +7,8 @@ import { type OrganSource } from '@/api/organ';
 
 import NavBar from '@/components/NavBar.vue';
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
-import PersonDetails from '@/components/info/person/PersonDetails.vue';
+import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
+import OrganSources from '@/components/info/details/OrganSources.vue';
 
 const router: Router = useRouter();
 // @ts-ignore
@@ -37,8 +38,8 @@ const createPerson = async () => {
 <template>
   <main>
     <NavBar />
-    <article class="gp-scroll">
-      <section>
+    <article>
+      <section class="gp-scroll">
         <PersonBanner
           :person="person"
           edit
@@ -47,11 +48,19 @@ const createPerson = async () => {
         <PersonDetails
           :person="person"
           edit
-          create
-          hide-relations
           hide-memberships
-          :updated-sources="sources"
+          hide-relations
+          hide-sources
+          hide-socials
         />
+        <div>
+          <h2>Sources</h2>
+          <OrganSources
+            :organ="person"
+            edit
+            :updatedSources="sources"
+          />
+        </div>
         <button @click="createPerson">
           <font-awesome-icon icon="save" />
           Save
@@ -72,14 +81,19 @@ main {
 }
 
 article {
+  flex-grow: 1;
+  flex-basis: 0;
   padding: 1em;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: stretch;
   align-items: center;
 }
 
 section {
-  width: 60vw;
+  flex-grow: 1;
+  flex-basis: 0;
+  padding: 1em;
   word-wrap: break-word;
   display: flex;
   flex-direction: column;
@@ -103,5 +117,9 @@ section button {
 
 section button:hover {
   background-position: 100% 0;
+}
+
+h2 {
+  margin: .5em;
 }
 </style>

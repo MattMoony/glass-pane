@@ -5,6 +5,7 @@ import Organ from '@/models/Organ';
 import Organization from '@/models/Organization';
 import Membership from '@/models/Membership';
 import Person from '@/models/Person';
+import Role from '@/models/Role';
 
 import MembershipInfo from '@/components/info/MembershipInfo.vue';
 import SelectSearch from '@/components/SelectSearch.vue';

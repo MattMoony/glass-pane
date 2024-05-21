@@ -6,7 +6,7 @@ import Organization from '@/models/Organization';
 
 import OrganPage from '@/components/info/OrganPage.vue';
 import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
-import OrganizationDetails from '@/components/info/organization/OrganizationDetails.vue';
+import OrganizationDetails from '@/components/info/details/organization/OrganizationDetails.vue';
 import OrganizationNetwork from '@/components/map/organization/OrganizationNetwork.vue';
 
 const router: Router = useRouter();

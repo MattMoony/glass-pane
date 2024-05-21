@@ -22,7 +22,7 @@ const props = defineProps<{
 const sources: Ref<OrganSource[]> = ref([]);
 const newSource: Ref<string> = ref('');
 
-  const addSource = async () => {
+const addSource = async () => {
   if (!newSource.value.trim()) return;
   if (!props.updatedSources) {
     const source = await props.organ?.sources.add(newSource.value);
@@ -103,7 +103,7 @@ watch(() => props.organ, async () => {
 
 <style scoped>
 .sources {
-  word-wrap: break-word;
+  word-break: break-all;
 }
 
 ul {

@@ -7,7 +7,8 @@ import { type OrganSource } from '@/api/organ';
 
 import NavBar from '@/components/NavBar.vue';
 import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
-import OrganizationDetails from '@/components/info/organization/OrganizationDetails.vue';
+import OrganizationDetails from '@/components/info/details/organization/OrganizationDetails.vue';
+import OrganSources from '@/components/info/details/OrganSources.vue';
 
 const router: Router = useRouter();
 // @ts-ignore
@@ -36,8 +37,8 @@ const createOrganization = async () => {
 <template>
   <main>
     <NavBar />
-    <article class="gp-scroll">
-      <section>
+    <article>
+      <section class="gp-scroll">
         <OrganizationBanner
           :organization="organization"
           edit
@@ -46,11 +47,19 @@ const createOrganization = async () => {
         <OrganizationDetails
           :organization="organization"
           edit
-          create
           hide-memberships
           hide-members
-          :updated-sources="sources"
+          hide-sources
+          hide-socials
         />
+        <div>
+          <h2>Sources</h2>
+          <OrganSources
+            :organ="organization"
+            edit
+            :updatedSources="sources"
+          />
+        </div>
         <button @click="createOrganization">
           <font-awesome-icon icon="save" />
           Save
@@ -71,14 +80,19 @@ main {
 }
 
 article {
+  flex-grow: 1;
+  flex-basis: 0;
   padding: 1em;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: stretch;
   align-items: center;
 }
 
 section {
-  width: 60vw;
+  flex-grow: 1;
+  flex-basis: 0;
+  padding: 1em;
   word-wrap: break-word;
   display: flex;
   flex-direction: column;
@@ -102,5 +116,9 @@ section button {
 
 section button:hover {
   background-position: 100% 0;
+}
+
+h2 {
+  margin: .5em;
 }
 </style>

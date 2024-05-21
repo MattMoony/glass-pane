@@ -96,7 +96,7 @@ watch(() => props.organ, async () => {
 
 <style scoped>
 .socials {
-  word-wrap: break-word;
+  word-break: break-all;
 }
 
 ul {

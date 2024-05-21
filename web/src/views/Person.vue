@@ -7,7 +7,7 @@ import Person from '@/models/Person';
 import OrganPage from '@/components/info/OrganPage.vue';
 import PersonNetwork from '@/components/map/person/PersonNetwork.vue';
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
-import PersonDetails from '@/components/info/person/PersonDetails.vue';
+import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 
 const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
