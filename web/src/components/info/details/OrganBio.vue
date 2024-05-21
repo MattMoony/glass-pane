@@ -16,23 +16,112 @@ const props = defineProps<{
    */
   edit?: boolean;
 }>();
+const emits = defineEmits<{
+  /**
+   * Emitted when the updated content is saving.
+   */
+  (e: 'startSaving'): void;
+  /**
+   * Emitted when the updated content is saved.
+   */
+  (e: 'endSaving'): void;
+}>();
 
 const bio: Ref<string|undefined> = ref(undefined);
-const bioEditor: Ref<HTMLDivElement|undefined> = ref(undefined);
+const bioEditorElement: Ref<HTMLDivElement|undefined> = ref(undefined);
+
+const saveBio = async (editor: monaco.editor.IStandaloneCodeEditor) => {
+  if (!props.organ) return;
+  emits('startSaving');
+  props.organ.bio = editor.getValue();
+  await props.organ.update();
+  emits('endSaving');
+};
 
 watch(() => props.edit, () => {
   if (!props.edit || !props.organ) return;
   nextTick(() => {
-    if (!bioEditor.value) return;
-    monaco.editor.create(bioEditor.value, {
+    if (!bioEditorElement.value) return;
+    const editor = monaco.editor.create(bioEditorElement.value, {
       value: props.organ.bio,
       language: 'markdown',
       theme: 'vs-dark',
       automaticLayout: true,
       minimap: {
         enabled: true,
+        renderCharacters: false,
       },
       wordWrap: 'on',
+    });
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB,
+      () => {
+        const selection = editor.getSelection();
+        if (!selection) return;
+        const text = editor.getModel()?.getValueInRange(selection);
+        if (!text) return;
+        editor.executeEdits('bold', [{
+          range: selection,
+          text: `**${text}**`,
+        }]);
+      }
+    );
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+      () => {
+        const selection = editor.getSelection();
+        if (!selection) return;
+        const text = editor.getModel()?.getValueInRange(selection);
+        if (!text) return;
+        editor.executeEdits('italic', [{
+          range: selection,
+          text: `*${text}*`,
+        }]);
+      }
+    );
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyS,
+      () => {
+        const selection = editor.getSelection();
+        if (!selection) return;
+        const text = editor.getModel()?.getValueInRange(selection);
+        if (!text) return;
+        editor.executeEdits('italic', [{
+          range: selection,
+          text: `~~${text}~~`,
+        }]);
+      }
+    );
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV,
+      async () => {
+        const raw: ClipboardItem[] = await navigator.clipboard.read();
+        const img: ClipboardItem|null = raw.find(item => item.types.some(t => t.includes('image/'))) || null;
+        if (!img) 
+          return editor.trigger('source', 'editor.action.clipboardPasteAction', null);
+        const selection = editor.getSelection();
+        if (!selection) return;
+        const type: string = img.types.find(t => t.includes('image/')) || '';
+        const blob: Blob = await img.getType(type as 'image/png').catch(() => new Blob());
+        if (!blob.size) return;
+        const res = await api.uploadBioPic(props.organ.id, blob);
+        if (!res.success) return;
+        editor.executeEdits('pasteImage', [{
+          range: selection,
+          text: `![](${API}${res.url})`,
+        }]);
+      }
+    );
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+      () => {
+        if (!props.organ) return;
+        saveBio(editor);
+      }
+    );
+    editor.getModel()?.onDidChangeContent(() => {
+      if (!props.organ) return;
+      saveBio(editor);
     });
   });
 }, { immediate: true });
@@ -56,7 +145,7 @@ watch(() => props.organ?.bio, async () => {
   ></div>
   <div
     v-else-if="edit && organ"
-    ref="bioEditor"
+    ref="bioEditorElement"
     class="md-bio-edit"
   >
   </div>

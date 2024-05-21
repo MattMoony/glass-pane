@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useSlots, watch } from 'vue';
+import { ref, useSlots, watch } from 'vue';
 
 import Organ from '@/models/Organ';
 
@@ -18,16 +18,25 @@ const props = defineProps<{
 }>();
 
 const slots = useSlots();
+const bioSaving = ref(false);
+
 </script>
 
 <template>
   <section v-if="organ" :class="[edit ? 'edit' : '']">
     <div>
-      <h2>Biography</h2>
+      <h2>
+        Biography
+        <span class="bio-saving" v-if="bioSaving">
+          saving...
+        </span>
+      </h2>
       <OrganBio 
         #bio 
         :organ="organ"
         :edit="edit"
+        @start-saving="bioSaving = true"
+        @end-saving="bioSaving = false"
       />
     </div>
     <div>
@@ -59,6 +68,18 @@ h2 {
   padding: .5em;
   border: 2px solid var(--color-border);
   border-radius: 5px 5px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h2 > span {
+  font-weight: normal;
+  font-size: .7em;
+  font-style: italic;
+  background-color: var(--color-background-mute);
+  padding: .2em .5em;
+  border-radius: 5px;
 }
 
 h2 + div {
