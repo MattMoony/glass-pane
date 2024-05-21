@@ -10,6 +10,7 @@ import PersonNetworkNew from '@/components/map/person/PersonNetwork.vue';
 import OrganDetails from '@/components/info/details/OrganDetails.vue';
 
 const person = ref<Person | null>(null);
+const edit = ref(false);
 
 (async () => {
   const p = await Person.get(1);
@@ -34,11 +35,13 @@ window.Organization = Organization;
         }"
         autofocus
       />
+      <input type="button" :value="edit ? 'Stop' : 'Edit'" @click="edit=!edit" />
     </div>
     <div>
       <PersonBanner 
         :person="person" 
         socials
+        :edit="edit"
       />
     </div>
     <!-- <div class="netw-wrapper">
@@ -50,6 +53,7 @@ window.Organization = Organization;
     <div class="details-wrapper gp-scroll">
       <OrganDetails
         :organ="person"
+        :edit="edit"
       >
       </OrganDetails>
     </div>

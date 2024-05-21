@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { type Ref, ref, shallowRef, watch } from 'vue';
-import { markdown } from '@codemirror/lang-markdown';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { type Ref, ref, watch, type VNodeRef, nextTick } from 'vue';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { API } from '@/api';
 import * as api from '@/api/organ';
@@ -19,43 +18,24 @@ const props = defineProps<{
 }>();
 
 const bio: Ref<string|undefined> = ref(undefined);
-const bioEditorState = shallowRef(null);
-const bioEditorView = shallowRef(null);
+const bioEditor: Ref<HTMLDivElement|undefined> = ref(undefined);
 
-const bioKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 's' && e.ctrlKey) {
-    console.log(e.key, e.ctrlKey, e.metaKey, e.shiftKey, e.altKey);
-    e.preventDefault();
-    (async () => props.organ && await props.organ.update())();
-    return false;
-  }
-  else if (e.key === 'v' && e.ctrlKey) {
-    (async () => {
-      if (!props.organ) return;
-      const raw: ClipboardItem[] = await navigator.clipboard.read();
-      const img: ClipboardItem|null = raw.find(item => item.types.some(t => t.includes('image/'))) || null;
-      if (!bioEditorView.value || !img) return;
-      const type: string = img.types.find(t => t.includes('image/')) || '';
-      const blob: Blob = await img.getType(type as 'image/png').catch(() => new Blob());
-      if (!blob.size) return;
-      const res = await api.uploadBioPic(props.organ.id, blob);
-      if (!res.success) return;
-      // @ts-ignore
-      bioEditorView.value.dispatch({
-        changes: { 
-          // @ts-ignore
-          from: bioEditorView.value.state.selection.ranges[0].anchor, 
-          insert: `![](${API}${res.url})`, 
-        }
-      });
-    })();
-  }
-};
-
-const editorReady = (payload: any) => {
-  bioEditorState.value = payload.state;
-  bioEditorView.value = payload.view;
-};
+watch(() => props.edit, () => {
+  if (!props.edit || !props.organ) return;
+  nextTick(() => {
+    if (!bioEditor.value) return;
+    monaco.editor.create(bioEditor.value, {
+      value: props.organ.bio,
+      language: 'markdown',
+      theme: 'vs-dark',
+      automaticLayout: true,
+      minimap: {
+        enabled: true,
+      },
+      wordWrap: 'on',
+    });
+  });
+}, { immediate: true });
 
 watch(() => props.organ, async (newOrgan: Organ|null) => {
   if (!newOrgan) return;
@@ -76,27 +56,26 @@ watch(() => props.organ?.bio, async () => {
   ></div>
   <div
     v-else-if="edit && organ"
-    class="md-bio"
+    ref="bioEditor"
+    class="md-bio-edit"
   >
-    <codemirror 
-      ref="bioEditor"
-      v-model="organ.bio"
-      :extensions="[markdown(), oneDark,]"
-      @keydown="bioKeyDown"
-      @blur="async () => organ && await organ.update()"
-      @ready="editorReady"
-    />
   </div>
 </template>
 
 <style scoped>
-.md-bio {
+.md-bio,
+.md-bio-edit {
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
   gap: .3em;
+  word-wrap: break-word;
+}
+
+.md-bio-edit {
+  height: 40vh;
 }
 </style>
 
@@ -204,5 +183,12 @@ for markdown bio
 
 .md-bio .md-alert-caution .md-alert-title {
   color: var(--color-caution);
+}
+
+/*
+for bio editor
+*/
+.md-bio .cm-editor {
+  word-wrap: break-word;
 }
 </style>

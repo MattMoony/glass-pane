@@ -161,6 +161,10 @@ const emits = defineEmits<{
   align-items: center;
 }
 
+.membership-details h3 {
+  font-weight: normal;
+}
+
 .role {
   display: inline-block;
   background-color: var(--color-background-soft);
@@ -182,5 +186,31 @@ const emits = defineEmits<{
   background: var(--color-background-soft);
   color: var(--color-text);
   border: none;
+}
+
+@media only screen and (max-width: 600px) {
+  .membership-info {
+    gap: 1rem;
+  }
+
+  .membership-details h3 {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: .5em;
+    font-size: 1em;
+    font-weight: bold;
+  }
+
+  .dates {
+    text-align: center;
+  }
+
+  .pic img {
+    height: 6em;
+  }
 }
 </style>
