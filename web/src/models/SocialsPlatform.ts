@@ -19,14 +19,14 @@ enum SocialsPlatforms {
 export const platform_domains: { [platform: number]: RegExp[], } = {
   [SocialsPlatforms.EMAIL]: [ /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, ],
   [SocialsPlatforms.PHONE]: [ /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/, ],
-  [SocialsPlatforms.FACEBOOK]: [ /^https:\/\/(?:www\.)facebook\.com\/.*$/, ],
-  [SocialsPlatforms.INSTAGRAM]: [ /^https:\/\/(?:www\.)instagram\.com\/.*$/, ],
-  [SocialsPlatforms.TWITTER]: [ /^https:\/\/(?:www\.)twitter\.com\/.*$/, ],
+  [SocialsPlatforms.FACEBOOK]: [ /^https:\/\/(?:www\.)?facebook\.com\/.*$/, ],
+  [SocialsPlatforms.INSTAGRAM]: [ /^https:\/\/(?:www\.)?instagram\.com\/.*$/, ],
+  [SocialsPlatforms.TWITTER]: [ /^https:\/\/(?:www\.)?twitter\.com\/.*$/, ],
   [SocialsPlatforms.TELEGRAM]: [ /^https:\/\/t\.me\/.*$/, ],
-  [SocialsPlatforms.YOUTUBE]: [ /^https:\/\/(?:www\.)youtube\.com\/.*$/, /^https:\/\/youtu\.be\/.*$/, ],
-  [SocialsPlatforms.TIKTOK]: [ /^https:\/\/(?:www\.)tiktok\.com\/.*$/, ],
-  [SocialsPlatforms.LINKEDIN]: [ /^https:\/\/(?:www\.)linkedin\.com\/.*$/, ],
-  [SocialsPlatforms.XING]: [ /^https:\/\/(?:www\.)xing\.com\/.*$/, ],
+  [SocialsPlatforms.YOUTUBE]: [ /^https:\/\/(?:www\.)?youtube\.com\/.*$/, /^https:\/\/youtu\.be\/.*$/, ],
+  [SocialsPlatforms.TIKTOK]: [ /^https:\/\/(?:www\.)?tiktok\.com\/.*$/, ],
+  [SocialsPlatforms.LINKEDIN]: [ /^https:\/\/(?:www\.)?linkedin\.com\/.*$/, ],
+  [SocialsPlatforms.XING]: [ /^https:\/\/(?:www\.)?xing\.com\/.*$/, ],
 };
 
 export const icons: {[name: string]: { icon: string, title: string, }} = {
