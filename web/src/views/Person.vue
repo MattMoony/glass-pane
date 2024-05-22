@@ -32,6 +32,7 @@ watch(pid, async (newPid: number) => {
           person._vref = Math.floor(Math.random() * 1000);
       }
     }"
+    switchable
   >
     <template #left>
       <PersonBanner 

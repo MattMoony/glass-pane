@@ -35,6 +35,7 @@ watch(oid, async (newOid: number) => {
           organization._vref = Math.floor(Math.random() * 1000);
       }
     }"
+    switchable
   >
     <template #left>
       <OrganizationBanner
