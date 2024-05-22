@@ -72,7 +72,6 @@ watch(() => props.relations, () => {
         >
           <RelationInfo
             :relation="relation"
-            show-type
           />
         </RouterLink>
       </template>
