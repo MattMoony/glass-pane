@@ -142,6 +142,7 @@ class Person extends Organ implements person.Person {
       get: async () => {
         const res = await person.parents(this.id);
         return res.parents?.map(r => new Relation(
+          r.id,
           RelationType.PARENT,
           new Person(
             r.to.id,
@@ -157,6 +158,7 @@ class Person extends Organ implements person.Person {
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
+          -1,
           RelationType.PARENT,
           other,
           since
@@ -168,6 +170,7 @@ class Person extends Organ implements person.Person {
       get: async () => {
         const res = await person.children(this.id);
         return res.children?.map(r => new Relation(
+          r.id,
           RelationType.CHILD,
           new Person(
             r.to.id,
@@ -183,6 +186,7 @@ class Person extends Organ implements person.Person {
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
+          -1,
           RelationType.CHILD,
           other,
           since
@@ -194,6 +198,7 @@ class Person extends Organ implements person.Person {
       get: async () => {
         const res = await person.romantic(this.id);
         return res.romantic?.map(r => new Relation(
+          r.id,
           RelationType.ROMANTIC,
           new Person(
             r.to.id,
@@ -209,6 +214,7 @@ class Person extends Organ implements person.Person {
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
+          -1,
           RelationType.ROMANTIC,
           other,
           since
@@ -220,6 +226,7 @@ class Person extends Organ implements person.Person {
       get: async () => {
         const res = await person.friends(this.id);
         return res.friends?.map(r => new Relation(
+          r.id,
           RelationType.FRIEND,
           new Person(
             r.to.id,
@@ -235,6 +242,7 @@ class Person extends Organ implements person.Person {
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
+          -1,
           RelationType.FRIEND,
           other,
           since
@@ -265,8 +273,9 @@ class Person extends Organ implements person.Person {
           sources,
           _rel.since
         );
-        if (!res.success) return null;
+        if (!res.relation) return null;
         return new Relation(
+          res.relation.id,
           _rel.type,
           _rel.other,
           _rel.since,
@@ -275,19 +284,16 @@ class Person extends Organ implements person.Person {
       },
       update: async (rel: Relation) => {
         await person.rel.update(
-          rel.type,
           this.id, 
-          rel.other.id, 
+          rel.id, 
           rel.since,
           rel.until
         );
       },
       remove: async (rel: Relation) => {
         await person.rel.remove(
-          rel.type,
-          this.id, 
-          rel.other.id,
-          rel.since,
+          this.id,
+          rel.id,
         );
       },
     };

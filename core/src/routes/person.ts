@@ -49,27 +49,16 @@ router.post('/:pid/relation',
   controller.parsePid, 
   controller.addRelation
 );
-router.patch('/:pid/relation', 
+router.patch('/:pid/relation/:rid', 
   requireAuth,
   requireBody({
-    type: { type: 'number', },
-    other: { type: 'number', },
     since: { type: 'string', },
     until: { type: 'string', optional: true, },
-  }), 
+  }),
   controller.parsePid, 
   controller.updateRelation
 );
-router.delete('/:pid/relation', 
-  requireAuth,
-  requireBody({
-    type: { type: 'number', },
-    other: { type: 'number', },
-    since: { type: 'string', },
-  }), 
-  controller.parsePid, 
-  controller.removeRelation
-);
+router.delete('/:pid/relation/:rid', requireAuth, controller.parsePid, controller.removeRelation);
 router.get('/:pid/parents', controller.parsePid, controller.getParents);
 router.get('/:pid/children', controller.parsePid, controller.getChildren);
 router.get('/:pid/romantic', controller.parsePid, controller.getRomantic);

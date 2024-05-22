@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, shallowRef } from 'vue';
+import { type Ref, ref, watch } from 'vue';
 
 import Person from '@/models/Person';
 import Relation from '@/models/Relation';
@@ -19,12 +19,16 @@ const props = defineProps<{
    */
   relations: Relation[];
   /**
+   * The relation type to display.
+   */
+  type: RelationType;
+  /**
    * Whether to display in edit mode.
    */
   edit?: boolean;
 }>();
 
-const relations: Ref<Relation[]> = shallowRef(props.relations);
+const relations: Ref<Relation[]> = ref([]);
 const newRelation: Ref<Relation|null> = ref(null);
 
 const addRelation = async () => {
@@ -50,6 +54,10 @@ const removeRelation = async (relation: Relation) => {
   // @ts-ignore
   props.person._vref = Math.floor(Math.random() * 1000);
 };
+
+watch(() => props.relations, () => {
+  relations.value = props.relations;
+}, { immediate: true });
 </script>
 
 <template>
@@ -99,7 +107,7 @@ const removeRelation = async (relation: Relation) => {
           type="person"
           @select="(organ: Organ) => {
             if (organ)
-              newRelation = new Relation(-1, RelationType.PARENT, organ as Person, new Date());
+              newRelation = new Relation(-1, type, organ as Person, new Date());
           }"
         />
       </template>
@@ -125,6 +133,11 @@ const removeRelation = async (relation: Relation) => {
 </template>
 
 <style scoped>
+.relations a {
+  text-decoration: none;
+  color: inherit;
+}
+
 button {
   width: 100%;
   padding: .5em;

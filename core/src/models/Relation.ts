@@ -1,4 +1,5 @@
 import { pool } from '../db';
+import Organ from './Organ';
 
 import Person from './Person';
 import RelationType from './RelationshipType';
@@ -12,11 +13,11 @@ class Relation {
   type: RelationType;
   from: Person;
   to: Person;
-  since: Date;
+  since?: Date;
   until?: Date;
 
-  public constructor (type: RelationType, from: Person, to: Person, since: Date, until?: Date);
-  public constructor (id: number, type: RelationType, from: Person, to: Person, since: Date, until?: Date);
+  public constructor (type: RelationType, from: Person, to: Person, since?: Date, until?: Date);
+  public constructor (id: number, type: RelationType, from: Person, to: Person, since?: Date, until?: Date);
   public constructor (v: RelationType|number, v2?: RelationType|Person, v3?: Person, v4?: Person|Date, v5?: Date, v6?: Date) {
     if (typeof v === 'number') {
       this.id = v;
@@ -40,16 +41,20 @@ class Relation {
    * @param {boolean} abbrev Whether to abbreviate the JSON representation.
    * @returns {Object} The JSON representation of this relation.
    */
-  public json (abbrev?: boolean): Object {
+  public json (without?: Person): Object {
     return {
       id: this.id,
+      type: RelationType[this.type].toLowerCase(),
       ...(
-        !abbrev 
-        ? {type: RelationType[this.type].toLowerCase(), from: this.from.json(),} 
-        : {}
+        !without
+        ? { from: this.from.json(), to: this.to.json(), }
+        : (
+          without === this.from
+          ? { to: this.to.json(), }
+          : { to: this.from.json(), }
+        )
       ),
-      to: this.to.json(),
-      since: this.since.toISOString(),
+      since: this.since?.toISOString(),
       until: this.until?.toISOString(),
     };
   }
@@ -59,7 +64,7 @@ class Relation {
    * @returns {string} The string representation of this relation.
    */
   public toString(): string {
-    return `${this.from.toString()} -[${RelationType[this.type]} ${this.since.toISOString()}]-> ${this.to.toString()}`;
+    return `${this.from.toString()} -[${RelationType[this.type]}]-> ${this.to.toString()}`;
   }
 
   /**
@@ -76,8 +81,8 @@ class Relation {
 
     for (const source of sources) {
       await client.query(
-        'INSERT INTO relation_source (person, relative, since, url) VALUES ($1, $2, $3, $4)',
-        [this.from.id, this.to.id, this.since, source],
+        'INSERT INTO relation_source (rid, url) VALUES ($1, $2, $3, $4)',
+        [this.id, source],
       );
     }
     client.release();
@@ -108,8 +113,8 @@ class Relation {
     if (v instanceof RelationSource) return await v.update();
     const client = await pool.connect();
     await client.query(
-      'UPDATE relation SET until = $1 WHERE person = $2 AND relative = $3 AND since = $4',
-      [this.until, this.from.id, this.to.id, this.since],
+      'UPDATE relation SET since = $1, until = $2 WHERE rid = $3',
+      [this.since, this.until, this.id],
     );
     client.release();
   }
@@ -130,24 +135,36 @@ class Relation {
     const client = await pool.connect();
     await client.query(
       `DELETE FROM relation_source
-      WHERE       (person = $1
-                  AND relative = $2
-                  AND since = $3)
-                  OR
-                  (person = $2
-                  AND relative = $1
-                  AND since = $3)`,
-      [this.from.id, this.to.id, this.since],
+      WHERE       rid = $1`,
+      [this.id],
     );
 
     await client.query(
       `DELETE FROM relation
-      WHERE       person = $1
-                  AND relative = $2
-                  AND since = $3`,
-      [this.from.id, this.to.id, this.since],
+      WHERE       rid = $1`,
+      [this.id],
     );
     client.release();
+  }
+
+  /**
+   * Create a new relation in the database.
+   * @param {RelationType} type The type of the relation.
+   * @param {Person} from The first person in the relation.
+   * @param {Person} to The second person in the relation.
+   * @param {Date} since The date the relation started.
+   * @param {Date} until The date the relation ended.
+   * @returns {Promise<Relation|null>} A promise that resolves with the relation, or null if not created.
+   */
+  public static async create (type: RelationType, from: Person, to: Person, since?: Date, until?: Date): Promise<Relation|null> {
+    const client = await pool.connect();
+    const res = await client.query(
+      'INSERT INTO relation (person, relative, relation, since, until) VALUES ($1, $2, $3, $4, $5) RETURNING rid',
+      [from.id, to.id, type, since, until],
+    );
+    client.release();
+    if (!res.rows.length) return null;
+    return new Relation(+res.rows[0].rid, type, from, to, since, until);
   }
 
   /**
@@ -200,6 +217,75 @@ class Relation {
       );
     }
     throw new Error('Invalid argument type');
+  }
+
+  /**
+   * Get all relations of a type from the database.
+   * @param {Person} person A person in the relations.
+   * @param {RelationType} type The type of the relations.
+   * @returns {Promise<Relation[]>} A promise that resolves with all relations.
+   */
+  public static async getAll (person: Person, type: RelationType): Promise<Relation[]> {
+    const client = await pool.connect();
+    let res;
+    if (type === RelationType.PARENT) {
+      res = await client.query(
+        `SELECT   person.*, relation.* 
+        FROM      relation 
+                  INNER JOIN person ON relation.relative = person.pid 
+        WHERE     relation.person = $1 AND relation.relation = $2`,
+        [person.id, type],
+      );
+    } else if (type === RelationType.CHILD) {
+      res = await client.query(
+        `SELECT   person.*, relation.*
+        FROM      relation
+                  INNER JOIN person ON relation.person = person.pid
+        WHERE     relation.relative = $1 AND relation.relation = $2`,
+        [person.id, RelationType.PARENT],
+      );
+    } else {
+      res = await client.query(
+        `SELECT   person.*, relation.*
+        FROM      relation
+                  INNER JOIN person ON relation.relative = person.pid
+        WHERE     relation.person = $1 AND relation.relation = $2
+        UNION
+        SELECT   person.*, relation.*
+        FROM      relation
+                  INNER JOIN person ON relation.person = person.pid
+        WHERE     relation.relative = $1 AND relation.relation = $2`,
+        [person.id, type],
+      );
+    }
+    client.release();
+    if (res.rows.length === 0) return [];
+    return await Promise.all(res.rows.map(async (row) => new Relation(
+      +row.rid, 
+      row.relation, 
+      (person.id === +row.person) || RelationType.CHILD === type
+        ? person 
+        : new Person(
+            +row.pid, 
+            (await Organ.get(+row.pid))!.bio,
+            row.firstname,
+            row.lastname,
+            row.birthdate,
+            row.deathdate
+          ), 
+      (person.id === +row.person) || RelationType.CHILD === type
+        ? new Person(
+            +row.pid, 
+            (await Organ.get(+row.pid))!.bio,
+            row.firstname,
+            row.lastname,
+            row.birthdate,
+            row.deathdate
+          )
+        : person, 
+      row.since, 
+      row.until,
+    )));
   }
 
   public static async sources (id: number): Promise<RelationSource[]>;

@@ -3,7 +3,9 @@ import { ref, watch, type Ref } from 'vue';
 
 import type Person from '@/models/Person';
 import type Relation from '@/models/Relation';
-import PersonOneRelations from './PersonOneRelations.vue';
+import RelationType from '@/models/RelationTypes';
+
+import PersonOneRelations from '@/components/info/details/person/PersonOneRelations.vue';
 
 const props = defineProps<{
   /**
@@ -37,6 +39,7 @@ watch(() => props.person, async () => {
       <PersonOneRelations
         :person="person"
         :relations="parents"
+        :type="RelationType.PARENT"
         :edit="edit"
       />
     </div>
@@ -45,6 +48,7 @@ watch(() => props.person, async () => {
       <PersonOneRelations
         :person="person"
         :relations="romantic"
+        :type="RelationType.ROMANTIC"
         :edit="edit"
       />
     </div>
@@ -53,6 +57,7 @@ watch(() => props.person, async () => {
       <PersonOneRelations
         :person="person"
         :relations="children"
+        :type="RelationType.CHILD"
         :edit="edit"
       />
     </div>
@@ -61,6 +66,7 @@ watch(() => props.person, async () => {
       <PersonOneRelations
         :person="person"
         :relations="friends"
+        :type="RelationType.FRIEND"
         :edit="edit"
       />
     </div>

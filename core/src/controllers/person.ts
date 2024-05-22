@@ -164,13 +164,12 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
-  const relation = new Relation(req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
-  try {
-    await person.add(relation, req.body.sources);
-    res.send({ 'success': true });
-  } catch {
-    res.send({ 'success': false, 'msg': 'relation already exists' });
+  const relation = await Relation.create(req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
+  if (relation == null) {
+    res.send({ 'success': false, 'msg': 'couldn\'t create relation' });
+    return;
   }
+  res.send({ 'success': true, 'relation': relation.json() });
 };
 
 /**
@@ -181,24 +180,17 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
 export const updateRelation = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  if (!(req.body.type in RelationType)) {
-    res.send({ 'success': false, 'msg': 'bad type' });
+  const relation = await Relation.get(+req.params.rid);
+  if (!relation) {
+    res.send({ 'success': false, 'msg': 'relation not found' });
     return;
   }
 
-  const relative = await Person.get(req.body.other);
-  if (relative === null) {
-    res.send({ 'success': false, 'msg': 'not found' });
-    return;
-  }
+  if (req.body.since) relation.since = new Date(req.body.since);
+  if (req.body.until) relation.until = new Date(req.body.until);
 
-  const relation = new Relation(+req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
-  try {
-    await person.update(relation);
-    res.send({ 'success': true });
-  } catch {
-    res.send({ 'success': false, 'msg': 'relation doesn\'t exist', });
-  }
+  await relation.update();
+  res.send({ 'success': true, 'relation': relation.json() });
 }
 
 /**
@@ -209,19 +201,13 @@ export const updateRelation = async (req: Request, res: Response): Promise<void>
 export const removeRelation = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  if (!(req.body.type in RelationType)) {
-    res.send({ 'success': false, 'msg': 'bad type' });
+  const relation = await Relation.get(+req.params.rid);
+  if (!relation) {
+    res.send({ 'success': false, 'msg': 'relation not found' });
     return;
   }
 
-  const relative = await Person.get(req.body.other);
-  if (relative === null) {
-    res.send({ 'success': false, 'msg': 'not found' });
-    return;
-  }
-
-  const relation = new Relation(req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
-  await person.remove(relation);
+  await relation.remove();
   res.send({ 'success': true });
 }
 
@@ -232,8 +218,9 @@ export const removeRelation = async (req: Request, res: Response): Promise<void>
  */
 export const getParents = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const parents = await person.getParents();
-  res.send({ 'success': true, 'parents': parents.map((p) => p.json(true)) });
+  // const parents = await person.getParents();
+  const parents = await Relation.getAll(person, RelationType.PARENT);
+  res.send({ 'success': true, 'parents': parents.map((p) => p.json(person)) });
 };
 
 /**
@@ -243,8 +230,9 @@ export const getParents = async (req: Request, res: Response): Promise<void> => 
  */
 export const getChildren = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const children = await person.getChildren();
-  res.send({ 'success': true, 'children': children.map((p) => p.json(true)) });
+  // const children = await person.getChildren();
+  const children = await Relation.getAll(person, RelationType.CHILD);
+  res.send({ 'success': true, 'children': children.map((p) => p.json(person)) });
 };
 
 /**
@@ -254,8 +242,9 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
  */
 export const getRomantic = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const romantic = await person.getRomantic();
-  res.send({ 'success': true, 'romantic': romantic.map((p) => p.json(true)) });
+  // const romantic = await person.getRomantic();
+  const romantic = await Relation.getAll(person, RelationType.ROMANTIC);
+  res.send({ 'success': true, 'romantic': romantic.map((p) => p.json(person)) });
 };
 
 /**
@@ -265,8 +254,9 @@ export const getRomantic = async (req: Request, res: Response): Promise<void> =>
  */
 export const getFriends = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const friends = await person.getFriends();
-  res.send({ 'success': true, 'friends': friends.map((p) => p.json(true)) });
+  // const friends = await person.getFriends();
+  const friends = await Relation.getAll(person, RelationType.FRIEND);
+  res.send({ 'success': true, 'friends': friends.map((p) => p.json(person)) });
 };
 
 /**

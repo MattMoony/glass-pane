@@ -33,13 +33,17 @@ export interface Person extends Organ {
  */
 export interface PersonRelation {
   /**
+   * The ID of the relation. This is unique across all relations.
+   */
+  id: number;
+  /**
    * The person that the relation is with.
    */
   to: Person;
   /**
    * The date that the relation started.
    */
-  since: Date;
+  since?: Date;
   /**
    * The date that the relation ended.
    */
@@ -50,27 +54,11 @@ export interface PersonRelation {
  * Represents a relation between two people.
  * Relations are identified by their `from`, `to`, and `since` fields.
  */
-export interface Relation {
-  /**
-   * The ID of the relation. This is unique across all relations.
-   */
-  id: number;
+export interface Relation extends PersonRelation {
   /**
    * The person that the relation is from.
    */
   from: Person;
-  /**
-   * The person that the relation is to.
-   */
-  to: Person;
-  /**
-   * The date that the relation started.
-   */
-  since: Date;
-  /**
-   * The date that the relation ended.
-   */
-  until?: Date;
 }
 
 /**
@@ -95,10 +83,17 @@ export interface PersonResponse extends APIResponse {
 }
 
 /**
- * 
+ * Represents a response from the API for people.
  */
 export interface PeopleResponse extends APIResponse {
   people: Person[];
+}
+
+/**
+ * Represents a response from the API for a relation.
+ */
+export interface RelationResponse extends APIResponse {
+  relation?: Relation;
 }
 
 /**
@@ -222,7 +217,7 @@ export const parents = async (pid: number): Promise<ParentsResponse> => {
     res.parents.forEach(p => {
       p.to.birthdate = p.to.birthdate ? new Date(p.to.birthdate) : undefined;
       p.to.deathdate = p.to.deathdate ? new Date(p.to.deathdate) : undefined;
-      p.since = new Date(p.since);
+      p.since = p.since ? new Date(p.since) : undefined;
       p.until = p.until ? new Date(p.until) : undefined;
     });
   }
@@ -240,7 +235,7 @@ export const children = async (pid: number): Promise<ChildrenResponse> => {
     res.children.forEach(c => {
       c.to.birthdate = c.to.birthdate ? new Date(c.to.birthdate) : undefined;
       c.to.deathdate = c.to.deathdate ? new Date(c.to.deathdate) : undefined;
-      c.since = new Date(c.since);
+      c.since = c.since ? new Date(c.since) : undefined;
       c.until = c.until ? new Date(c.until) : undefined;
     });
   }
@@ -258,7 +253,7 @@ export const romantic = async (pid: number): Promise<RomanticResponse> => {
     res.romantic.forEach(r => {
       r.to.birthdate = r.to.birthdate ? new Date(r.to.birthdate) : undefined;
       r.to.deathdate = r.to.deathdate ? new Date(r.to.deathdate) : undefined;
-      r.since = new Date(r.since);
+      r.since = r.since ? new Date(r.since) : undefined;
       r.until = r.until ? new Date(r.until) : undefined;
     });
   }
@@ -276,7 +271,7 @@ export const friends = async (pid: number): Promise<FriendsResponse> => {
     res.friends.forEach(f => {
       f.to.birthdate = f.to.birthdate ? new Date(f.to.birthdate) : undefined;
       f.to.deathdate = f.to.deathdate ? new Date(f.to.deathdate) : undefined;
-      f.since = new Date(f.since);
+      f.since = f.since ? new Date(f.since) : undefined;
       f.until = f.until ? new Date(f.until) : undefined;
     });
   }
@@ -297,7 +292,7 @@ export const rel = {
    * @param until The date the relation ended.
    * @returns The response from the API.
    */
-  add: async (type: number, pid: number, other: number, sources: string[], since: Date, until?: Date): Promise<APIResponse> => {
+  add: async (type: number, pid: number, other: number, sources: string[], since?: Date, until?: Date): Promise<RelationResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -308,35 +303,30 @@ export const rel = {
 
   /**
    * Updates a relation of a person.
-   * @param type The type of relation.
    * @param pid The ID of the person.
-   * @param other The ID of the other person.
+   * @param rid The ID of the relation.
    * @param since The date the relation started.
    * @param until The date the relation ended.
    * @returns The response from the API.
    */
-  update: async (type: number, pid: number, other: number, since: Date, until?: Date): Promise<APIResponse> => {
-    return await jreq(`${API}/person/${pid}/relation`, {
+  update: async (pid: number, rid: number, since?: Date, until?: Date): Promise<RelationResponse> => {
+    return await jreq(`${API}/person/${pid}/relation/${rid}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, other, since, until }),
+      body: JSON.stringify({ since, until }),
       credentials: 'include',
     });
   },
 
   /**
    * Removes a relation from a person.
-   * @param type The type of relation.
    * @param pid The ID of the person.
-   * @param other The ID of the other person.
-   * @param since The date the relation started.
+   * @param rid The ID of the relation.
    * @returns The response from the API.
    */
-  remove: async (type: number, pid: number, other: number, since: Date): Promise<APIResponse> => {
-    return await jreq(`${API}/person/${pid}/relation`, {
+  remove: async (pid: number, rid: number): Promise<APIResponse> => {
+    return await jreq(`${API}/person/${pid}/relation/${rid}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, other, since, }),
       credentials: 'include',
     });
   },
