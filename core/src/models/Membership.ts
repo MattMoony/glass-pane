@@ -110,7 +110,7 @@ class Membership {
     const client = await pool.connect();
     await client.query(
       'UPDATE membership SET role = $1, since = $2, until = $3 WHERE mid = $4',
-      [this.role, this.since, this.until, this.id]
+      [this.role.id, this.since, this.until, this.id]
     );
     client.release();
   }

@@ -175,6 +175,7 @@ class Membership {
     else if (v instanceof Organ) {
       const res = await organ.memberships(v.id);
       return res.memberships.map((m: organ.OrganMembership) => new Membership(
+        m.id,
         v,
         new Organization(
           m.organization.id, 

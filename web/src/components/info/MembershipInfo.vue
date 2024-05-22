@@ -127,8 +127,15 @@ const emits = defineEmits<{
           type="date"
           :value="membership.until ? membership.until.toISOString().split('T')[0] : ''"
           @change="e => {
-            const d = new Date((e.target as HTMLInputElement).value);
-            if (!isNaN(d.getTime()) && membership) {
+            if (!membership) return;
+            const v = (e.target as HTMLInputElement).value;
+            if (!v) {
+              membership.until = null;
+              $emit('change', membership);
+              return;
+            }
+            const d = new Date(v);
+            if (!isNaN(d.getTime())) {
               membership.until = d;
               $emit('change', membership);
             }

@@ -300,11 +300,6 @@ export const addMembership = async (req: Request, res: Response): Promise<void> 
  */
 export const updateMembership = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
-  const organization = await Organization.get(parseInt(req.body.organization));
-  if (!organization) {
-    res.send({ 'success': false, 'msg': 'unknown organization' });
-    return;
-  }
   const membership = await Membership.get(parseInt(req.params.mid));
   if (!membership) {
     res.send({ 'success': false, 'msg': 'membership doesn\'t exist' });

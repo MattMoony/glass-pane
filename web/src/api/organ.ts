@@ -388,7 +388,7 @@ export const memberships = async (oid: number): Promise<OrganMembershipsResponse
     res.memberships.forEach((m: OrganMembership) => {
       m.organization.established = m.organization.established ? new Date(m.organization.established) : undefined;
       m.organization.dissolved = m.organization.dissolved ? new Date(m.organization.dissolved) : undefined;
-      m.since = new Date(m.since);
+      m.since = m.since ? new Date(m.since) : undefined;
       m.until = m.until ? new Date(m.until) : undefined;
     });
   }
