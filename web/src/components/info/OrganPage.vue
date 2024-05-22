@@ -101,7 +101,7 @@ watch(() => props.edit, (newEdit: boolean) => {
         </button>
       </div>
       <section :class="['slots', 'gp-scroll', editing ? 'edit' : '',]">
-        <div class="left-slot" v-if="shown.left">
+        <div :class="['left-slot', shown['right'] ? 'constrained' : '']" v-if="shown.left">
           <slot name="left"></slot>
         </div>
         <div class="right-slot" v-if="shown.right">
@@ -184,7 +184,7 @@ article {
   gap: 1em;
 }
 
-.slots.edit .left-slot {
+.slots.edit .left-slot.constrained {
   max-width: 60vw;
 }
 
