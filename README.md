@@ -21,6 +21,9 @@ Here are some preview images of what the page will look like eventually - howeve
 ![Preview](images/preview.gif)
 ***Image 1:** The search & person/organization info page.*
 
+![Preview 2](images/preview3.png)
+***Image 2:** A preview of what an extended network graph could look like.*
+
 ## ERD
 
 Also, here is the *Entity Relationship Diagram* of the database behind this project - as exported using *DataGrip*.
