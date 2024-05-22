@@ -292,7 +292,7 @@ export const rel = {
    * @param until The date the relation ended.
    * @returns The response from the API.
    */
-  add: async (type: number, pid: number, other: number, sources: string[], since?: Date, until?: Date): Promise<RelationResponse> => {
+  add: async (type: number, pid: number, other: number, sources: string[], since?: Date|null, until?: Date|null): Promise<RelationResponse> => {
     return await jreq(`${API}/person/${pid}/relation`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -309,7 +309,7 @@ export const rel = {
    * @param until The date the relation ended.
    * @returns The response from the API.
    */
-  update: async (pid: number, rid: number, since?: Date, until?: Date): Promise<RelationResponse> => {
+  update: async (pid: number, rid: number, since?: Date|null, until?: Date|null): Promise<RelationResponse> => {
     return await jreq(`${API}/person/${pid}/relation/${rid}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

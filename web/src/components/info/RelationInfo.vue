@@ -15,10 +15,6 @@ const props = defineProps<{
    * Whether to allow editing the relation.
    */
   edit?: boolean;
-  /**
-   * Whether to use this for creating a new relation.
-   */
-  create?: boolean;
 }>();
 const emits = defineEmits<{
   /**
@@ -44,16 +40,27 @@ const emits = defineEmits<{
         </span>
       </h3>
       <div class="dates">
-        <span class="start" v-if="!create">
-          {{ new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(relation.since) }}
+        <span class="start" v-if="!edit">
+          {{ 
+            relation.since
+            ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(relation.since) 
+            : 'unknown'
+          }}
         </span>
         <input
           v-else
           type="date"
           :value="relation.since ? relation.since.toISOString().split('T')[0] : ''"
           @change="e => {
-            const d = new Date((e.target as HTMLInputElement).value);
-            if (!isNaN(d.getTime()) && relation) {
+            if (!relation) return;
+            const v = (e.target as HTMLInputElement).value;
+            if (!v) {
+              relation.since = null;
+              $emit('change', relation);
+              return;
+            }
+            const d = new Date(v);
+            if (!isNaN(d.getTime())) {
               relation.since = d;
               $emit('change', relation);
             }
@@ -61,17 +68,26 @@ const emits = defineEmits<{
         />
         -
         <span class="end" v-if="!edit">
-          {{ relation.until 
-             ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(relation.until)
-             : 'present' }}
+          {{
+            relation.until 
+            ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(relation.until)
+            : 'present' 
+          }}
         </span>
         <input
           v-else
           type="date"
           :value="relation.until ? relation.until.toISOString().split('T')[0] : ''"
           @change="e => {
-            const d = new Date((e.target as HTMLInputElement).value);
-            if (!isNaN(d.getTime()) && relation) {
+            if (!relation) return;
+            const v = (e.target as HTMLInputElement).value;
+            if (!v) {
+              relation.until = null;
+              $emit('change', relation);
+              return;
+            }
+            const d = new Date(v);
+            if (!isNaN(d.getTime())) {
               relation.until = d;
               $emit('change', relation);
             }

@@ -13,12 +13,12 @@ class Relation {
   type: RelationType;
   from: Person;
   to: Person;
-  since?: Date;
-  until?: Date;
+  since?: Date|null;
+  until?: Date|null;
 
-  public constructor (type: RelationType, from: Person, to: Person, since?: Date, until?: Date);
-  public constructor (id: number, type: RelationType, from: Person, to: Person, since?: Date, until?: Date);
-  public constructor (v: RelationType|number, v2?: RelationType|Person, v3?: Person, v4?: Person|Date, v5?: Date, v6?: Date) {
+  public constructor (type: RelationType, from: Person, to: Person, since?: Date|null, until?: Date|null);
+  public constructor (id: number, type: RelationType, from: Person, to: Person, since?: Date|null, until?: Date|null);
+  public constructor (v: RelationType|number, v2?: RelationType|Person, v3?: Person, v4?: Person|Date|null, v5?: Date|null, v6?: Date|null) {
     if (typeof v === 'number') {
       this.id = v;
       this.type = v2 as RelationType;
@@ -156,7 +156,7 @@ class Relation {
    * @param {Date} until The date the relation ended.
    * @returns {Promise<Relation|null>} A promise that resolves with the relation, or null if not created.
    */
-  public static async create (type: RelationType, from: Person, to: Person, since?: Date, until?: Date): Promise<Relation|null> {
+  public static async create (type: RelationType, from: Person, to: Person, since?: Date|null, until?: Date|null): Promise<Relation|null> {
     const client = await pool.connect();
     const res = await client.query(
       'INSERT INTO relation (person, relative, relation, since, until) VALUES ($1, $2, $3, $4, $5) RETURNING rid',

@@ -115,7 +115,6 @@ watch(() => props.relations, () => {
         <RelationInfo
           :relation="newRelation"
           edit
-          create
         />
         <div class="button-wrapper">
           <button @click="newRelation = null">

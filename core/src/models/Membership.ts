@@ -15,12 +15,12 @@ class Membership {
   public organ: Organ;
   public organization: Organization;
   public role: Role;
-  public since: Date;
-  public until?: Date;
+  public since?: Date|null;
+  public until?: Date|null;
 
-  public constructor (organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
-  public constructor (id: number, organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
-  public constructor (v: Organ|number, v2?: Organ|Organization, v3?: Organization|Role, v4?: Role|Date, v5?: Date, v6?: Date) {
+  public constructor (organ: Organ, organization: Organization, role: Role, since?: Date|null, until?: Date|null);
+  public constructor (id: number, organ: Organ, organization: Organization, role: Role, since?: Date|null, until?: Date|null);
+  public constructor (v: Organ|number, v2?: Organ|Organization, v3?: Organization|Role, v4?: Role|Date|null, v5?: Date|null, v6?: Date|null) {
     if (typeof v === 'number') {
       this.id = v;
       this.organ = v2 as Organ;
@@ -48,7 +48,7 @@ class Membership {
       organ: this.organ.json(),
       organization: this.organization.json(),
       role: this.role.json(),
-      since: this.since.toISOString(),
+      since: this.since?.toISOString(),
       until: this.until?.toISOString(),
     };
   }
@@ -58,7 +58,7 @@ class Membership {
    * @returns The string representation of the membership.
    */
   public toString (): string {
-    return `${this.organ} in ${this.organization} as ${this.role} (${this.since.toISOString()}${this.until ? ` - ${this.until.toISOString()}` : ''})`;
+    return `${this.organ} in ${this.organization} as ${this.role} (${this.since?.toISOString()}${this.until ? ` - ${this.until.toISOString()}` : ''})`;
   }
 
   /**
@@ -109,8 +109,8 @@ class Membership {
     if (v instanceof MembershipSource) return v.update();
     const client = await pool.connect();
     await client.query(
-      'UPDATE membership SET until = $1 WHERE organ = $2 AND organization = $3 AND role = $4 AND since = $5',
-      [this.until, this.organ.id, this.organization.id, this.role.id, this.since]
+      'UPDATE membership SET role = $1, since = $2, until = $3 WHERE mid = $4',
+      [this.role, this.since, this.until, this.id]
     );
     client.release();
   }
@@ -130,12 +130,12 @@ class Membership {
     if (v instanceof MembershipSource) return v.remove();
     const client = await pool.connect();
     await client.query(
-      'DELETE FROM membership_source WHERE organ = $1 AND organization = $2 AND role = $3 AND since = $4',
-      [this.organ.id, this.organization.id, this.role.id, this.since]
+      'DELETE FROM membership_source WHERE mid = $1',
+      [this.id]
     );
     await client.query(
-      'DELETE FROM membership WHERE organ = $1 AND organization = $2 AND role = $3 AND since = $4',
-      [this.organ.id, this.organization.id, this.role.id, this.since]
+      'DELETE FROM membership WHERE mid = $1',
+      [this.id]
     );
     client.release();
   }
@@ -155,8 +155,8 @@ class Membership {
     organ: Organ, 
     organization: Organization, 
     role: Role, 
-    since: Date, 
-    until?: Date
+    since?: Date|null, 
+    until?: Date|null
   ): Promise<Membership> {
     const membership = new Membership(organ, organization, role, since, until);
     await membership.create(sources);

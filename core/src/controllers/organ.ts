@@ -282,7 +282,7 @@ export const addMembership = async (req: Request, res: Response): Promise<void> 
     res.send({ 'success': false, 'msg': 'unknown role' });
     return;
   }
-  const since = new Date(req.body.since);
+  const since = req.body.since ? new Date(req.body.since) : undefined;
   const until = req.body.until ? new Date(req.body.until) : undefined;
   const sources = req.body.sources as string[];
   try {
@@ -305,24 +305,19 @@ export const updateMembership = async (req: Request, res: Response): Promise<voi
     res.send({ 'success': false, 'msg': 'unknown organization' });
     return;
   }
-  const role = await Role.get(parseInt(req.body.role));
-  if (!role) {
-    res.send({ 'success': false, 'msg': 'unknown role' });
-    return;
-  }
-  const since = new Date(req.body.since);
-  const until = req.body.until ? new Date(req.body.until) : undefined;
-  const membership = await Membership.get(organ, organization, role, since);
+  const membership = await Membership.get(parseInt(req.params.mid));
   if (!membership) {
-    res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
+    res.send({ 'success': false, 'msg': 'membership doesn\'t exist' });
     return;
   }
-  try {
-    await membership.update();
-    res.send({ 'success': true });
-  } catch {
-    res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
+  if (req.body.role) {
+    const role = await Role.get(parseInt(req.body.role));
+    if (role) membership.role = role;
   }
+  if (req.body.since !== undefined) membership.since = req.body.since ? new Date(req.body.since) : null;
+  if (req.body.until !== undefined) membership.until = req.body.until ? new Date(req.body.until) : null;
+  await membership.update();
+  res.send({ 'success': true });
 };
 
 /**
@@ -332,26 +327,11 @@ export const updateMembership = async (req: Request, res: Response): Promise<voi
  */
 export const removeMembership = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
-  const organization = await Organization.get(parseInt(req.body.organization));
-  if (!organization) {
-    res.send({ 'success': false, 'msg': 'unknown organization' });
+  const membership = await Membership.get(parseInt(req.params.mid));
+  if (!membership) {
+    res.send({ 'success': false, 'msg': 'membership doesn\'t exist' });
     return;
   }
-  const role = await Role.get(parseInt(req.body.role));
-  if (!role) {
-    res.send({ 'success': false, 'msg': 'unknown role' });
-    return;
-  }
-  const since = new Date(req.body.since);
-  try {
-    const membership = await Membership.get(organ, organization, role, since);
-    if (!membership) {
-      res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
-      return;
-    }
-    await membership.remove();
-    res.send({ 'success': true });
-  } catch {
-    res.send({ 'success': false, 'msg': 'membership doesn\'t exist', });
-  }
+  await membership.remove();
+  res.send({ 'success': true });
 };

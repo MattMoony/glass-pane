@@ -62,11 +62,11 @@ export interface AbstractMembership {
   /**
    * The date that the person became a member of the organization.
    */
-  since: Date;
+  since?: Date|null;
   /**
    * The date that the person stopped being a member of the organization.
    */
-  until?: Date;
+  until?: Date|null;
 }
 
 /**
@@ -410,8 +410,8 @@ memberships.add = async (
   organ: Organ, 
   organization: Organization, 
   role: Role, 
-  since: Date, 
-  until?: Date
+  since?: Date|null, 
+  until?: Date|null
 ): Promise<MembershipResponse> => {
   return await jreq(`${API}/organ/${organ.id}/memberships`, {
     method: 'POST',
@@ -432,17 +432,16 @@ memberships.add = async (
  */
 memberships.update = async (
   organ: Organ,
-  organization: Organization,
-  role: Role,
-  since: Date,
-  until?: Date
+  mid: number,
+  role?: Role,
+  since?: Date|null,
+  until?: Date|null
 ): Promise<APIResponse> => {
-  return await jreq(`${API}/organ/${organ.id}/memberships`, {
+  return await jreq(`${API}/organ/${organ.id}/memberships/${mid}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      organization: organization.id,
-      role: role.id,
+      role: role?.id,
       since,
       until,
     }),
@@ -455,18 +454,10 @@ memberships.update = async (
  */
 memberships.remove = async (
   organ: Organ,
-  organization: Organization,
-  role: Role,
-  since: Date
+  mid: number
 ): Promise<APIResponse> => {
-  return await jreq(`${API}/organ/${organ.id}/memberships`, {
+  return await jreq(`${API}/organ/${organ.id}/memberships/${mid}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      organization: organization.id,
-      role: role.id,
-      since,
-    }),
     credentials: 'include',
   }) as APIResponse;
 };

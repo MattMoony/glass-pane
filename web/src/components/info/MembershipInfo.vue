@@ -22,10 +22,6 @@ const props = defineProps<{
    * Whether to allow editing the membership.
    */
   edit?: boolean;
-  /**
-   * Whether to use this for creating a new membership.
-   */
-  create?: boolean;
 }>();
 const emits = defineEmits<{
   /**
@@ -65,7 +61,7 @@ const emits = defineEmits<{
           }}
           :
         </span>
-        <span class="role" v-if="!create">
+        <span class="role" v-if="!edit">
           {{ membership.role.name }}
         </span>
         <RoleSelect
@@ -88,17 +84,28 @@ const emits = defineEmits<{
       <div class="dates">
         <span 
           class="start"
-          v-if="!create"
+          v-if="!edit"
         >
-          {{ new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(membership.since) }}
+          {{
+            membership.since 
+            ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(membership.since)
+            : 'unknown'
+          }}
         </span>
         <input
           v-else
           type="date"
           :value="membership.since ? membership.since.toISOString().split('T')[0] : ''"
           @change="e => {
-            const d = new Date((e.target as HTMLInputElement).value);
-            if (!isNaN(d.getTime()) && membership) {
+            if (!membership) return;
+            const v = (e.target as HTMLInputElement).value;
+            if (!v) {
+              membership.since = null;
+              $emit('change', membership);
+              return;
+            }
+            const d = new Date(v);
+            if (!isNaN(d.getTime())) {
               membership.since = d;
               $emit('change', membership);
             }
@@ -112,7 +119,7 @@ const emits = defineEmits<{
           {{ 
             membership.until 
             ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', }).format(membership.until) 
-            : 'Present' 
+            : 'present' 
           }}
         </span>
         <input

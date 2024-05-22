@@ -101,7 +101,7 @@ watch(() => props.organization, async () => {
         <SelectSearch
           @select="organ => {
             if (organization)
-              newMember = new Membership(-1, organ, organization, new Role(-1, ''), new Date());
+              newMember = new Membership(-1, organ, organization, new Role(-1, ''));
           }"
         />
       </template>
@@ -110,7 +110,6 @@ watch(() => props.organization, async () => {
           :membership="newMember"
           organization-members
           edit
-          create
         />
         <div class="button-wrapper">
           <button

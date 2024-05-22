@@ -77,7 +77,7 @@ class RelationEdge extends Relation {
       this.target = relation.other.id.toString();
     }
     this.direction = 'out';
-    this.label = `${RelationType[relation.type].toLowerCase()} (${relation.since?.getUTCFullYear() ?? '-'} ~ ${relation.until?.getUTCFullYear() ?? '-'})`;
+    this.label = `${RelationType[relation.type].toLowerCase()}${relation.since||relation.until ? (' ('+(relation.since?.getUTCFullYear() ?? '') + '-' + (relation.until?.getUTCFullYear() ?? '')+')') : ''}`;
     this.color = COLORS[relation.type];
   }
 }
@@ -118,7 +118,7 @@ class MembershipEdge extends Membership {
     this.source = this.organ.id.toString();
     this.target = this.organization.id.toString();
     this.direction = 'out';
-    this.label = `${this.role.name} (${membership.since?.getUTCFullYear() ?? '-'} ~ ${membership.until?.getUTCFullYear() ?? '-'})`;
+    this.label = `${this.role.name}${membership.since||membership.until ? (' ('+(membership.since?.getUTCFullYear() ?? '') + '-' + (membership.until?.getUTCFullYear() ?? '')+')') : ''}`;
     this.color = getComputedStyle(document.body).getPropertyValue('--color-border');
   }
 }

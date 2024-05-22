@@ -138,7 +138,7 @@ export const members = async (oid: number): Promise<OrganizationMembersResponse>
     const organization = m.organ as Organization;
     if (organization.established !== undefined) organization.established = new Date(organization.established);
     if (organization.dissolved !== undefined) organization.dissolved = new Date(organization.dissolved);
-    m.since = new Date(m.since);
+    m.since = m.since ? new Date(m.since) : undefined;
     m.until = m.until ? new Date(m.until) : undefined;
   });
   return res;

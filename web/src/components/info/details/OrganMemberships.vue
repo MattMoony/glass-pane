@@ -96,7 +96,7 @@ watch(() => props.organ, async () => {
           type="organization"
           @select="(org: Organ) => {
             if (organ)
-              newMembership = new Membership(organ, org as Organization, new Role(-1, ''), new Date());
+              newMembership = new Membership(organ, org as Organization, new Role(-1, ''));
           }"
         />
       </template>
@@ -105,7 +105,6 @@ watch(() => props.organ, async () => {
           :membership="newMembership"
           organ-membership
           edit
-          create
         />
         <div class="button-wrapper">
           <button @click="newMembership = null">

@@ -39,30 +39,24 @@ router.post('/:oid/memberships',
     sources: { type: 'array', items: 'string', },
     organization: { type: 'number', },
     role: { type: 'number', },
-    since: { type: 'string', },
-    until: { type: 'string', optional: true, },
+    since: { type: 'string', optional: true, nullable: true, },
+    until: { type: 'string', optional: true, nullable: true, },
   }),
   controller.parseOid,
   controller.addMembership
 );
-router.patch('/:oid/memberships',
+router.patch('/:oid/memberships/:mid',
   requireAuth,
   requireBody({
-    organization: { type: 'number', },
-    role: { type: 'number', },
-    since: { type: 'string', },
-    until: { type: 'string', optional: true, },
+    role: { type: 'number', optional: true, },
+    since: { type: 'string', optional: true, nullable: true, },
+    until: { type: 'string', optional: true, nullable: true, },
   }),
   controller.parseOid,
   controller.updateMembership
 );
-router.delete('/:oid/memberships', 
+router.delete('/:oid/memberships/:mid', 
   requireAuth,
-  requireBody({
-    organization: { type: 'number', },
-    role: { type: 'number', },
-    since: { type: 'string', },
-  }), 
   controller.parseOid, controller.removeMembership
 );
 

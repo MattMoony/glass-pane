@@ -186,8 +186,8 @@ export const updateRelation = async (req: Request, res: Response): Promise<void>
     return;
   }
 
-  if (req.body.since) relation.since = new Date(req.body.since);
-  if (req.body.until) relation.until = new Date(req.body.until);
+  if (req.body.since !== undefined) relation.since = req.body.since ? new Date(req.body.since) : null;
+  if (req.body.until !== undefined) relation.until = req.body.until ? new Date(req.body.until) : null;
 
   await relation.update();
   res.send({ 'success': true, 'relation': relation.json() });

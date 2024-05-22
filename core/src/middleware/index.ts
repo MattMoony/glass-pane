@@ -14,6 +14,7 @@ interface CheckTemplate {
   [ key: string ]: {
     type: string|CheckTemplate;
     optional?: boolean;
+    nullable?: boolean;
     items?: string;
   };
 }
@@ -66,7 +67,9 @@ const checkBody = (
     }
     else if (body[key] === undefined && !template[key].optional)
       return { ok: false, msg: `Missing "${path.length ? path.join('.') + '.' : ''}${key}"` };
-    else if ((typeof body[key] !== template[key].type) && (!template[key].optional || body[key] !== undefined))
+    else if ((typeof body[key] !== template[key].type) 
+             && (!template[key].optional || body[key] !== undefined)
+             && (!template[key].nullable || body[key] !== null))
       return { ok: false, msg: `Invalid "${path.length ? path.join('.') + '.' : ''}${key}"` };
   }
   return { ok: true }

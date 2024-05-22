@@ -29,15 +29,15 @@ class Membership {
   /**
    * The date that the organ became a member of the organization.
    */
-  public since: Date;
+  public since?: Date|null;
   /**
    * The date that the organ stopped being a member of the organization.
    */
-  public until?: Date;
+  public until?: Date|null;
 
-  public constructor (organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
-  public constructor (id: number, organ: Organ, organization: Organization, role: Role, since: Date, until?: Date);
-  public constructor (id: number|Organ, organ: Organ|Organization, organization: Organization|Role, role: Role|Date, since: Date, until?: Date) {
+  public constructor (organ: Organ, organization: Organization, role: Role, since?: Date|null, until?: Date|null);
+  public constructor (id: number, organ: Organ, organization: Organization, role: Role, since?: Date|null, until?: Date|null);
+  public constructor (id: number|Organ, organ: Organ|Organization, organization: Organization|Role, role?: Role|Date|null, since?: Date|null, until?: Date|null) {
     if (typeof id === 'number') {
       this.id = id;
       this.organ = organ as Organ;
@@ -101,7 +101,7 @@ class Membership {
   public async update (): Promise<void> {
     await organ.memberships.update(
       this.organ,
-      this.organization,
+      this.id,
       this.role,
       this.since,
       this.until
@@ -115,9 +115,7 @@ class Membership {
   public async remove (): Promise<void> {
     await organ.memberships.remove(
       this.organ,
-      this.organization,
-      this.role,
-      this.since
+      this.id
     );
   }
 
@@ -147,35 +145,36 @@ class Membership {
   public static async get (v: Organ|Organization, v2?: Organization, v3?: Role, v4?: Date): Promise<Membership[]> {
     if (v instanceof Organization) {
       const res = await organization.members(v.id);
-      return res.members.map((m: any) => new Membership(
+      return res.members.map((m: organ.OrganizationMember) => new Membership(
+        m.id,
         (m.organ as person.Person).firstname !== undefined
         ? new Person(
             m.organ.id,
             m.organ.bio,
-            m.organ.firstname, 
-            m.organ.lastname, 
-            m.organ.birthdate,
-            m.organ.deathdate
+            (m.organ as Person).firstname, 
+            (m.organ as Person).lastname, 
+            (m.organ as Person).birthdate,
+            (m.organ as Person).deathdate
           )
         : new Organization(
             m.organ.id, 
             m.organ.bio, 
-            m.organ.name, 
-            m.organ.established, 
-            m.organ.dissolved
+            (m.organ as Organization).name, 
+            (m.organ as Organization).established, 
+            (m.organ as Organization).dissolved
           ),
         v,
         new Role(
           m.role.id, 
           m.role.name
         ),
-        new Date(m.since),
+        m.since ? new Date(m.since) : undefined,
         m.until ? new Date(m.until) : undefined
       ));
     }
     else if (v instanceof Organ) {
       const res = await organ.memberships(v.id);
-      return res.memberships.map((m: any) => new Membership(
+      return res.memberships.map((m: organ.OrganMembership) => new Membership(
         v,
         new Organization(
           m.organization.id, 
@@ -188,7 +187,7 @@ class Membership {
           m.role.id, 
           m.role.name
         ),
-        new Date(m.since),
+        m.since ? new Date(m.since) : undefined,
         m.until ? new Date(m.until) : undefined
       ));
     }

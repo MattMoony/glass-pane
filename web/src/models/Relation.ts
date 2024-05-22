@@ -20,15 +20,15 @@ class Relation {
   /**
    * The date the relation started.
    */
-  public since?: Date;
+  public since?: Date|null;
   /**
    * The date the relation ended.
    */
-  public until?: Date;
+  public until?: Date|null;
 
-  public constructor (type: RelationType, other: Person, since?: Date, until?: Date);
-  public constructor (id: number, type: RelationType, other: Person, since?: Date, until?: Date);
-  public constructor (id: number|RelationType, type: RelationType|Person, other?: Person|Date, since?: Date, until?: Date) {
+  public constructor (type: RelationType, other: Person, since?: Date|null, until?: Date|null);
+  public constructor (id: number, type: RelationType, other: Person, since?: Date|null, until?: Date|null);
+  public constructor (id: number|RelationType, type: RelationType|Person, other?: Person|Date|null, since?: Date|null, until?: Date|null) {
     if (typeof id === 'number') {
       this.id = id;
       this.type = type as RelationType;
