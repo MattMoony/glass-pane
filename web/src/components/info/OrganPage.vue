@@ -216,7 +216,7 @@ article {
   .slots .right-slot {
     border-left: none;
     border-bottom: 2px solid var(--color-border);
-    min-height: 40vh;
+    min-height: 50vh;
   }
 }
 </style>

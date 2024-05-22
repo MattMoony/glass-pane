@@ -195,6 +195,10 @@ const eventHandlers: vNG.EventHandlers = {
   },
 }
 const loading: Ref<boolean> = ref(true);
+  
+const distance: Ref<number> = ref(1);
+const deeperNodes: Ref<{[id: string]: PersonNode|OrganizationNode}[]> = ref([]);
+const deeperEdges: Ref<(RelationEdge|MembershipEdge)[][]> = ref([]);
 
 const refreshNodes = async (
   organ: Organ,
@@ -234,29 +238,134 @@ const refreshesEdges = async (
 const refreshNetwork = async () => {
   loading.value = true;
   if (!props.organ) return;
-  nodes.value = await refreshNodes(
-    props.organ, 
-    props.relations||[], 
-    props.memberships||[],
-    props.members||[]
-  );
-  edges.value = await refreshesEdges(
-    props.organ, 
-    props.relations||[], 
-    props.memberships||[],
-    props.members||[]
-  );
+  nodes.value = {
+    ...await refreshNodes(
+      props.organ, 
+      props.relations||[], 
+      props.memberships||[],
+      props.members||[]
+    ),
+    ...deeperNodes.value.slice(2).reduce((a, b) => ({ ...a, ...b }), {}),
+  };
+  edges.value = [
+    ...await refreshesEdges(
+      props.organ, 
+      props.relations||[], 
+      props.memberships||[],
+      props.members||[]
+    ),
+    ...deeperEdges.value.slice(2).reduce((a, b) => [...a, ...b], []),
+  ];
   window.setTimeout(() => loading.value=false, 500);
 };
 
+const refreshDeepNetwork = async (
+  depth: number,
+  maxDepth: number,
+  nodes: {[id: string]: PersonNode|OrganizationNode},
+) => {
+  if (depth-2 < 0 || depth > maxDepth) return;
+  for (const n of Object.values(nodes)) {
+    const memberships = await Membership.get(new Organ(n.id, n.bio));
+    deeperNodes.value[depth] = {
+      ...deeperNodes.value[depth]||{},
+      ...memberships
+         .filter(m => !Object.keys(deeperNodes.value[depth-2]).includes(m.organ.id.toString())
+                      && !Object.keys(deeperNodes.value[depth-2]).includes(m.organization.id.toString()))
+         .map(m => ({
+        [(m.organ.id !== n.id ? m.organ.id : m.organization.id).toString()]: (
+          m.organ.id !== n.id
+          ? (
+            m.organ instanceof Person 
+            ? new PersonNode(m.organ as Person) 
+            : new OrganizationNode(m.organ as Organization)
+          )
+          : new OrganizationNode(m.organization)
+        ),
+      })).reduce((a, b) => ({ ...a, ...b }), {}),
+    };
+    deeperEdges.value[depth] = [
+      ...deeperEdges.value[depth]||[],
+      ...memberships
+         .filter(m => !Object.keys(deeperNodes.value[depth-2]).includes(m.organ.id.toString())
+                      && !Object.keys(deeperNodes.value[depth-2]).includes(m.organization.id.toString()))
+         .map(m => new MembershipEdge(m)),
+    ];
+    if (n instanceof PersonNode) {
+      const parents = await n.parents.get();
+      const romantic = await n.romantic.get();
+      const children = await n.children.get();
+      const friends = await n.friends.get();
+      deeperNodes.value[depth] = {
+        ...deeperNodes.value[depth]||{},
+        ...([...parents, ...romantic, ...children, ...friends]
+            .filter(r => !Object.keys(deeperNodes.value[depth-2]).includes(r.other.id.toString()))
+            .map(r => ({
+          [r.other.id.toString()]: new PersonNode(r.other),
+        })).reduce((a, b) => ({ ...a, ...b }), {})),
+      };
+      deeperEdges.value[depth] = [
+        ...deeperEdges.value[depth]||[],
+        ...([...parents, ...romantic, ...children, ...friends]
+            .filter(r => !Object.keys(deeperNodes.value[depth-2]).includes(r.other.id.toString()))
+            .map(r => new RelationEdge(r, n))
+        ),
+      ];
+    }
+    else if (n instanceof OrganizationNode) {
+      const members = await Membership.get(n);
+      deeperNodes.value[depth] = {
+        ...deeperNodes.value[depth]||{},
+        ...members
+           .filter(m => !Object.keys(deeperNodes.value[depth-2]).includes(m.organ.id.toString()))
+           .map(m => ({
+          [m.organ.id.toString()]: (
+            m.organ instanceof Person 
+            ? new PersonNode(m.organ as Person) 
+            : new OrganizationNode(m.organ as Organization)
+          ),
+        })).reduce((a, b) => ({ ...a, ...b }), {}),
+      };
+      deeperEdges.value[depth] = [
+        ...deeperEdges.value[depth]||[],
+        ...members
+           .filter(m => !Object.keys(deeperNodes.value[depth-2]).includes(m.organ.id.toString()))
+           .map(m => new MembershipEdge(m)),
+      ];
+    }
+  }
+  await refreshDeepNetwork(depth+1, maxDepth, deeperNodes.value[depth]);
+};
+
+watch(
+  distance,
+  async () => {
+    loading.value = true;
+    deeperNodes.value.splice(+distance.value);
+    deeperEdges.value.splice(+distance.value);
+    await refreshDeepNetwork(+distance.value, +distance.value, deeperNodes.value[distance.value-1]); 
+    await refreshNetwork();
+  },
+);
+
 watch(
   () => [props.organ, props.organ?._vref, props.memberships, props.members,], 
-  refreshNetwork, 
+  async () => {
+    if (!props.organ) return;
+    await refreshNetwork();
+    deeperNodes.value[0] = { [props.organ.id.toString()]: nodes.value[props.organ.id.toString()], };
+    deeperNodes.value[1] = Object.values(nodes.value).filter(n => n.id !== props.organ!.id).reduce((a, b) => ({ ...a, [b.id]: b, }), {});
+  },
   { immediate: true }
 );
 </script>
 
 <template>
+  <div class="controls">
+    <label for="distance">Distance</label>
+    <span>{{ distance }}</span>
+    <input id="distance" v-model="distance" type="range" min="1" max="3" step="1" />
+  </div>
   <v-network-graph
     :nodes="nodes"
     :edges="edges"
@@ -317,6 +426,21 @@ watch(
 </template>
 
 <style scoped>
+.controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: .5em;
+  gap: 1em;
+  border-bottom: 2px dashed var(--color-border);
+  z-index: 98;
+  backdrop-filter: blur(10px);
+}
+
 .loading {
   position: absolute;
   top: 0;
@@ -326,7 +450,7 @@ watch(
   font-size: 2em;
   color: var(--color-text);
   z-index: 99;
-  background-color: rgba(20, 20, 20, .99);
+  backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
   justify-content: center;
