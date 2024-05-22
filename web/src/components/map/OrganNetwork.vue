@@ -123,6 +123,7 @@ class MembershipEdge extends Membership {
   }
 }
 
+const graph = ref<vNG.VNetworkGraphInstance>();
 const nodes: Ref<{[id: string]: PersonNode|OrganizationNode}> = ref({});
 const edges: Ref<(RelationEdge|MembershipEdge)[]> = ref([]);
 const configs = ref(
@@ -367,6 +368,7 @@ watch(
     <input id="distance" v-model="distance" type="range" min="1" max="3" step="1" />
   </div>
   <v-network-graph
+    ref="graph"
     :nodes="nodes"
     :edges="edges"
     :configs="configs"
