@@ -24,7 +24,7 @@ const memberships: Ref<Membership[]> = ref([]);
 const newMembership: Ref<Membership|null> = ref(null);
 
 const addMembership = async () => {
-  if (!props.organ || !newMembership.value || newMembership.value.role.id < 0 || isNaN(newMembership.value.since.getTime())) return;
+  if (!props.organ || !newMembership.value || newMembership.value.role.id < 0) return;
   await newMembership.value.create([ 'none', ]);
   memberships.value.push(newMembership.value);
   newMembership.value = null;
