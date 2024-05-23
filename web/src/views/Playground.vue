@@ -67,6 +67,7 @@ window.Organization = Organization;
       <OrganizationNetwork
         :organization="organization"
         cytoscape
+        layout="cola"
       />
     </div>
     <!-- <div class="details-wrapper gp-scroll">

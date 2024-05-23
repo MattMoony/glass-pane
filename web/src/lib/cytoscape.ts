@@ -2,7 +2,7 @@ import Person from "@/models/Person";
 import Relation from "@/models/Relation";
 import Organization from "@/models/Organization";
 import Membership from "@/models/Membership";
-import RelationType from "@/models/RelationTypes";
+import RelationType, { COLORS } from "@/models/RelationTypes";
 
 /**
  * Represents a Cytoscape node.
@@ -78,6 +78,7 @@ export class RelationEdge extends Relation {
     source: string;
     target: string;
     label: string;
+    color: string;
   };
 
   constructor (relation: Relation, person: Person) {
@@ -95,6 +96,7 @@ export class RelationEdge extends Relation {
         ? { source: this.other.toString(), target: person.id.toString() }
         : { source: person.id.toString(), target: this.other.toString() }
       ),
+      color: COLORS[this.type],
     };
   }
 }
@@ -135,6 +137,7 @@ export class MembershipEdge extends Membership {
     source: string;
     target: string;
     label: string;
+    color: string;
   };
 
   constructor (membership: Membership) {
@@ -151,6 +154,7 @@ export class MembershipEdge extends Membership {
       label: this.role.name,
       source: this.organ.id.toString(),
       target: this.organization.id.toString(),
+      color: 'rgba(84, 84, 84, 0.48)',
     };
   }
 }
