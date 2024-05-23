@@ -21,7 +21,7 @@ const edit = ref(false);
 (async () => {
   // const p = await Person.get(1);
   // person.value = p;
-  const o = await Organization.get(9);
+  const o = await Organization.get(4);
   organization.value = o;
 })();
 
@@ -36,7 +36,7 @@ window.Organization = Organization;
       <input 
         type="text"
         placeholder="person id"
-        value="9"
+        value="4"
         @keyup="async (e) => {
           // const p = await Person.get(parseInt((e.target! as HTMLInputElement).value));
           // person = p;
@@ -67,7 +67,6 @@ window.Organization = Organization;
       <OrganizationNetwork
         :organization="organization"
         cytoscape
-        layout="cola"
       />
     </div>
     <!-- <div class="details-wrapper gp-scroll">

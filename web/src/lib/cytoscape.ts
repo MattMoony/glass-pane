@@ -90,7 +90,7 @@ export class RelationEdge extends Relation {
       relation.until,
     );
     this.data = {
-      id: this.id.toString(),
+      id: `r-${this.id}-${person.id}-${this.other.id}`,
       label: RelationType[this.type].toLowerCase(),
       ...(this.type === RelationType.CHILD
         ? { source: this.other.id.toString(), target: person.id.toString() }
@@ -150,7 +150,7 @@ export class MembershipEdge extends Membership {
       membership.until,
     )
     this.data = {
-      id: `${this.id}-${this.organ.id.toString()}-${this.organization.id.toString()}`,
+      id: `m-${this.id}-${this.organ.id}-${this.organization.id}`,
       label: this.role.name,
       source: this.organ.id.toString(),
       target: this.organization.id.toString(),

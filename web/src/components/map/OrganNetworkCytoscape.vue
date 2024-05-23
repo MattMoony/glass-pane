@@ -4,6 +4,10 @@ import cytoscape from 'cytoscape';
 // @ts-ignore
 import cola from 'cytoscape-cola';
 import fcose from 'cytoscape-fcose';
+import avsdf from 'cytoscape-avsdf';
+import euler from 'cytoscape-euler';
+// @ts-ignore
+import spread from 'cytoscape-spread';
 // @ts-ignore
 import BounceLoader from 'vue-spinner/src/BounceLoader.vue';
 
@@ -41,7 +45,7 @@ const props = defineProps<{
    * The layout algorithm to
    * use for the graph.
    */
-  layout?: 'cola'|'fcose';
+  layout?: 'cola'|'fcose'|'avsdf'|'euler'|'spread';
 }>();
 
 const cy = ref<cytoscape.Core>();
@@ -53,6 +57,28 @@ const loading: Ref<boolean> = ref(true);
 
 cytoscape.use(cola);
 cytoscape.use(fcose);
+cytoscape.use(avsdf);
+cytoscape.use(euler);
+cytoscape.use(spread);
+
+const layoutConfigs = {
+  cola: {
+    name: 'cola',
+    nodeDimensionsIncludeLabels: true,
+  },
+  fcose: {
+    name: 'fcose',
+  },
+  avsdf: {
+    name: 'avsdf',
+  },
+  euler: {
+    name: 'euler',
+  },
+  spread: {
+    name: 'spread',
+  },
+};
 
 const refreshData = () => {
   if (props.organ instanceof Person)
@@ -80,12 +106,12 @@ const refreshData = () => {
   });
 };
 
-const refreshLayout = () => {
-  cy.value?.layout({
-    name: props.layout || 'breadthfirst',
-  }).run().on('layoutstop', () => {
-    loading.value = false;
-  });
+const refreshLayout = async (): Promise<void> => {
+  return new Promise((resolve, reject) => cy.value?.layout(
+    layoutConfigs[props.layout || 'cola'],
+  ).run()?.on('layoutstop', () => {
+    resolve();
+  }));
 }
 
 const refresh = async () => {
@@ -94,12 +120,16 @@ const refresh = async () => {
   cy.value.elements().remove();
   
   refreshData();
-  for (const n of nodes.value.flat())
+  for (const n of nodes.value.flat()) {
+    if (cy.value.getElementById(n.data.id).length) continue;
     cy.value.add(n);
-  for (const e of edges.value.flat())
+  }
+  for (const e of edges.value.flat()) {
+    if (cy.value.getElementById(e.data.id).length) continue;
     cy.value.add(e);
+  }
 
-  refreshLayout();
+  await refreshLayout();
 };
 
 const refreshDeep = async (
@@ -146,19 +176,19 @@ const refreshDeep = async (
     cy.value.add(n);
   }
   for (const e of edges.value[depth]) {
-    console.log('edge', e, e.data.id, cy.value.getElementById(e.data.id));
     if (cy.value.getElementById(e.data.id).length) continue;
     cy.value.add(e);
   }
 
-  refreshLayout();
-  refreshDeep(depth+1, maxDepth, nodes.value[depth]);
+  await refreshLayout();
+  await refreshDeep(depth+1, maxDepth, nodes.value[depth]);
 };
 
-onMounted(() => {
+onMounted(async () => {
   loading.value = true;
   cy.value = cytoscape({
     container: container.value,
+    wheelSensitivity: .1,
     style: [
       {
         selector: 'node',
@@ -175,6 +205,17 @@ onMounted(() => {
         },
       },
       {
+        selector: 'node.highlight',
+        style: {
+        },
+      },
+      {
+        selector: 'node.semitransp',
+        style: {
+          opacity: .5,
+        },
+      },
+      {
         selector: 'edge',
         style: {
           content: 'data(label)',
@@ -188,9 +229,31 @@ onMounted(() => {
           "text-rotation": "autorotate",
         },
       },
+      {
+        selector: 'edge.highlight',
+        style: {
+        },
+      },
+      {
+        selector: 'edge.semitransp',
+        style: {
+          opacity: .2,
+        },
+      },
     ],
   });
-  refresh();
+  cy.value.on('mouseover', 'node', e => {
+    const edges = e.target.connectedEdges();
+    cy.value!.elements().difference(edges.union(edges.connectedNodes())).addClass('semitransp');
+    edges.addClass('highlight').connectedNodes().addClass('highlight');
+  });
+  cy.value.on('mouseout', 'node', e => {
+    const edges = e.target.connectedEdges();
+    cy.value!.elements().removeClass('semitransp');
+    edges.removeClass('highlight').connectedNodes().removeClass('highlight');
+  });
+  await refresh();
+  loading.value = false;
 });
 
 watch(
@@ -204,6 +267,8 @@ watch(
       +distance.value, 
       nodes.value[+distance.value-1]
     );
+    await refresh();
+    loading.value = false;
   }
 )
 
@@ -216,7 +281,11 @@ watch(
     props.members, 
     props.relations,
   ], 
-  refresh,
+  async () => {
+    loading.value = true;
+    await refresh();
+    loading.value = false;
+  },
   { immediate: true },
 );
 </script>
