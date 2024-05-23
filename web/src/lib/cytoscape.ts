@@ -50,6 +50,7 @@ export class PersonNode extends Person {
     id: string;
     label: string;
     image: string;
+    type: string;
   };
 
   constructor (person: Person) {
@@ -65,6 +66,7 @@ export class PersonNode extends Person {
       id: this.id.toString(),
       label: this.firstname + " " + this.lastname,
       image: this.pic.src(),
+      type: 'person',
     };
   }
 }
@@ -79,6 +81,7 @@ export class RelationEdge extends Relation {
     target: string;
     label: string;
     color: string;
+    type: string;
   };
 
   constructor (relation: Relation, person: Person) {
@@ -97,6 +100,7 @@ export class RelationEdge extends Relation {
         : { source: person.id.toString(), target: this.other.id.toString() }
       ),
       color: COLORS[this.type],
+      type: 'relation',
     };
   }
 }
@@ -109,6 +113,7 @@ export class OrganizationNode extends Organization {
     id: string;
     label: string;
     image: string;
+    type: string;
   };
 
   constructor (organization: Organization) {
@@ -123,6 +128,7 @@ export class OrganizationNode extends Organization {
       id: this.id.toString(),
       label: this.name,
       image: this.pic.src(),
+      type: 'organization',
     };
   }
 }
@@ -138,6 +144,7 @@ export class MembershipEdge extends Membership {
     target: string;
     label: string;
     color: string;
+    type: string;
   };
 
   constructor (membership: Membership) {
@@ -155,6 +162,7 @@ export class MembershipEdge extends Membership {
       source: this.organ.id.toString(),
       target: this.organization.id.toString(),
       color: 'rgba(84, 84, 84, 0.48)',
+      type: 'membership',
     };
   }
 }

@@ -52,6 +52,7 @@ watch(pid, async (newPid: number) => {
       <PersonNetwork 
         :person="person" 
         show-memberships
+        cytoscape
       />
     </template>
   </OrganPage>

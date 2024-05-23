@@ -22,6 +22,7 @@ import {
   OrganizationNode,
   MembershipEdge,
 } from '@/lib/cytoscape';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   /**
@@ -48,6 +49,7 @@ const props = defineProps<{
   layout?: 'cola'|'fcose'|'avsdf'|'euler'|'spread';
 }>();
 
+const router = useRouter();
 const cy = ref<cytoscape.Core>();
 const container = ref<HTMLDivElement>();
 const nodes: Ref<(PersonNode|OrganizationNode)[][]> = ref([]);
@@ -251,6 +253,14 @@ onMounted(async () => {
     const edges = e.target.connectedEdges();
     cy.value!.elements().removeClass('semitransp');
     edges.removeClass('highlight').connectedNodes().removeClass('highlight');
+  });
+  cy.value.on('click', 'node', e => {
+    const node = e.target;
+    if (node.data().type === 'person') {
+      router.push(`/p/${node.data().id}`);
+    } else if (node.data().type === 'organization') {
+      router.push(`/o/${node.data().id}`);
+    }
   });
   await refresh();
   loading.value = false;

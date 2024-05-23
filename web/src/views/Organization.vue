@@ -54,6 +54,7 @@ watch(oid, async (newOid: number) => {
     <template #right>
       <OrganizationNetwork
         :organization="organization"
+        cytoscape
       />
     </template>
   </OrganPage>
