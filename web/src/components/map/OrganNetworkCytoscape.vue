@@ -142,12 +142,12 @@ const refreshDeep = async (
     }
   }
   for (const n of nodes.value[depth]) {
-    console.log(n);
-    if (cy.value.getElementById(n.data.id)) continue;
+    if (cy.value.getElementById(n.data.id).length) continue;
     cy.value.add(n);
   }
   for (const e of edges.value[depth]) {
-    if (cy.value.getElementById(e.data.id)) continue;
+    console.log('edge', e, e.data.id, cy.value.getElementById(e.data.id));
+    if (cy.value.getElementById(e.data.id).length) continue;
     cy.value.add(e);
   }
 

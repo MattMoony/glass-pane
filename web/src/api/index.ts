@@ -1,7 +1,7 @@
 /**
  * Module for interacting with the API.
  */
-export const API = 'http://localhost:8888/api';
+export const API = 'https://api.watchthe.top/api';
 
 /**
  * The standard format for API responses.

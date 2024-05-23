@@ -93,8 +93,8 @@ export class RelationEdge extends Relation {
       id: this.id.toString(),
       label: RelationType[this.type].toLowerCase(),
       ...(this.type === RelationType.CHILD
-        ? { source: this.other.toString(), target: person.id.toString() }
-        : { source: person.id.toString(), target: this.other.toString() }
+        ? { source: this.other.id.toString(), target: person.id.toString() }
+        : { source: person.id.toString(), target: this.other.id.toString() }
       ),
       color: COLORS[this.type],
     };
