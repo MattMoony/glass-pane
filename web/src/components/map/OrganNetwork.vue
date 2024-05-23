@@ -350,7 +350,7 @@ watch(
 );
 
 watch(
-  () => [props.organ, props.organ?._vref, props.memberships, props.members,], 
+  () => [props.organ, props.organ?._vref, props.memberships, props.members, props.relations,], 
   async () => {
     if (!props.organ) return;
     await refreshNetwork();

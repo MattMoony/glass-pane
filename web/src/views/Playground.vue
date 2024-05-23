@@ -11,6 +11,8 @@ import OrganDetails from '@/components/info/details/OrganDetails.vue';
 import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 import OrganizationDetails from '@/components/info/details/organization/OrganizationDetails.vue';
 import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
+import OrganNetworkCytoscape from '@/components/map/OrganNetworkCytoscape.vue';
+import OrganizationNetwork from '@/components/map/organization/OrganizationNetwork.vue';
 
 const person = ref<Person | null>(null);
 const organization = ref<Organization | null>(null);
@@ -57,23 +59,27 @@ window.Organization = Organization;
         :edit="edit"
       />
     </div>
-    <!-- <div class="netw-wrapper">
-      <PersonNetworkNew
+    <div class="netw-wrapper">
+      <!-- <PersonNetworkNew
         :person="person"
         show-memberships
+      /> -->
+      <OrganizationNetwork
+        :organization="organization"
+        cytoscape
       />
-    </div> -->
-    <div class="details-wrapper gp-scroll">
-      <!-- <PersonDetails
+    </div>
+    <!-- <div class="details-wrapper gp-scroll">
+      <PersonDetails
         :person="person"
         :edit="edit"
       >
-      </PersonDetails> -->
+      </PersonDetails>
       <OrganizationDetails
         :organization="organization"
         :edit="edit"
       />
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -113,6 +119,9 @@ window.Organization = Organization;
 .netw-wrapper {
   flex-grow: 1;
   flex-basis: 0;
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
 }
 
 .details-wrapper {

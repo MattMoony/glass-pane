@@ -7,6 +7,7 @@ import Relation from '@/models/Relation';
 import Membership from '@/models/Membership';
 
 import OrganNetwork from '@/components/map/OrganNetwork.vue';
+import OrganNetworkCytoscape from '@/components/map/OrganNetworkCytoscape.vue';
 
 const props = defineProps<{
   /**
@@ -17,6 +18,10 @@ const props = defineProps<{
    * Whether to show memberships in organizations.
    */
   showMemberships?: boolean;
+  /**
+   * Whether to use cytoscape for rendering.
+   */
+  cytoscape?: boolean;
 }>();
 
 const relations: Ref<Relation[]> = ref([]);
@@ -37,6 +42,13 @@ watch(() => [props.person, props.person?._vref,], refreshNetwork, { immediate: t
     :organ="props.person"
     :relations="relations"
     :memberships="memberships"
+    v-if="!cytoscape"
+  />
+  <OrganNetworkCytoscape
+    :organ="props.person"
+    :relations="relations"
+    :memberships="memberships"
+    v-else
   />
 </template>
 

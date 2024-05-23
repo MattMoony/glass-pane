@@ -7,12 +7,17 @@ import Organization from '@/models/Organization';
 import Membership from '@/models/Membership';
 
 import OrganNetwork from '@/components/map/OrganNetwork.vue';
+import OrganNetworkCytoscape from '@/components/map/OrganNetworkCytoscape.vue';
 
 const props = defineProps<{
   /**
    * The organization to show the network for.
    */
   organization: Organization|null;
+  /**
+   * Whether to use cytoscape for rendering.
+   */
+  cytoscape?: boolean;
 }>();
 
 const memberships: Ref<Membership[]> = ref([]);
@@ -36,6 +41,13 @@ watch(
     :organ="props.organization"
     :memberships="memberships"
     :members="members"
+    v-if="!cytoscape"
+  />
+  <OrganNetworkCytoscape
+    :organ="props.organization"
+    :memberships="memberships"
+    :members="members"
+    v-else
   />
 </template>
 
