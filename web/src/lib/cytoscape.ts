@@ -3,6 +3,7 @@ import Relation from "@/models/Relation";
 import Organization from "@/models/Organization";
 import Membership from "@/models/Membership";
 import RelationType, { COLORS } from "@/models/RelationTypes";
+import Role from "@/models/Role";
 
 /**
  * Represents a Cytoscape node.
@@ -11,12 +12,14 @@ class Node {
   public data: {
     id: string;
     label: string;
+    parent?: string;
   };
 
-  constructor (id: number, label: string) {
+  constructor (id: number, label: string, parent?: string) {
     this.data = {
       id: id.toString(),
       label,
+      ...(parent ? {parent,} : {}),
     };
   }
 }
@@ -170,3 +173,130 @@ export class MembershipEdge extends Membership {
     };
   }
 }
+
+/**
+ * Group memberships into compound nodes.
+ */
+export const groupMemberships = (memberships: Membership[]) => {
+  const nodes: (any)[] = [];
+  const edges: (any)[] = [];
+  const grouped = new Map<number, [Role, Membership[]]>();
+  memberships.forEach((m) => {
+    if (!grouped.has(m.role.id)) grouped.set(m.role.id, [m.role, []]);
+    grouped.get(m.role.id)![1].push(m);
+  });
+  for (const [role, ms] of grouped) {
+    if (ms[1].length > 1) {
+      const group = { 
+        data: {
+          id: `${ms[1][0].organ.id}-${ms[0].name.toString()}`,
+          label: ms[0].name.toString(),
+          color: getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        },
+      };
+      nodes.push(group);
+      ms[1].forEach((m) => {
+        const organization = new OrganizationNode(m.organization, group);
+        nodes.push(organization);
+      });
+      edges.push({ 
+        data: {
+          id: `edge-${group.data.id}`, 
+          source: ms[1][0].organ.id, 
+          target: group.data.id,
+          color: getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
+        },
+      });
+    } else {
+      const membership = new MembershipEdge(ms[1][0]);
+      nodes.push(new OrganizationNode(ms[1][0].organization));
+      edges.push(membership);
+    }
+  }
+  return [nodes, edges];
+};
+
+/**
+ * Group members into compound nodes.
+ */
+export const groupMembers = (members: Membership[]) => {
+  const nodes: (any)[] = [];
+  const edges: (any)[] = [];
+  const grouped = new Map<number, [Role, Membership[]]>();
+  members.forEach((m) => {
+    if (!grouped.has(m.role.id)) grouped.set(m.role.id, [m.role, []]);
+    grouped.get(m.role.id)![1].push(m);
+  });
+  for (const [role, ms] of grouped) {
+    if (ms[1].length > 1) {
+      const group = { 
+        data: {
+          id: `${ms[1][0].organization.id}-${ms[0].name.toString()}`,
+          label: ms[0].name.toString(),
+          color: getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        },
+      };
+      nodes.push(group);
+      ms[1].forEach((m) => {
+        const person = m.organ instanceof Person 
+                       ? new PersonNode(m.organ, group) 
+                       : new OrganizationNode(m.organ as Organization, group);
+        nodes.push(person);
+      });
+      edges.push({ 
+        data: {
+          id: `edge-${group.data.id}`,
+          source: group.data.id, 
+          target: ms[1][0].organization.id,
+          color: getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
+        },
+      });
+    } else {
+      const membership = new MembershipEdge(ms[1][0]);
+      nodes.push(ms[1][0].organ instanceof Person 
+                 ? new PersonNode(ms[1][0].organ as Person) 
+                 : new OrganizationNode(ms[1][0].organ as Organization));
+      edges.push(membership);
+    }
+  }
+  return [nodes, edges];
+};
+
+export const groupRelations = (relations: Relation[], person: Person) => {
+  const nodes: (any)[] = [];
+  const edges: (any)[] = [];
+  const grouped = new Map<number, Relation[]>();
+  relations.forEach((r) => {
+    if (!grouped.has(r.type)) grouped.set(r.type, []);
+    grouped.get(r.type)!.push(r);
+  });
+  for (const [type, rs] of grouped) {
+    if (rs.length > 1) {
+      const group = { 
+        data: {
+          id: `${person.id}-${RelationType[type].toLowerCase()}`,
+          label: RelationType[type].toLowerCase(),
+          color: COLORS[type as RelationType],
+        },
+      };
+      nodes.push(group);
+      rs.forEach((r) => {
+        const person = new PersonNode(r.other, group);
+        nodes.push(person);
+      });
+      edges.push({ 
+        data: {
+          id: `edge-${group.data.id}`, 
+          source: group.data.id, 
+          target: person.id,
+          color: COLORS[type as RelationType],
+        },
+      });
+    } else {
+      const relation = new RelationEdge(rs[0], person);
+      nodes.push(new PersonNode(rs[0].other));
+      edges.push(relation);
+    }
+  }
+  return [nodes, edges];
+};

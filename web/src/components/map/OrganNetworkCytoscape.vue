@@ -16,12 +16,14 @@ import Person from '@/models/Person';
 import Relation from '@/models/Relation';
 import Organization from '@/models/Organization';
 import Membership from '@/models/Membership';
-import Role from '@/models/Role';
 import { 
   PersonNode,
   RelationEdge,
   OrganizationNode,
   MembershipEdge,
+  groupMembers,
+  groupMemberships,
+  groupRelations,
 } from '@/lib/cytoscape';
 import { useRouter } from 'vue-router';
 
@@ -71,6 +73,7 @@ const layoutConfigs = {
   },
   fcose: {
     name: 'fcose',
+    nodeDimensionsIncludeLabels: true,
   },
   avsdf: {
     name: 'avsdf',
@@ -80,74 +83,13 @@ const layoutConfigs = {
   },
   spread: {
     name: 'spread',
+    prelayout: {
+      name: 'fcose',
+    },
   },
 };
 
-const groupMemberships = (memberships: Membership[]) => {
-  const nodes: (any)[] = [];
-  const edges: (any)[] = [];
-  const grouped = new Map<number, [Role, Membership[]]>();
-  memberships.forEach((m) => {
-    if (!grouped.has(m.role.id)) grouped.set(m.role.id, [m.role, []]);
-    grouped.get(m.role.id)![1].push(m);
-  });
-  for (const [role, ms] of grouped) {
-    const group = { 
-      data: {
-        id: `${ms[1][0].organ.id}-${ms[0].name.toString()}`,
-        label: ms[0].name.toString(),
-      },
-    };
-    nodes.push(group);
-    ms[1].forEach((m) => {
-      const organization = new OrganizationNode(m.organization, group);
-      nodes.push(organization);
-    });
-    edges.push({ 
-      data: {
-        id: `edge-${group.data.id}`, 
-        source: ms[1][0].organ.id, 
-        target: group.data.id,
-        color: getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
-      },
-    });
-  }
-  return [nodes, edges];
-};
-
-const groupMembers = (members: Membership[]) => {
-  const nodes: (any)[] = [];
-  const edges: (any)[] = [];
-  const grouped = new Map<number, [Role, Membership[]]>();
-  members.forEach((m) => {
-    if (!grouped.has(m.role.id)) grouped.set(m.role.id, [m.role, []]);
-    grouped.get(m.role.id)![1].push(m);
-  });
-  for (const [role, ms] of grouped) {
-    const group = { 
-      data: {
-        id: `${ms[1][0].organization.id}-${ms[0].name.toString()}`,
-        label: ms[0].name.toString(),
-      },
-    };
-    nodes.push(group);
-    ms[1].forEach((m) => {
-      const person = m.organ instanceof Person ? new PersonNode(m.organ, group) : new OrganizationNode(m.organ as Organization, group);
-      nodes.push(person);
-    });
-    edges.push({ 
-      data: {
-        id: `edge-${group.data.id}`,
-        source: group.data.id, 
-        target: ms[1][0].organization.id,
-        color: getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
-      },
-    });
-  }
-  return [nodes, edges];
-};
-
-const refreshData = () => {
+const refreshData = async () => {
   if (props.organ instanceof Person)
     nodes.value[0] = [new PersonNode(props.organ),];
   else if (props.organ instanceof Organization)
@@ -173,18 +115,26 @@ const refreshData = () => {
   const members = groupMembers(props.members || []);
   nodes.value[1].push(...members[0]);
   edges.value[1].push(...members[1]);
-  props.relations?.forEach((r) => {
-    nodes.value[1].push(new PersonNode(r.other));
-    edges.value[1].push(new RelationEdge(r, props.organ as Person));
-  });
+  // props.relations?.forEach((r) => {
+  //   nodes.value[1].push(new PersonNode(r.other));
+  //   edges.value[1].push(new RelationEdge(r, props.organ as Person));
+  // });
+  const relations = groupRelations(props.relations || [], props.organ as Person)
+  nodes.value[1].push(...relations[0]);
+  edges.value[1].push(...relations[1]);
 };
 
 const refreshLayout = async (): Promise<void> => {
-  return new Promise((resolve, reject) => cy.value?.layout(
-    layoutConfigs[props.layout || 'cola'],
-  ).run()?.on('layoutstop', () => {
-    resolve();
-  }));
+  return new Promise((resolve, reject) => {
+    // max loading ...
+    window.setTimeout(() => resolve(), 2000);
+    cy.value?.layout({
+      ...layoutConfigs[props.layout || 'fcose'],
+      stop: () => {
+        resolve();
+      },
+    }).run()
+  });
 }
 
 const refresh = async () => {
@@ -192,18 +142,15 @@ const refresh = async () => {
   loading.value = true;
   cy.value.elements().remove();
   
-  refreshData();
-  console.log('refreshing');
+  await refreshData();
   for (const n of nodes.value.flat()) {
     if (cy.value.getElementById(n.data.id).length) continue;
-    console.log(n.data);
     cy.value.add(n);
   }
   for (const e of edges.value.flat()) {
     if (cy.value.getElementById(e.data.id).length) continue;
     cy.value.add(e);
   }
-
   await refreshLayout();
 };
 
@@ -255,7 +202,6 @@ const refreshDeep = async (
     cy.value.add(e);
   }
 
-  await refreshLayout();
   await refreshDeep(depth+1, maxDepth, nodes.value[depth]);
 };
 
@@ -283,11 +229,11 @@ onMounted(async () => {
         selector: 'node:parent',
         css: {
           'content': 'data(label)',
-          'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+          'color': 'data(color)',
           'font-size': '.5em',
-          'background-opacity': 0.333,
-          'background-color': getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
-          'border-color': getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
+          'background-opacity': 0.2,
+          'background-color': 'data(color)',
+          'border-color': 'data(color)',
         },
       },
       {
