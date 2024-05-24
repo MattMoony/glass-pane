@@ -1,9 +1,91 @@
+import cytoscape from "cytoscape";
+
 import Person from "@/models/Person";
 import Relation from "@/models/Relation";
 import Organization from "@/models/Organization";
 import Membership from "@/models/Membership";
 import RelationType, { COLORS } from "@/models/RelationTypes";
 import Role from "@/models/Role";
+
+export const GRAPH_STYLE: cytoscape.CytoscapeOptions = {
+  wheelSensitivity: .1,
+  style: [
+    {
+      selector: 'node[type]',
+      style: {
+        'content': 'data(label)',
+        'text-wrap': 'wrap',
+        'line-height': 1.1,
+        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'background-image': 'data(image)',
+        'background-repeat': 'no-repeat',
+        'background-fit': 'cover',
+        'background-color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'border-color': getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
+        'border-width': '1.5px',
+        'font-size': '.6em',
+        'text-valign': 'bottom',
+        'text-margin-y': 5,
+      },
+    },
+    {
+      selector: 'node:parent',
+      css: {
+        'content': 'data(label)',
+        'text-wrap': 'wrap',
+        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'font-size': '.8em',
+        'background-opacity': 0.2,
+        'background-color': 'data(color)',
+        'border-color': 'data(color)',
+        'shape': 'roundrectangle'
+      },
+    },
+    {
+      selector: 'node.highlight',
+      style: {
+      },
+    },
+    {
+      selector: 'node.semitransp',
+      style: {
+        opacity: .5,
+      },
+    },
+    {
+      selector: 'edge',
+      style: {
+        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'width': '1.5px',
+        'curve-style': 'bezier',
+        'target-arrow-shape': 'triangle',
+        'line-color': 'data(color)',
+        'target-arrow-color': 'data(color)',
+        'font-size': '.6em',
+      },
+    },
+    {
+      selector: 'edge[label]',
+      style: {
+        'content': 'data(label)',
+        'text-wrap': 'wrap',
+        'text-rotation': 'autorotate',
+        'line-height': 1.1,
+      },
+    },
+    {
+      selector: 'edge.highlight',
+      style: {
+      },
+    },
+    {
+      selector: 'edge.semitransp',
+      style: {
+        'opacity': .2,
+      },
+    },
+  ],
+};
 
 /**
  * Represents a Cytoscape node.
@@ -68,7 +150,7 @@ export class PersonNode extends Person {
     );
     this.data = {
       id: this.id.toString(),
-      label: this.firstname + " " + this.lastname,
+      label: this.firstname + ' ' + this.lastname + (this.birthdate ? `\n*${this.birthdate.getFullYear()}` : ''),
       image: this.pic.src(),
       type: 'person',
       ...(parentNode ? {parent: parentNode.data.id,} : {}),
@@ -99,7 +181,9 @@ export class RelationEdge extends Relation {
     );
     this.data = {
       id: `r-${this.id}-${person.id}-${this.other.id}`,
-      label: RelationType[this.type].toLowerCase(),
+      label: RelationType[this.type].toLowerCase() 
+             + (this.since ? `\n${this.since.getFullYear()} - ` : '')
+             + (this.until ? `${this.since ? '' : '\n - '}${this.until.getFullYear()}` : ''),
       ...(this.type === RelationType.CHILD
         ? { source: this.other.id.toString(), target: person.id.toString() }
         : { source: person.id.toString(), target: this.other.id.toString() }
@@ -132,7 +216,7 @@ export class OrganizationNode extends Organization {
     );
     this.data = {
       id: this.id.toString(),
-      label: this.name,
+      label: this.name + (this.established ? `\n*${this.established.getFullYear()}` : ''),
       image: this.pic.src(),
       type: 'organization',
       ...(parentNode ? {parent: parentNode.data.id,} : {}),
@@ -165,7 +249,9 @@ export class MembershipEdge extends Membership {
     )
     this.data = {
       id: `m-${this.id}-${this.organ.id}-${this.organization.id}`,
-      label: this.role.name,
+      label: this.role.name 
+             + (this.since ? `\n${this.since.getFullYear()} - ` : '')
+             + (this.until ? `${this.since ? '' : '\n - '}${this.until.getFullYear()}` : ''),
       source: this.organ.id.toString(),
       target: this.organization.id.toString(),
       color: 'rgba(84, 84, 84, 0.48)',
@@ -191,7 +277,7 @@ export const groupMemberships = (memberships: Membership[]) => {
         data: {
           id: `${ms[1][0].organ.id}-${ms[0].name.toString()}`,
           label: ms[0].name.toString(),
-          color: getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+          color: getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
         },
       };
       nodes.push(group);
@@ -233,7 +319,7 @@ export const groupMembers = (members: Membership[]) => {
         data: {
           id: `${ms[1][0].organization.id}-${ms[0].name.toString()}`,
           label: ms[0].name.toString(),
-          color: getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+          color: getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
         },
       };
       nodes.push(group);

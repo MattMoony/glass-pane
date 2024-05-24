@@ -24,6 +24,7 @@ import {
   groupMembers,
   groupMemberships,
   groupRelations,
+  GRAPH_STYLE,
 } from '@/lib/cytoscape';
 import { useRouter } from 'vue-router';
 
@@ -209,75 +210,7 @@ onMounted(async () => {
   loading.value = true;
   cy.value = cytoscape({
     container: container.value,
-    wheelSensitivity: .1,
-    style: [
-      {
-        selector: 'node[type]',
-        style: {
-          content: 'data(label)',
-          color: getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
-          "background-image": 'data(image)',
-          "background-repeat": 'no-repeat',
-          "background-fit": 'cover',
-          "background-color": getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
-          "border-color": getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
-          "border-width": "1.5px",
-          "font-size": ".6em",
-        },
-      },
-      {
-        selector: 'node:parent',
-        css: {
-          'content': 'data(label)',
-          'color': 'data(color)',
-          'font-size': '.5em',
-          'background-opacity': 0.2,
-          'background-color': 'data(color)',
-          'border-color': 'data(color)',
-        },
-      },
-      {
-        selector: 'node.highlight',
-        style: {
-        },
-      },
-      {
-        selector: 'node.semitransp',
-        style: {
-          opacity: .5,
-        },
-      },
-      {
-        selector: 'edge',
-        style: {
-          color: getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
-          "curve-style": "bezier",
-          "target-arrow-shape": "triangle",
-          "line-color": 'data(color)',
-          "target-arrow-color": 'data(color)',
-          "font-size": ".6em",
-          width: "1.5px",
-          "text-rotation": "autorotate",
-        },
-      },
-      {
-        selector: 'edge[label]',
-        style: {
-          content: 'data(label)',
-        },
-      },
-      {
-        selector: 'edge.highlight',
-        style: {
-        },
-      },
-      {
-        selector: 'edge.semitransp',
-        style: {
-          opacity: .2,
-        },
-      },
-    ],
+    ...GRAPH_STYLE,
   });
   cy.value.on('mouseover', 'node', e => {
     const edges = e.target.connectedEdges();
