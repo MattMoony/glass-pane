@@ -29,6 +29,14 @@ export const GRAPH_STYLE: cytoscape.CytoscapeOptions = {
       },
     },
     {
+      selector: 'node[centerNode]',
+      style: {
+        'border-width': '3px',
+        'width': 50,
+        'height': 50,
+      },
+    },
+    {
       selector: 'node:parent',
       css: {
         'content': 'data(label)',
@@ -139,7 +147,7 @@ export class PersonNode extends Person {
     parent?: string;
   };
 
-  constructor (person: Person, parentNode?: any) {
+  constructor (person: Person, parentNode?: any, center?: boolean) {
     super(
       person.id,
       person.bio,
@@ -154,6 +162,7 @@ export class PersonNode extends Person {
       image: this.pic.src(),
       type: 'person',
       ...(parentNode ? {parent: parentNode.data.id,} : {}),
+      ...(center ? {centerNode: true,} : {}),
     };
   }
 }
@@ -206,7 +215,7 @@ export class OrganizationNode extends Organization {
     parent?: string;
   };
 
-  constructor (organization: Organization, parentNode?: any) {
+  constructor (organization: Organization, parentNode?: any, center?: boolean) {
     super(
       organization.id,
       organization.bio,
@@ -220,6 +229,7 @@ export class OrganizationNode extends Organization {
       image: this.pic.src(),
       type: 'organization',
       ...(parentNode ? {parent: parentNode.data.id,} : {}),
+      ...(center ? {centerNode: true,} : {}),
     };
   }
 }
@@ -263,7 +273,7 @@ export class MembershipEdge extends Membership {
 /**
  * Group memberships into compound nodes.
  */
-export const groupMemberships = (memberships: Membership[]) => {
+export const groupMemberships = (memberships: Membership[], ignore?: (PersonNode|OrganizationNode)[]) => {
   const nodes: (any)[] = [];
   const edges: (any)[] = [];
   const grouped = new Map<number, [Role, Membership[]]>();
@@ -272,7 +282,7 @@ export const groupMemberships = (memberships: Membership[]) => {
     grouped.get(m.role.id)![1].push(m);
   });
   for (const [role, ms] of grouped) {
-    if (ms[1].length > 1) {
+    if (ms[1].filter(m => !ignore || !ignore.some(i => i.id === m.organization.id)).length > 1) {
       const group = { 
         data: {
           id: `${ms[1][0].organ.id}-${ms[0].name.toString()}`,
@@ -282,8 +292,11 @@ export const groupMemberships = (memberships: Membership[]) => {
       };
       nodes.push(group);
       ms[1].forEach((m) => {
-        const organization = new OrganizationNode(m.organization, group);
-        nodes.push(organization);
+        if (ignore && ignore.some((i) => i.id === m.organization.id)) {
+          edges.push(new MembershipEdge(m));
+          return;
+        };
+        nodes.push(new OrganizationNode(m.organization, group));
       });
       edges.push({ 
         data: {
@@ -294,9 +307,13 @@ export const groupMemberships = (memberships: Membership[]) => {
         },
       });
     } else {
-      const membership = new MembershipEdge(ms[1][0]);
-      nodes.push(new OrganizationNode(ms[1][0].organization));
-      edges.push(membership);
+      ms[1].forEach(m => {
+        const membership = new MembershipEdge(m);
+        if (!ignore || !ignore.some((i) => i.id === m.organization.id)) {
+          nodes.push(new OrganizationNode(m.organization));
+        }
+        edges.push(membership);
+      });
     }
   }
   return [nodes, edges];
@@ -305,7 +322,7 @@ export const groupMemberships = (memberships: Membership[]) => {
 /**
  * Group members into compound nodes.
  */
-export const groupMembers = (members: Membership[]) => {
+export const groupMembers = (members: Membership[], ignore?: (PersonNode|OrganizationNode)[]) => {
   const nodes: (any)[] = [];
   const edges: (any)[] = [];
   const grouped = new Map<number, [Role, Membership[]]>();
@@ -314,7 +331,7 @@ export const groupMembers = (members: Membership[]) => {
     grouped.get(m.role.id)![1].push(m);
   });
   for (const [role, ms] of grouped) {
-    if (ms[1].length > 1) {
+    if (ms[1].filter(m => !ignore || !ignore.some(i => i.id === m.organ.id)).length > 1) {
       const group = { 
         data: {
           id: `${ms[1][0].organization.id}-${ms[0].name.toString()}`,
@@ -324,10 +341,13 @@ export const groupMembers = (members: Membership[]) => {
       };
       nodes.push(group);
       ms[1].forEach((m) => {
-        const person = m.organ instanceof Person 
-                       ? new PersonNode(m.organ, group) 
-                       : new OrganizationNode(m.organ as Organization, group);
-        nodes.push(person);
+        if (ignore && ignore.some((i) => i.id === m.organ.id)) {
+          edges.push(new MembershipEdge(m));
+          return;
+        }
+        nodes.push(m.organ instanceof Person 
+                   ? new PersonNode(m.organ, group) 
+                   : new OrganizationNode(m.organ as Organization, group));
       });
       edges.push({ 
         data: {
@@ -338,17 +358,21 @@ export const groupMembers = (members: Membership[]) => {
         },
       });
     } else {
-      const membership = new MembershipEdge(ms[1][0]);
-      nodes.push(ms[1][0].organ instanceof Person 
-                 ? new PersonNode(ms[1][0].organ as Person) 
-                 : new OrganizationNode(ms[1][0].organ as Organization));
-      edges.push(membership);
+      ms[1].forEach((m) => {
+        const membership = new MembershipEdge(m);
+        if (!ignore || !ignore.some((i) => i.id === m.organ.id)) {
+          nodes.push(m.organ instanceof Person 
+                    ? new PersonNode(m.organ as Person) 
+                    : new OrganizationNode(m.organ as Organization));
+        }
+        edges.push(membership);
+      });
     }
   }
   return [nodes, edges];
 };
 
-export const groupRelations = (relations: Relation[], person: Person) => {
+export const groupRelations = (relations: Relation[], person: Person, ignore?: (PersonNode|OrganizationNode)[]) => {
   const nodes: (any)[] = [];
   const edges: (any)[] = [];
   const grouped = new Map<number, Relation[]>();
@@ -357,7 +381,7 @@ export const groupRelations = (relations: Relation[], person: Person) => {
     grouped.get(r.type)!.push(r);
   });
   for (const [type, rs] of grouped) {
-    if (rs.length > 1) {
+    if (rs.filter(r => !ignore || !ignore.some(i => i.id === r.other.id)).length > 1) {
       const group = { 
         data: {
           id: `${person.id}-${RelationType[type].toLowerCase()}`,
@@ -367,8 +391,11 @@ export const groupRelations = (relations: Relation[], person: Person) => {
       };
       nodes.push(group);
       rs.forEach((r) => {
-        const person = new PersonNode(r.other, group);
-        nodes.push(person);
+        if (ignore && ignore.some((i) => i.id === r.other.id)) {
+          edges.push(new RelationEdge(r, person));
+          return;
+        }
+        nodes.push(new PersonNode(r.other, group));
       });
       edges.push({ 
         data: {
@@ -379,9 +406,13 @@ export const groupRelations = (relations: Relation[], person: Person) => {
         },
       });
     } else {
-      const relation = new RelationEdge(rs[0], person);
-      nodes.push(new PersonNode(rs[0].other));
-      edges.push(relation);
+      rs.forEach(r => {
+        const relation = new RelationEdge(r, person);
+        if (!ignore || !ignore.some((i) => i.id === r.other.id)) {
+          nodes.push(new PersonNode(r.other));
+        }
+        edges.push(relation);
+      });
     }
   }
   return [nodes, edges];

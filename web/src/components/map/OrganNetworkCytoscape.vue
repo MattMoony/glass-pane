@@ -75,6 +75,7 @@ const layoutConfigs = {
   fcose: {
     name: 'fcose',
     nodeDimensionsIncludeLabels: true,
+    packComponents: true,
   },
   avsdf: {
     name: 'avsdf',
@@ -92,34 +93,18 @@ const layoutConfigs = {
 
 const refreshData = async () => {
   if (props.organ instanceof Person)
-    nodes.value[0] = [new PersonNode(props.organ),];
+    nodes.value[0] = [new PersonNode(props.organ, undefined, true),];
   else if (props.organ instanceof Organization)
-    nodes.value[0] = [new OrganizationNode(props.organ),];
+    nodes.value[0] = [new OrganizationNode(props.organ, undefined, true),];
 
   nodes.value[1] = [];
   edges.value[1] = [];
-  // props.memberships?.forEach((m) => {
-  //   nodes.value[1].push(new OrganizationNode(m.organization));
-  //   edges.value[1].push(new MembershipEdge(m));
-  // });
   const memberships = groupMemberships(props.memberships || []);
   nodes.value[1].push(...memberships[0]);
   edges.value[1].push(...memberships[1]);
-  // props.members?.forEach((m) => {
-  //   nodes.value[1].push(
-  //     m.organ instanceof Person
-  //     ? new PersonNode(m.organ)
-  //     : new OrganizationNode(m.organ as Organization),
-  //   );
-  //   edges.value[1].push(new MembershipEdge(m));
-  // });
   const members = groupMembers(props.members || []);
   nodes.value[1].push(...members[0]);
   edges.value[1].push(...members[1]);
-  // props.relations?.forEach((r) => {
-  //   nodes.value[1].push(new PersonNode(r.other));
-  //   edges.value[1].push(new RelationEdge(r, props.organ as Person));
-  // });
   const relations = groupRelations(props.relations || [], props.organ as Person)
   nodes.value[1].push(...relations[0]);
   edges.value[1].push(...relations[1]);
@@ -166,32 +151,35 @@ const refreshDeep = async (
   edges.value[depth] = [];
 
   for (const n of prevNodes) {
-    const memberships = await Membership.get(new Organ(n.id, n.bio));
-    for (const m of memberships) {
-      if (nodes.value[depth-2].find((p) => p.id === m.organization.id)) continue;
-      nodes.value[depth].push(new OrganizationNode(m.organization));
-      edges.value[depth].push(new MembershipEdge(m));
-    }
+    // ignore parent nodes
+    if (!(n instanceof Person || n instanceof Organization)) continue;
+
+    const memberships = groupMemberships(
+      (await Membership.get(new Organ(n.id, n.bio)))
+      .filter(m => !nodes.value[depth-2].find(p => p.id === m.organization.id)),
+      prevNodes
+    );
+    nodes.value[depth].push(...memberships[0]);
+    edges.value[depth].push(...memberships[1]);
     
     if (n instanceof Person) {
-      const relations = await n.relations.get();
-      for (const r of relations) {
-        if (nodes.value[depth-2].find((p) => p.id === r.other.id)) continue;
-        nodes.value[depth].push(new PersonNode(r.other));
-        edges.value[depth].push(new RelationEdge(r, n));
-      }
+      const relations = groupRelations(
+        (await n.relations.get())
+        .filter(r => !nodes.value[depth-2].find(p => p.id === r.other.id)),
+        n as Person,
+        prevNodes
+      );
+      nodes.value[depth].push(...relations[0]);
+      edges.value[depth].push(...relations[1]);
     } 
     else if (n instanceof Organization) {
-      const members = await Membership.get(n);
-      for (const m of members) {
-        if (nodes.value[depth-2].find((p) => p.id === m.organ.id)) continue;
-        nodes.value[depth].push(
-          m.organ instanceof Person
-          ? new PersonNode(m.organ)
-          : new OrganizationNode(m.organ as Organization),
-        );
-        edges.value[depth].push(new MembershipEdge(m));
-      }
+      const members = groupMembers(
+        (await Membership.get(n))
+        .filter(m => !nodes.value[depth-2].find(p => p.id === m.organ.id)),
+        prevNodes
+      );
+      nodes.value[depth].push(...members[0]);
+      edges.value[depth].push(...members[1]);
     }
   }
   for (const n of nodes.value[depth]) {
