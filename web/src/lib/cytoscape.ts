@@ -51,9 +51,10 @@ export class PersonNode extends Person {
     label: string;
     image: string;
     type: string;
+    parent?: string;
   };
 
-  constructor (person: Person) {
+  constructor (person: Person, parentNode?: any) {
     super(
       person.id,
       person.bio,
@@ -67,6 +68,7 @@ export class PersonNode extends Person {
       label: this.firstname + " " + this.lastname,
       image: this.pic.src(),
       type: 'person',
+      ...(parentNode ? {parent: parentNode.data.id,} : {}),
     };
   }
 }
@@ -114,9 +116,10 @@ export class OrganizationNode extends Organization {
     label: string;
     image: string;
     type: string;
+    parent?: string;
   };
 
-  constructor (organization: Organization) {
+  constructor (organization: Organization, parentNode?: any) {
     super(
       organization.id,
       organization.bio,
@@ -129,6 +132,7 @@ export class OrganizationNode extends Organization {
       label: this.name,
       image: this.pic.src(),
       type: 'organization',
+      ...(parentNode ? {parent: parentNode.data.id,} : {}),
     };
   }
 }
