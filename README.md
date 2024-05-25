@@ -33,6 +33,10 @@ Also, here is the *Entity Relationship Diagram* of the database behind this proj
 ![ERD](images/erd_datagrip.png)
 ***Image 2:** ER-diagram of the current database schema.*
 
+## Docs
+
+For more info, check the [Wiki](https://github.com/MattMoony/glass-pane/wiki).
+
 ## Feature Ideas
 
 Here a collection of ideas that would be really nice to have in a somewhat finished version of this project.
