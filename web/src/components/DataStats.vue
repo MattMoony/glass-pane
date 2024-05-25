@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-ignore
 import anime from 'animejs/lib/anime.es.js';
 import { onMounted } from 'vue';
 
