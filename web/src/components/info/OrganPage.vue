@@ -213,6 +213,10 @@ article {
     max-width: 100vw;
   }
 
+  .slots.edit .left-slot.constrained {
+    max-width: 100vw;
+  }
+
   .slots .right-slot {
     border-left: none;
     border-bottom: 2px solid var(--color-border);
