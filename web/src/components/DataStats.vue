@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import anime from 'animejs';
+// @ts-ignore
+import anime from 'animejs/lib/anime.es.js';
 import { onMounted } from 'vue';
 
 const props = defineProps<{

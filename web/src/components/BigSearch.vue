@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import anime from 'animejs';
+// @ts-ignore
+import anime from 'animejs/lib/anime.es.js';
 
 import { useUserStore } from '@/stores/user';
 
