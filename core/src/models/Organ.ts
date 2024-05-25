@@ -7,6 +7,11 @@ import SocialsPlatforms from './SocialsPlatforms';
 import Socials from './Socials';
 
 /**
+ * A cache of all organs in order not to overload the DB.
+ */
+const ORGAN_CACHE: Map<number, Organ|null> = new Map();
+
+/**
  * Represents a member of an organ. That member
  * doesn't have to be a natural person - they could themselves
  * be an organ, for example.
@@ -18,6 +23,11 @@ class Organ {
   public constructor (id: number, bio: string) {
     this.id = id;
     this.bio = bio;
+    this.cache();
+  }
+
+  private cache (): void {
+    ORGAN_CACHE.set(this.id, this);
   }
 
   /**
@@ -104,6 +114,7 @@ class Organ {
     const client = await pool.connect();
     await client.query('DELETE FROM organ WHERE oid = $1', [this.id]);
     client.release();
+    ORGAN_CACHE.set(this.id, null);
   }
 
   /**
@@ -156,12 +167,18 @@ class Organ {
   public static async get (id: number): Promise<Organ|null> {
     const _id = +id;
     if (isNaN(_id)) return null;
-    const client = await pool.connect();
-    const res = await client.query('SELECT * FROM organ WHERE oid = $1', [_id]);
-    client.release();
-    if (res.rows.length === 0) return null;
-    if (!fs.existsSync(`${process.env.DATA_DIR}/${_id}.md`)) fs.writeFileSync(`${process.env.DATA_DIR}/${_id}.md`, '');
-    return new Organ(+res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${_id}.md`, 'utf8'));
+    if (!ORGAN_CACHE.has(_id)) {
+      const client = await pool.connect();
+      const res = await client.query('SELECT * FROM organ WHERE oid = $1', [_id]);
+      client.release();
+      if (res.rows.length === 0) {
+        ORGAN_CACHE.set(_id, null);
+      } else {
+        if (!fs.existsSync(`${process.env.DATA_DIR}/${_id}.md`)) fs.writeFileSync(`${process.env.DATA_DIR}/${_id}.md`, '');
+        return new Organ(+res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${_id}.md`, 'utf8'));
+      }
+    }
+    return ORGAN_CACHE.get(_id)||null;
   }
 }
 
