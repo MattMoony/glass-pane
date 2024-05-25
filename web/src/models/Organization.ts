@@ -1,6 +1,9 @@
 import * as organization from '@/api/organization';
 
-import Organ from './Organ';
+import Organ, { type OrganCache } from './Organ';
+
+export interface OrganizationCache extends OrganCache {
+}
 
 /**
  * Represents an organization.

@@ -5,6 +5,21 @@ import * as organization from '@/api/organization';
 import { marked } from '@/lib/markdown';
 import { reactive, ref, type Ref } from 'vue';
 import type SocialsPlatforms from './SocialsPlatform';
+import { Mutex } from 'async-mutex';
+
+/**
+ * Cache for socials and sources.
+ */
+export interface OrganCache {
+  /**
+       * The socials of the organ.
+       */
+  socials?: organ.OrganSocials[];
+  /**
+   * The sources of the organ.
+   */
+  sources?: organ.OrganSource[];
+}
 
 /**
  * Represents a member of an organization. That member
@@ -62,7 +77,7 @@ class Organ implements organ.Organ {
      * Gets the social media profiles of the organ.
      * @returns A promise that resolves to the social media profiles of the organ.
      */
-    get: () => Promise<organ.OrganSocials[]>;
+    get: (refresh?: boolean) => Promise<organ.OrganSocials[]>;
     /**
      * Adds a social media profile to the organ.
      * @param platform The platform of the social media profile.
@@ -85,6 +100,11 @@ class Organ implements organ.Organ {
      */
     remove: (sid: number) => Promise<void>;
   };
+  
+  /**
+   * Mutex for socials operations.
+   */
+  private socials_mutex = new Mutex();
 
   /**
    * The sources of the organ. These are URLs that are
@@ -95,7 +115,7 @@ class Organ implements organ.Organ {
      * Gets the sources of the organ.
      * @returns A promise that resolves to the sources of the organ.
      */
-    get: () => Promise<organ.OrganSource[]>;
+    get: (refresh?: boolean) => Promise<organ.OrganSource[]>;
     /**
      * Adds a source to the organ.
      * @param url The URL of the source to add.
@@ -115,6 +135,16 @@ class Organ implements organ.Organ {
      */
     remove: (sid: number) => Promise<void>;
   }
+
+  /**
+   * Mutex for sources operations.
+   */
+  private sources_mutex = new Mutex();
+
+  /**
+   * Cache for socials and sources.
+   */
+  protected cache: OrganCache = {};
 
   public constructor (id: number, bio: string) {
     this.id = id;
@@ -136,9 +166,14 @@ class Organ implements organ.Organ {
     };
 
     this.socials = {
-      get: async () => {
-        const res = await organ.socials(this.id);
-        return res.socials ? res.socials : [];
+      get: async (refresh?: boolean) => {
+        if (refresh || !this.cache.socials) {
+          const release = await this.socials_mutex.acquire();
+          const res = await organ.socials(this.id);
+          this.cache.socials = res.socials ? res.socials : [];
+          release();
+        }
+        return this.cache.socials;
       },
       add: async (platform: SocialsPlatforms, url: string) => {
         const res = await organ.socials.add(this.id, platform, url);
@@ -153,9 +188,14 @@ class Organ implements organ.Organ {
     };
 
     this.sources = {
-      get: async () => {
-        const res = await organ.sources(this.id);
-        return res.sources ? res.sources : [];
+      get: async (refresh?: boolean) => {
+        if (refresh || !this.cache.sources) {
+          const release = await this.sources_mutex.acquire();
+          const res = await organ.sources(this.id);
+          this.cache.sources = res.sources ? res.sources : [];
+          release();
+        }
+        return this.cache.sources;
       },
       add: async (url: string) => {
         const res = await organ.sources.add(this.id, url);

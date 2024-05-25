@@ -1,8 +1,29 @@
+import { Mutex } from 'async-mutex';
+
 import * as person from '@/api/person';
 
-import Organ from './Organ';
+import Organ, { type OrganCache } from './Organ';
 import Relation from './Relation';
 import RelationType from './RelationTypes';
+
+export interface PersonCache extends OrganCache {
+  /**
+     * The parents of the person.
+     */
+  parents?: Relation[];
+  /**
+   * The children of the person.
+   */
+  children?: Relation[];
+  /**
+   * The romantic partners of the person.
+   */
+  romantic?: Relation[];
+  /**
+   * The friends of the person.
+   */
+  friends?: Relation[];
+};
 
 /**
  * Represents a natural person.
@@ -32,7 +53,7 @@ class Person extends Organ implements person.Person {
     /**
      * Gets the parents of the person.
      */
-    get: () => Promise<Relation[]>;
+    get: (refresh?: boolean) => Promise<Relation[]>;
     /**
      * Adds a parent to the person.
      * @param other The parent to add.
@@ -43,13 +64,18 @@ class Person extends Organ implements person.Person {
   };
 
   /**
+   * Mutex for parents operations.
+   */
+  private parents_mutex = new Mutex();
+
+  /**
    * The children of the person.
    */
   public children: {
     /**
      * Gets the children of the person.
      */
-    get: () => Promise<Relation[]>;
+    get: (refresh?: boolean) => Promise<Relation[]>;
     /**
      * Adds a child to the person.
      * @param other The child to add.
@@ -60,13 +86,18 @@ class Person extends Organ implements person.Person {
   };
 
   /**
+   * Mutex for children operations.
+   */
+  private children_mutex = new Mutex();
+
+  /**
    * The romantic partners of the person.
    */
   public romantic: {
     /**
      * Gets the romantic partners of the person.
      */
-    get: () => Promise<Relation[]>;
+    get: (refresh?: boolean) => Promise<Relation[]>;
     /**
      * Adds a romantic partner to the person.
      * @param other The romantic partner to add.
@@ -77,6 +108,11 @@ class Person extends Organ implements person.Person {
   };
 
   /**
+   * Mutex for romantic operations.
+   */
+  private romantic_mutex = new Mutex();
+
+  /**
    * The friends of the person.
    */
   public friends: {
@@ -84,7 +120,7 @@ class Person extends Organ implements person.Person {
      * Gets the friends of the person.
      * @returns A promise that resolves to the friends of the person.
      */
-    get: () => Promise<Relation[]>;
+    get: (refresh?: boolean) => Promise<Relation[]>;
     /**
      * Adds a friend to the person.
      * @param other The friend to add.
@@ -95,6 +131,11 @@ class Person extends Organ implements person.Person {
   };
 
   /**
+   * Mutex for friends operations.
+   */
+  private friends_mutex = new Mutex();
+
+  /**
    * The relations of the person.
    */
   public relations: {
@@ -102,7 +143,7 @@ class Person extends Organ implements person.Person {
      * Gets the relations of the person.
      * @returns A promise that resolves to the relations of the person.
      */
-    get: () => Promise<Relation[]>;
+    get: (refresh?: boolean) => Promise<Relation[]>;
     /**
      * Adds a relation to the person.
      * @param rel The relation to add.
@@ -123,6 +164,16 @@ class Person extends Organ implements person.Person {
     remove: (rel: Relation) => Promise<void>;
   };
 
+  /**
+   * Mutex for relations operations.
+   */
+  private relations_mutex = new Mutex();
+
+  /**
+   * Cache for data of the person.
+   */
+  protected cache: PersonCache = {};
+
   public constructor (
     id: number, 
     bio: string, 
@@ -139,22 +190,27 @@ class Person extends Organ implements person.Person {
     this.deathdate = deathdate;
 
     this.parents = {
-      get: async () => {
-        const res = await person.parents(this.id);
-        return res.parents?.map(r => new Relation(
-          r.id,
-          RelationType.PARENT,
-          new Person(
-            r.to.id,
-            r.to.bio,
-            r.to.firstname,
-            r.to.lastname,
-            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
-            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
-          ), 
-          r.since, 
-          r.until
-        )) || [];
+      get: async (refresh?: boolean) => {
+        if (refresh || !this.cache.parents) {
+          const release = await this.parents_mutex.acquire();
+          const res = await person.parents(this.id);
+          this.cache.parents = res.parents?.map(r => new Relation(
+            r.id,
+            RelationType.PARENT,
+            new Person(
+              r.to.id,
+              r.to.bio,
+              r.to.firstname,
+              r.to.lastname,
+              r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+              r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+            ), 
+            r.since, 
+            r.until
+          )) || [];
+          release();
+        }
+        return this.cache.parents;
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
@@ -167,22 +223,27 @@ class Person extends Organ implements person.Person {
     };
 
     this.children = {
-      get: async () => {
-        const res = await person.children(this.id);
-        return res.children?.map(r => new Relation(
-          r.id,
-          RelationType.CHILD,
-          new Person(
-            r.to.id,
-            r.to.bio,
-            r.to.firstname,
-            r.to.lastname,
-            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
-            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
-          ), 
-          r.since, 
-          r.until
-        )) || [];
+      get: async (refresh?: boolean) => {
+        if (refresh || !this.cache.children) {
+          const release = await this.children_mutex.acquire();
+          const res = await person.children(this.id);
+          this.cache.children = res.children?.map(r => new Relation(
+            r.id,
+            RelationType.CHILD,
+            new Person(
+              r.to.id,
+              r.to.bio,
+              r.to.firstname,
+              r.to.lastname,
+              r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+              r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+            ), 
+            r.since, 
+            r.until
+          )) || [];
+          release();
+        }
+        return this.cache.children;
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
@@ -195,22 +256,27 @@ class Person extends Organ implements person.Person {
     };
 
     this.romantic = {
-      get: async () => {
-        const res = await person.romantic(this.id);
-        return res.romantic?.map(r => new Relation(
-          r.id,
-          RelationType.ROMANTIC,
-          new Person(
-            r.to.id,
-            r.to.bio,
-            r.to.firstname,
-            r.to.lastname,
-            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
-            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
-          ), 
-          r.since, 
-          r.until
-        )) || [];
+      get: async (refresh?: boolean) => {
+        if (refresh || !this.cache.romantic) {
+          const release = await this.romantic_mutex.acquire();
+          const res = await person.romantic(this.id);
+          this.cache.romantic = res.romantic?.map(r => new Relation(
+            r.id,
+            RelationType.ROMANTIC,
+            new Person(
+              r.to.id,
+              r.to.bio,
+              r.to.firstname,
+              r.to.lastname,
+              r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+              r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+            ), 
+            r.since, 
+            r.until
+          )) || [];
+          release();
+        }
+        return this.cache.romantic;
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
@@ -223,22 +289,27 @@ class Person extends Organ implements person.Person {
     };
 
     this.friends = {
-      get: async () => {
-        const res = await person.friends(this.id);
-        return res.friends?.map(r => new Relation(
-          r.id,
-          RelationType.FRIEND,
-          new Person(
-            r.to.id,
-            r.to.bio,
-            r.to.firstname,
-            r.to.lastname,
-            r.to.birthdate ? new Date(r.to.birthdate) : undefined,
-            r.to.deathdate ? new Date(r.to.deathdate) : undefined,
-          ), 
-          r.since, 
-          r.until
-        )) || [];
+      get: async (refresh?: boolean) => {
+        if (refresh || !this.cache.friends) {
+          const release = await this.friends_mutex.acquire();
+          const res = await person.friends(this.id);
+          this.cache.friends = res.friends?.map(r => new Relation(
+            r.id,
+            RelationType.FRIEND,
+            new Person(
+              r.to.id,
+              r.to.bio,
+              r.to.firstname,
+              r.to.lastname,
+              r.to.birthdate ? new Date(r.to.birthdate) : undefined,
+              r.to.deathdate ? new Date(r.to.deathdate) : undefined,
+            ), 
+            r.since, 
+            r.until
+          )) || [];
+          release();
+        }
+        return this.cache.friends;
       },
       add: async (other: Person, since: Date, sources: string[]) => {
         return await this.relations.add(new Relation(
@@ -251,11 +322,11 @@ class Person extends Organ implements person.Person {
     };
 
     this.relations = {
-      get: async () => [ 
-        ...await this.parents.get(), 
-        ...await this.children.get(), 
-        ...await this.romantic.get(), 
-        ...await this.friends.get()
+      get: async (refresh?: boolean) => [ 
+        ...await this.parents.get(refresh), 
+        ...await this.children.get(refresh), 
+        ...await this.romantic.get(refresh), 
+        ...await this.friends.get(refresh)
       ],
       add: async (rel: Relation, sources: string[]) => {
         const _rel = rel.type !== RelationType.CHILD 
