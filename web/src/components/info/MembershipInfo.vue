@@ -66,6 +66,7 @@ const emits = defineEmits<{
         </span>
         <RoleSelect
           v-else
+          :init-role="membership.role"
           @select="role => {
             if (membership) {
               membership.role = role;
@@ -187,8 +188,12 @@ const emits = defineEmits<{
 }
 
 .dates {
-  margin-top: .2em;
+  margin: .2em 0;
   font-size: .9em;
+}
+
+.edit .dates {
+  margin: .5em 0;
 }
 
 .pic img {

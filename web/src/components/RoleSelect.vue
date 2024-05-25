@@ -45,6 +45,8 @@ const createRole = async () => {
 <template>
   <Select
     placeholder="Role ..."
+    :initResultPlain="selectedRole ? selectedRole.name : ''"
+    stretchedResult
     :inline="!notInline"
     @query="queryRoles"
   >

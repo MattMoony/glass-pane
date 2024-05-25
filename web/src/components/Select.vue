@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, type Ref } from 'vue';
+import { nextTick, ref, useSlots, watch, type Ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
 const props = defineProps<{
@@ -20,6 +20,14 @@ const props = defineProps<{
    */
   placeholder?: string;
   /**
+   * The plain string of the initial result.
+   */
+  initResultPlain?: string;
+  /**
+   * Whether to display the result as the total content.
+   */
+  stretchedResult?: boolean;
+  /**
    * Whether to display inline.
    */
   inline?: boolean;
@@ -30,6 +38,7 @@ const emits = defineEmits<{
    */
   (e: 'query', query: string, cb: (hasSuggestions: boolean) => void): void;
 }>();
+const slots = useSlots();
 
 const container: Ref<HTMLElement|null> = ref(null);
 const searchInput: Ref<HTMLInputElement|null> = ref(null);
@@ -37,6 +46,7 @@ const query: Ref<string> = ref(props.qry || '');
 const open: Ref<boolean> = ref(false);
 const timeout: Ref<number|undefined> = ref(undefined);
 const hasSuggestions: Ref<boolean> = ref(false);
+const typing: Ref<boolean> = ref(false);
 
 watch(query, async () => {
   if (query.value.trim().length < (props.minlen||3)) return;
@@ -51,6 +61,7 @@ watch(query, async () => {
 
 onClickOutside(container, () => {
   open.value = false;
+  typing.value = false;
 });
 </script>
 
@@ -59,17 +70,24 @@ onClickOutside(container, () => {
     tabindex="-1"
     :class="['search', inline ? 'inline' : '',]"
     ref="container"
-    @click="searchInput?.focus()"
+    @click="() => {
+      typing = true;
+      nextTick(() => searchInput?.focus());
+    }"
   >
     <div 
       :class="['bar', open && hasSuggestions ? 'open' : '',]"
     >
-      <div class="init-result">
+      <div 
+        class="init-result"
+        v-if="!typing"
+      >
         <slot 
           name="initResult" 
         ></slot>
       </div>
       <input 
+        v-if="!props.stretchedResult || !props.initResultPlain || typing"
         ref="searchInput"
         type="text"
         v-model="query"
@@ -80,7 +98,12 @@ onClickOutside(container, () => {
     <div 
       v-if="open && hasSuggestions"
       class="suggestions gp-scroll"
-      @click="query = ''"
+      @click="() => {
+        open = false;
+        typing = false;
+        query = '';
+        $forceUpdate();
+      }"
     >
       <slot name="suggestions"></slot>
     </div>
@@ -111,6 +134,7 @@ onClickOutside(container, () => {
   display: flex;
   justify-content: start;
   align-items: center;
+  gap: .5em;
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: 4px;
@@ -120,10 +144,6 @@ onClickOutside(container, () => {
 .bar.open {
   border-radius: 4px 4px 0 0;
   border-bottom: none;
-}
-
-.bar > .init-result {
-  margin-right: 0.5em;
 }
 
 .bar input {
