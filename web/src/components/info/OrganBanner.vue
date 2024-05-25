@@ -131,6 +131,7 @@ watch(
   async () => {
     if (props.organ && props.organ.id > 0) {
       image.value = props.organ.pic.src();
+      console.log('banner socials');
       const rawSocials = await props.organ.socials.get();
       socials.value = {};
       for (const social of rawSocials) {

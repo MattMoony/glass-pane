@@ -6,6 +6,8 @@ import { marked } from '@/lib/markdown';
 import { reactive, ref, type Ref } from 'vue';
 import type SocialsPlatforms from './SocialsPlatform';
 import { Mutex } from 'async-mutex';
+import type Membership from './Membership';
+import Role from './Role';
 
 /**
  * Cache for socials and sources.
@@ -19,6 +21,10 @@ export interface OrganCache {
    * The sources of the organ.
    */
   sources?: organ.OrganSource[];
+  /**
+   * The memberships of the organ.
+   */
+  memberships?: Membership[];
 }
 
 /**
@@ -142,6 +148,42 @@ class Organ implements organ.Organ {
   private sources_mutex = new Mutex();
 
   /**
+   * The memberships of the organ.
+   */
+  public memberships: {
+    /**
+     * Gets the memberships of the organ.
+     * @param refresh Whether to refresh the cache.
+     * @returns A promise that resolves to the memberships of the organ.
+     */
+    get: (refresh?: boolean) => Promise<Membership[]>;
+    /**
+     * Adds a membership to the organ.
+     * @param membership The membership to add.
+     * @param sources The sources for the membership.
+     * @returns A promise that resolves when the membership is added.
+     */
+    add: (membership: Membership, sources: string[]) => Promise<void>;
+    /**
+     * Updates a membership of the organ.
+     * @param membership The membership to update.
+     * @returns A promise that resolves when the membership is updated.
+     */
+    update: (membership: Membership) => Promise<void>;
+    /**
+     * Removes a membership of the organ.
+     * @param membership The membership to remove.
+     * @returns A promise that resolves when the membership is removed.
+     */
+    remove: (membership: Membership) => Promise<void>;
+  };
+
+  /**
+   * Mutex for memberships operations.
+   */
+  private memberships_mutex = new Mutex();
+
+  /**
    * Cache for socials and sources.
    */
   protected cache: OrganCache = {};
@@ -167,12 +209,12 @@ class Organ implements organ.Organ {
 
     this.socials = {
       get: async (refresh?: boolean) => {
+        const release = await this.socials_mutex.acquire();
         if (refresh || !this.cache.socials) {
-          const release = await this.socials_mutex.acquire();
           const res = await organ.socials(this.id);
           this.cache.socials = res.socials ? res.socials : [];
-          release();
         }
+        release();
         return this.cache.socials;
       },
       add: async (platform: SocialsPlatforms, url: string) => {
@@ -189,12 +231,12 @@ class Organ implements organ.Organ {
 
     this.sources = {
       get: async (refresh?: boolean) => {
+        const release = await this.sources_mutex.acquire();
         if (refresh || !this.cache.sources) {
-          const release = await this.sources_mutex.acquire();
           const res = await organ.sources(this.id);
           this.cache.sources = res.sources ? res.sources : [];
-          release();
         }
+        release();
         return this.cache.sources;
       },
       add: async (url: string) => {
@@ -206,6 +248,46 @@ class Organ implements organ.Organ {
       },
       remove: async (sid: number) => {
         await organ.sources.remove(this.id, sid);
+      },
+    };
+
+    this.memberships = {
+      get: async (refresh?: boolean) => {
+        const release = await this.memberships_mutex.acquire();
+        if (refresh || !this.cache.memberships) {
+          // Lazy import to avoid circular dependencies ... :o
+          const Organization = (await import('./Organization')).default;
+          const Membership = (await import('./Membership')).default;
+          const res = await organ.memberships(this.id);
+          this.cache.memberships = res.memberships ? res.memberships.map((m: organ.OrganMembership) => new Membership(
+            m.id,
+            this,
+            new Organization(
+              m.organization.id, 
+              m.organization.bio,
+              m.organization.name,
+              m.organization.established,
+              m.organization.dissolved
+            ),
+            new Role(
+              m.role.id, 
+              m.role.name
+            ),
+            m.since ? new Date(m.since) : undefined,
+            m.until ? new Date(m.until) : undefined
+          )) : [];
+        }
+        release();
+        return this.cache.memberships;
+      },
+      add: async (membership: Membership, sources: string[]) => {
+        await organ.memberships.add(sources, this, membership.organization, membership.role, membership.since, membership.until);
+      },
+      update: async (membership: Membership) => {
+        await organ.memberships.update(this, membership.id, membership.role, membership.since, membership.until);
+      },
+      remove: async (membership: Membership) => {
+        await organ.memberships.remove(this, membership.id);
       },
     };
 

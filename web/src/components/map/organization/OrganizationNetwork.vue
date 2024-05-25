@@ -25,8 +25,8 @@ const members: Ref<Membership[]> = ref([]);
 
 const refreshNetwork = async () => {
   if (!props.organization) return;
-  memberships.value = await Membership.get(new Organ(props.organization.id, props.organization.bio));
-  members.value = await Membership.get(props.organization);
+  memberships.value = await props.organization.memberships.get();
+  members.value = await props.organization.members.get();
 };
 
 watch(

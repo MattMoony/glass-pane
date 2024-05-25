@@ -155,7 +155,7 @@ const refreshDeep = async (
     if (!(n instanceof Person || n instanceof Organization)) continue;
 
     const memberships = groupMemberships(
-      (await Membership.get(new Organ(n.id, n.bio)))
+      (await n.memberships.get())
       .filter(m => !nodes.value[depth-2].find(p => p.id === m.organization.id)),
       prevNodes
     );
@@ -174,7 +174,7 @@ const refreshDeep = async (
     } 
     else if (n instanceof Organization) {
       const members = groupMembers(
-        (await Membership.get(n))
+        (await n.members.get())
         .filter(m => !nodes.value[depth-2].find(p => p.id === m.organ.id)),
         prevNodes
       );

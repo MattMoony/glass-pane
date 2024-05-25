@@ -30,7 +30,7 @@ const memberships: Ref<Membership[]> = ref([]);
 const refreshNetwork = async () => {
   if (!props.person) return;
   relations.value = await props.person.relations.get();
-  if (props.showMemberships) memberships.value = await Membership.get(props.person);
+  if (props.showMemberships) memberships.value = await props.person.memberships.get();
 };
 
 watch(() => props.showMemberships, refreshNetwork);

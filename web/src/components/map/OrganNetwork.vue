@@ -267,7 +267,7 @@ const refreshDeepNetwork = async (
 ) => {
   if (depth-2 < 0 || depth > maxDepth) return;
   for (const n of Object.values(nodes)) {
-    const memberships = await Membership.get(new Organ(n.id, n.bio));
+    const memberships = await n.memberships.get();
     deeperNodes.value[depth] = {
       ...deeperNodes.value[depth]||{},
       ...memberships
@@ -314,7 +314,7 @@ const refreshDeepNetwork = async (
       ];
     }
     else if (n instanceof OrganizationNode) {
-      const members = await Membership.get(n);
+      const members = await n.members.get();
       deeperNodes.value[depth] = {
         ...deeperNodes.value[depth]||{},
         ...members

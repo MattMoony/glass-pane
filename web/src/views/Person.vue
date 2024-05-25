@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
+import { computed, ref, shallowRef, watch, type ComputedRef, type Ref } from 'vue';
 import { useRoute, useRouter, type RouteLocationNormalized, type Router } from 'vue-router';
 
 import Person from '@/models/Person';
@@ -12,10 +12,11 @@ import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
 const pid: ComputedRef<number> = computed(() => +route.params.pid);
-const person: Ref<Person | null> = ref(null);
+const person: Ref<Person | null> = shallowRef(null);
 const editing: ComputedRef<boolean> = computed(() => Object.keys(route.query).includes('edit'));
 
 watch(pid, async (newPid: number) => {
+  console.log('asdf');
   person.value = await Person.get(newPid);
 }, { immediate: true });
 </script>

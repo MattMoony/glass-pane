@@ -26,7 +26,7 @@ const newMember: Ref<Membership|null> = ref(null);
 
 const addMember = async () => {
   if (!props.organization || !newMember.value || newMember.value.role.id < 0) return;
-  await newMember.value.create([ 'none', ]);
+  await props.organization.members.add(newMember.value, [ 'none', ]);
   members.value.push(newMember.value);
   newMember.value = null;
   // @ts-ignore
@@ -34,13 +34,15 @@ const addMember = async () => {
 };
 
 const updateMember = async (member: Membership) => {
-  await member.update();
+  if (!props.organization) return;
+  await props.organization.memberships.update(member);
   // @ts-ignore
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
 const removeMember = async (member: Membership) => {
-  await member.remove();
+  if (!props.organization) return;
+  await props.organization.members.remove(member);
   members.value = members.value.filter(m => m.id !== member.id);
   // @ts-ignore
   props.organization._vref = Math.floor(Math.random() * 1000);
@@ -48,7 +50,7 @@ const removeMember = async (member: Membership) => {
 
 watch(() => props.organization, async () => {
   if (!props.organization) return;
-  members.value = await Membership.get(props.organization);
+  members.value = await props.organization.members.get();
 }, { immediate: true, });
 </script>
 

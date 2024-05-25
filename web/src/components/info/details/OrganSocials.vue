@@ -41,6 +41,7 @@ const removeSocial = async (social: OrganSocials) => {
 
 watch(() => props.organ, async () => {
   if (!props.organ) return;
+  console.log('socials socials');
   socials.value = await props.organ.socials.get();
 }, { immediate: true, });
 </script>

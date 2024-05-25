@@ -191,8 +191,8 @@ class Person extends Organ implements person.Person {
 
     this.parents = {
       get: async (refresh?: boolean) => {
+        const release = await this.parents_mutex.acquire();
         if (refresh || !this.cache.parents) {
-          const release = await this.parents_mutex.acquire();
           const res = await person.parents(this.id);
           this.cache.parents = res.parents?.map(r => new Relation(
             r.id,
@@ -208,8 +208,8 @@ class Person extends Organ implements person.Person {
             r.since, 
             r.until
           )) || [];
-          release();
         }
+        release();
         return this.cache.parents;
       },
       add: async (other: Person, since: Date, sources: string[]) => {
@@ -224,8 +224,8 @@ class Person extends Organ implements person.Person {
 
     this.children = {
       get: async (refresh?: boolean) => {
+        const release = await this.children_mutex.acquire();
         if (refresh || !this.cache.children) {
-          const release = await this.children_mutex.acquire();
           const res = await person.children(this.id);
           this.cache.children = res.children?.map(r => new Relation(
             r.id,
@@ -241,8 +241,8 @@ class Person extends Organ implements person.Person {
             r.since, 
             r.until
           )) || [];
-          release();
         }
+        release();
         return this.cache.children;
       },
       add: async (other: Person, since: Date, sources: string[]) => {
@@ -257,8 +257,8 @@ class Person extends Organ implements person.Person {
 
     this.romantic = {
       get: async (refresh?: boolean) => {
+        const release = await this.romantic_mutex.acquire();
         if (refresh || !this.cache.romantic) {
-          const release = await this.romantic_mutex.acquire();
           const res = await person.romantic(this.id);
           this.cache.romantic = res.romantic?.map(r => new Relation(
             r.id,
@@ -274,8 +274,8 @@ class Person extends Organ implements person.Person {
             r.since, 
             r.until
           )) || [];
-          release();
         }
+        release();
         return this.cache.romantic;
       },
       add: async (other: Person, since: Date, sources: string[]) => {
@@ -290,8 +290,8 @@ class Person extends Organ implements person.Person {
 
     this.friends = {
       get: async (refresh?: boolean) => {
+        const release = await this.friends_mutex.acquire();
         if (refresh || !this.cache.friends) {
-          const release = await this.friends_mutex.acquire();
           const res = await person.friends(this.id);
           this.cache.friends = res.friends?.map(r => new Relation(
             r.id,
@@ -307,8 +307,8 @@ class Person extends Organ implements person.Person {
             r.since, 
             r.until
           )) || [];
-          release();
         }
+        release();
         return this.cache.friends;
       },
       add: async (other: Person, since: Date, sources: string[]) => {

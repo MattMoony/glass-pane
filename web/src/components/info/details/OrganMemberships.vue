@@ -25,7 +25,7 @@ const newMembership: Ref<Membership|null> = ref(null);
 
 const addMembership = async () => {
   if (!props.organ || !newMembership.value || newMembership.value.role.id < 0) return;
-  await newMembership.value.create([ 'none', ]);
+  await props.organ.memberships.add(newMembership.value, [ 'none', ]);
   memberships.value.push(newMembership.value);
   newMembership.value = null;
   // @ts-ignore
@@ -33,7 +33,8 @@ const addMembership = async () => {
 };
 
 const removeMembership = async (membership: Membership) => {
-  await membership.remove();
+  if (!props.organ) return;
+  await props.organ.memberships.remove(membership);
   const index = memberships.value.findIndex(m => 
     m.organ.id === membership.organ.id &&
     m.organization.id === membership.organization.id &&
@@ -46,7 +47,7 @@ const removeMembership = async (membership: Membership) => {
 
 watch(() => props.organ, async () => {
   if (!props.organ) return;
-  memberships.value = await Membership.get(new Organ(props.organ.id, props.organ.bio));
+  memberships.value = await props.organ.memberships.get();
 }, { immediate: true });
 </script>
 
@@ -75,7 +76,7 @@ watch(() => props.organ, async () => {
             :membership="membership"
             organ-membership
             edit
-            @change="async () => await membership.update()"
+            @change="async () => organ && await organ.memberships.update(membership)"
           />
           <div class="button-wrapper">
             <button @click="() => removeMembership(membership)">
