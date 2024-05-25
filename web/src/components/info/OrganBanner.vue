@@ -7,6 +7,7 @@ import Organization from '@/models/Organization';
 import SocialsPlatform from '@/models/SocialsPlatform';
 
 import PopDropDown from '@/components/PopDropDown.vue';
+import { onClickOutside } from '@vueuse/core';
 
 const props = defineProps<{
   /**
@@ -69,6 +70,7 @@ const emits = defineEmits<{
 
 const image: Ref<string|undefined> = ref(undefined);
 const imageInput: Ref<HTMLInputElement|null> = ref(null);
+const socialsContainer = ref<HTMLElement>();
 
 const icons: {[name: string]: { icon: string, title: string, }} = {
   phone: { icon: 'fa-solid fa-phone', title: 'Phone', },
@@ -117,6 +119,12 @@ const removeImage = () => {
   else if (props.organ)
     props.organ.pic.remove();
 };
+
+onClickOutside(socialsContainer, () => {
+  for (const key in socialsShown.value) {
+    socialsShown.value[key] = false;
+  }
+});
 
 watch(
   () => [ props.organ, props.organ?._vref, ], 
@@ -294,7 +302,11 @@ watch(
           </div>
         </template>
       </div>
-      <div v-if="!edit && props.showSocials && socials && Object.keys(socials).length" class="banner-socials">
+      <div 
+        v-if="!edit && props.showSocials && socials && Object.keys(socials).length" 
+        class="banner-socials"
+        ref="socialsContainer"
+      >
         <template 
           v-for="name in Object.keys(icons).filter(key => socials[key])"
           :key="name"
