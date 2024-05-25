@@ -150,9 +150,9 @@ const refreshDeep = async (
   nodes.value[depth] = [];
   edges.value[depth] = [];
 
-  for (const n of prevNodes) {
+  await Promise.all(prevNodes.map(async n => {
     // ignore parent nodes
-    if (!(n instanceof Person || n instanceof Organization)) continue;
+    if (!(n instanceof Person || n instanceof Organization)) return;
 
     const memberships = groupMemberships(
       (await n.memberships.get())
@@ -161,7 +161,7 @@ const refreshDeep = async (
     );
     nodes.value[depth].push(...memberships[0]);
     edges.value[depth].push(...memberships[1]);
-    
+
     if (n instanceof Person) {
       const relations = groupRelations(
         (await n.relations.get())
@@ -181,7 +181,7 @@ const refreshDeep = async (
       nodes.value[depth].push(...members[0]);
       edges.value[depth].push(...members[1]);
     }
-  }
+  }));
   for (const n of nodes.value[depth]) {
     if (cy.value.getElementById(n.data.id).length) continue;
     cy.value.add(n);

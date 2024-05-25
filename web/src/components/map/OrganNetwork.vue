@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * @deprecated Use OrganNetworkCytoscape.vue instead.
+ */
+
 import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
