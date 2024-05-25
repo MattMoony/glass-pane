@@ -5,7 +5,7 @@ import { useRouter, type Router } from 'vue-router';
 import Organization from '@/models/Organization';
 import { type OrganSource } from '@/api/organ';
 
-import NavBar from '@/components/NavBar.vue';
+import SearchNavBar from '@/components/SearchNavBar.vue';
 import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
 import OrganizationDetails from '@/components/info/details/organization/OrganizationDetails.vue';
 import OrganSources from '@/components/info/details/OrganSources.vue';
@@ -36,7 +36,7 @@ const createOrganization = async () => {
 
 <template>
   <main>
-    <NavBar />
+    <SearchNavBar />
     <article>
       <section class="gp-scroll">
         <OrganizationBanner

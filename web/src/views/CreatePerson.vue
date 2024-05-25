@@ -5,7 +5,7 @@ import { useRouter, type Router } from 'vue-router';
 import Person from '@/models/Person';
 import { type OrganSource } from '@/api/organ';
 
-import NavBar from '@/components/NavBar.vue';
+import SearchNavBar from '@/components/SearchNavBar.vue';
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
 import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 import OrganSources from '@/components/info/details/OrganSources.vue';
@@ -37,7 +37,7 @@ const createPerson = async () => {
 
 <template>
   <main>
-    <NavBar />
+    <SearchNavBar />
     <article>
       <section class="gp-scroll">
         <PersonBanner

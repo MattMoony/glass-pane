@@ -4,7 +4,7 @@ import { onMounted, ref, watch, type Ref } from 'vue';
 import Organ from '@/models/Organ';
 import { useUserStore } from '@/stores/user';
 
-import NavBar from '@/components/NavBar.vue';
+import SearchNavBar from '@/components/SearchNavBar.vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
@@ -63,7 +63,7 @@ watch(() => props.edit, (newEdit: boolean) => {
 
 <template>
   <main>
-    <NavBar 
+    <SearchNavBar 
       :result="organ ? organ : undefined"
     />
     <article>

@@ -144,6 +144,7 @@ onClickOutside(container, () => {
   padding: 0.5em;
   border-radius: 4px;
   text-decoration: underline;
+  color: var(--vt-c-text-dark-2);
 }
 
 .init-result.person {
@@ -215,6 +216,7 @@ onClickOutside(container, () => {
   background-color: var(--color-background);
   padding: .5em;
   border-radius: 4px;
+  color: var(--vt-c-text-dark-2);
 }
 
 .suggestion.person .suggestion-type {

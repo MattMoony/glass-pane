@@ -1,81 +1,117 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
 
-import SearchBar from '@/components/SearchBar.vue';
+import NavBar from '@/components/NavBar.vue';
+import BigSearch from '@/components/BigSearch.vue';
+import DataStats from '@/components/DataStats.vue';
 
 const user = useUserStore();
 </script>
 
 <template>
-  <div class="container">
-    <h1>
-      Gl<img class="logo" src="/pane.png" alt="pane" />ss
-      P<img class="logo" src="/pane.png" alt="pane" />ne
-    </h1>
-    <p v-if="user.user" class="welcome">
-      What are you looking for, <span class="username">{{ user.user.username }}</span>?
-    </p>
-    <div class="bar-container">
-      <SearchBar />
-    </div>
-    <div class="tools">
-      <template v-if="user.user">
-        <router-link to="/p">
-          <button>
-            <font-awesome-icon :icon="['fas', 'plus']" />
-            New Person
-          </button>
-        </router-link>
-        <router-link to="/o">
-          <button>
-            <font-awesome-icon :icon="['fas', 'plus']" />
-            New Organization
-          </button>
-        </router-link>
-      </template>
-      <template v-else>
-        <router-link to="/login">
-          <button>
-            <font-awesome-icon :icon="['fas', 'sign-in-alt']" />
-            Login
-          </button>
-        </router-link>
-      </template>
-    </div>
-  </div>
+  <main>
+    <NavBar>
+    </NavBar>
+    <article class="gp-scroll">
+      <div class="search-container">
+        <BigSearch />
+      </div>
+      <div class="other-content">
+        <DataStats 
+          :stats="['people', 'organizations', 'relations', 'memberships',]"
+        />
+        <div 
+          v-if="user.user"
+          class="tools"
+        >
+          <router-link to="/p">
+            <button>
+              <font-awesome-icon :icon="['fas', 'plus']" />
+              Person
+            </button>
+          </router-link>
+          <router-link to="/o">
+            <button>
+              <font-awesome-icon :icon="['fas', 'plus']" />
+              Organization
+            </button>
+          </router-link>
+        </div>
+        <div class="about">
+          <h2>About</h2>
+          <p>
+            Welcome to Glass Pane, an initiative aimed at <span class="gp-highlight-text">mapping the intricate relationships 
+            and memberships between politicians and key figures</span>. Our interactive platform strives 
+            to provide <span class="gp-highlight-text">insights into the networks that shape political landscapes</span>, offering a 
+            glimpse into connections, affiliations, and influences. Explore the links and connections 
+            that matter with Glass Pane.
+          </p>
+          <p class="gp-callout">
+            Credit where credit is due - this project has been heavily inspired by <a href="https://littlesis.org">littlesis.org</a>.
+          </p>
+        </div>
+        <div class="goals">
+          <h2>Our Goals</h2>
+          <p>
+            At Glass Pane, our goal is to <span class="gp-highlight-text">illuminate the complex web of relationships and 
+            memberships</span> among politicians and influential figures. We aim to:
+          </p>
+          <ol>
+            <li>Provide a <span class="gp-highlight-text">comprehensive overview</span> of the connections that shape political landscapes.</li>
+            <li>Offer <span class="gp-highlight-text">insights into the networks</span> that influence decision-making processes.</li>
+            <li>Enable users to <span class="gp-highlight-text">explore the relationships</span> that matter to them.</li>
+            <li>Facilitate a <span class="gp-highlight-text">deeper understanding</span> of the connections that drive political agendas.</li>
+          </ol>
+          <p class="gp-callout">
+            We believe that <span class="gp-highlight-text">transparency is key</span> - not only to understanding the political landscape,
+            that's why you can find the source code for this project on <a href="https://github.com/MattMoony/glass-pane">GitHub</a>.
+          </p>
+        </div>
+      </div>
+    </article>
+  </main>
 </template>
 
 <style scoped>
-.container {
+main {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: stretch;
+  align-items: stretch;
   flex-direction: column;
 }
 
-h1 {
-  user-select: none;
-  font-family: 'Comfortaa', sans-serif;
-  font-size: 3rem;
+article {
+  flex-basis: 0;
+  flex-grow: 1;
 }
 
-.welcome {
-  font-size: 1rem;
-  margin-bottom: 1em;
-  font-style: italic;
+.search-container {
+  padding: 6rem 2rem;
+  background-color: var(--color-background-soft);
 }
 
-.welcome .username {
-  background-color: var(--color-background-mute);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  margin: 0 0.25rem;
+.other-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 2rem;
+  padding: 2rem;
 }
 
-.logo {
-  height: 3rem;
+.other-content > div > h2 {
+  margin-bottom: .5rem;
+}
+
+.other-content ol {
+  padding: 1rem 2rem;
+  list-style: decimal;
+}
+
+.other-content ol li:not(:last-child) {
+  margin-bottom: .2rem;
 }
 
 .bar-container {
@@ -89,8 +125,10 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
-  padding-top: 1rem;
+  gap: .5rem;
+  padding: 2rem 0;
+  border-top: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .tools a {

@@ -1,39 +1,28 @@
 <script setup lang="ts">
-import Organ from '../models/Organ';
 import { useUserStore } from '@/stores/user';
-
-import SearchBar from '@/components/SearchBar.vue';
-
-const props = defineProps<{
-  /**
-   * The query string to display in the search bar.
-   */
-  qry?: string;
-  /**
-   * The result to display in the search bar.
-   */
-  result?: Organ;
-}>();
 
 const user = useUserStore();
 </script>
 
 <template>
   <nav>
-    <RouterLink to="/">
+    <RouterLink class="logo-wrap" to="/">
       <img class="logo" src="/pane.png" alt="Glass Pane Logo" />
     </RouterLink>
-    <form>
-      <SearchBar
-        :qry="props.qry"
-        :result="props.result"
-      />
-    </form>
+    <div class="custom-content">
+      <slot></slot>
+    </div>
     <div class="social">
       <div v-if="user.user" class="user">
         {{ user.user.username }}
       </div>
-      <a href="//github.com/MattMoony/glass-pane">
+      <RouterLink v-else to="/login">
+        <div class="user">
+          <font-awesome-icon icon="fa-solid fa-sign-in-alt" />
+          Login
+        </div>
+      </RouterLink>
+      <a class="github" href="//github.com/MattMoony/glass-pane">
         <font-awesome-icon icon="fa-brands fa-github" />
       </a>
     </div>
@@ -44,23 +33,30 @@ const user = useUserStore();
 nav {
   display: flex;
   justify-content: start;
-  align-items: stretch;
+  align-items: center;
   background-color: var(--color-background);
   border-bottom: 4px solid var(--color-border);
-  padding: 1em;
-  height: 4rem;
+  gap: 1em;
+  padding: .5em 1em;
+}
+
+.logo-wrap {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .logo {
   height: 100%;
-  margin-right: 1em;
+  max-height: 2.5em;
 }
 
-form {
+.custom-content {
   flex: 1;
   display: flex;
-  justify-content: start;
-  align-items: center;
+  justify-content: stretch;
+  align-items: stretch;
 }
 
 .social {
@@ -78,14 +74,17 @@ form {
   border-radius: 0.5em;
   padding: 0.25em 0.5em;
   margin-right: 1em;
-  cursor: default;
   user-select: none;
 }
 
 .social a {
-  font-size: 2em;
   color: var(--color-text);
   text-decoration: none;
+  cursor: pointer;
+}
+
+.social .github {
+  font-size: 2em;
 }
 
 @media only screen and (max-width: 600px) {

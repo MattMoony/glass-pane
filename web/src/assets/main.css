@@ -28,3 +28,16 @@
 .gp-scroll::-webkit-scrollbar-button {
   display: none;
 }
+
+.gp-highlight-text {
+  background-color: rgba(30, 171, 255, .2);
+  padding: 0.05rem;
+}
+
+.gp-callout {
+  background-color: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+}
