@@ -184,7 +184,7 @@ article {
   gap: 1em;
 }
 
-.slots.edit .left-slot.constrained {
+.slots .left-slot.constrained {
   max-width: 60vw;
 }
 
