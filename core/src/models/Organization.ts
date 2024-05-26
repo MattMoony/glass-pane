@@ -1,11 +1,24 @@
 import { pool } from '../db';
 
-import Organ from './Organ';
+import Organ, { OrganCache } from './Organ';
 import OrganSource from './OrganSource';
 import Membership from './Membership';
 import MembershipSource from './MembershipSource';
 import SocialsPlatforms from './SocialsPlatforms';
 import Socials from './Socials';
+import log from '../log/organization';
+
+/**
+ * A cache of all organizations in order not to overload the DB.
+ */
+const ORGANIZATION_CACHE: Map<number, Organization|null> = new Map();
+
+/**
+ * Cache of an organization.
+ */
+export interface OrganizationCache extends OrganCache {
+  members?: Membership[];
+}
 
 /**
  * Represents an organization - i.e. a grouping of several
@@ -17,11 +30,19 @@ class Organization extends Organ {
   public established?: Date;
   public dissolved?: Date;
 
+  public _cache: OrganizationCache = {};
+
   public constructor (id: number, bio: string, name: string, established?: Date, dissolved?: Date) {
     super(id, bio);
     this.name = name;
     this.established = established;
     this.dissolved = dissolved;
+    this.cache();
+  }
+
+  public cache(): void {
+    log.info(`Caching organization ${this}`);
+    ORGANIZATION_CACHE.set(this.id, this);    
   }
 
   /**
@@ -99,6 +120,7 @@ class Organization extends Organ {
       [this.name, this.established, this.dissolved, this.id]
     );
     client.release();
+    this.cache();
   }
 
   /**
@@ -130,6 +152,22 @@ class Organization extends Organ {
     );
     client.release();
     super.remove();
+    log.debug(`Nulling organization cache ${this}`);
+    ORGANIZATION_CACHE.set(this.id, null);
+  }
+
+  /**
+   * Returns all members of the organization.
+   * @returns A promise that resolves with all members for the organization.
+   */
+  public async getMembers (): Promise<Membership[]> {
+    if (!this._cache.members) {
+      log.info(`Missed members cache for ${this}`);
+      const Membership = (await import('./Membership')).default;
+      this._cache.members = await Membership.get(this);
+    }
+    log.debug(`Hit members cache for ${this}`);
+    return this._cache.members;
   }
 
   /**
@@ -175,22 +213,28 @@ class Organization extends Organ {
    * @returns A promise that resolves with the organization, or null if it doesn't exist.
    */
   public static async get (id: number): Promise<Organization|null> {
+    id = +id;
     const organ = await super.get(id);
     if (!organ) return null;
-    const client = await pool.connect();
-    const res = await client.query(
-      'SELECT name, established, dissolved FROM organization WHERE oid = $1', 
-      [id]
-    );
-    client.release();
-    if (res.rows.length === 0) return null;
-    return new Organization(
-      organ.id,
-      organ.bio,
-      res.rows[0].name,
-      res.rows[0].established,
-      res.rows[0].dissolved
-    );
+    if (!ORGANIZATION_CACHE.has(id)) {
+      log.info(`Missed organization cache for ${id}`);
+      const client = await pool.connect();
+      const res = await client.query(
+        'SELECT name, established, dissolved FROM organization WHERE oid = $1', 
+        [id]
+      );
+      client.release();
+      if (res.rows.length === 0) return null;
+      return new Organization(
+        organ.id,
+        organ.bio,
+        res.rows[0].name,
+        res.rows[0].established,
+        res.rows[0].dissolved
+      ); 
+    }
+    log.debug(`Hit organization cache ${id}`);
+    return ORGANIZATION_CACHE.get(id)!;
   }
 
   /**

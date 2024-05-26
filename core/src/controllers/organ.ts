@@ -261,7 +261,8 @@ export const removeSource = async (req: Request, res: Response): Promise<void> =
  */
 export const getMemberships = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
-  const memberships = await Membership.get(organ);
+  // const memberships = await Membership.get(organ);
+  const memberships = await organ.getMemberships();
   res.send({ 'success': true, 'memberships': memberships.map(m => ({ ...m.json(), organ: undefined, })) });
 };
 

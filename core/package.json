@@ -21,7 +21,8 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.11.3",
-    "pg-types": "^4.0.2"
+    "pg-types": "^4.0.2",
+    "winston": "^3.13.0"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
@@ -33,6 +34,7 @@
     "@types/passport": "^1.0.16",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.11.0",
+    "@types/winston": "^2.4.4",
     "async-mutex": "^0.5.0",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",

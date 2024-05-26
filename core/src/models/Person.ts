@@ -1,12 +1,30 @@
 import { pool } from '../db';
 
-import Organ from './Organ';
+import Organ, { OrganCache } from './Organ';
 import OrganSource from './OrganSource';
 import RelationType from './RelationshipType';
 import Relation from './Relation';
 import RelationSource from './RelationSource';
 import Socials from './Socials';
 import SocialsPlatforms from './SocialsPlatforms';
+import log from '../log/person';
+
+/**
+ * A cache of all organs in order not to overload the DB.
+ */
+const PERSON_CACHE: Map<number, Person|null> = new Map();
+
+/**
+ * Cache of a person.
+ */
+export interface PersonCache extends OrganCache {
+  relations: {
+    [RelationType.PARENT]?: Relation[];
+    [RelationType.CHILD]?: Relation[];
+    [RelationType.ROMANTIC]?: Relation[];
+    [RelationType.FRIEND]?: Relation[];
+  }
+}
 
 /**
  * Represents a natural person.
@@ -17,14 +35,22 @@ class Person extends Organ {
   public birthdate?: Date;
   public deathdate?: Date;
 
+  public _cache: PersonCache = { relations: {}, };
+
   public constructor (id: number, bio: string, firstname: string, lastname: string, birthdate?: Date, deathdate?: Date) {
     super(id, bio);
     this.firstname = firstname;
     this.lastname = lastname;
     this.birthdate = birthdate;
     this.deathdate = deathdate;
+    this.cache();
   }
   
+  public cache (): void {
+    log.info(`Caching person ${this}`);
+    PERSON_CACHE.set(this.id, this);
+  }
+
   /**
    * Get the JSON representation of this person.
    * @returns {Object} The JSON representation of this person.
@@ -102,6 +128,7 @@ class Person extends Organ {
       [this.firstname, this.lastname, this.birthdate, this.deathdate, this.id],
     );
     client.release();
+    this.cache();
   }
 
 
@@ -132,6 +159,20 @@ class Person extends Organ {
     );
     client.release();
     super.remove();
+    log.debug(`Nulling person cache ${this}`);
+    PERSON_CACHE.set(this.id, null);
+  }
+
+  /**
+   * Get all relations of this person.
+   * @returns {Promise<Relation[]>} The relations of this person.
+   */
+  public async getRelations (): Promise<Relation[]> {
+    const parents = await this.getParents();
+    const children = await this.getChildren();
+    const romantic = await this.getRomantic();
+    const friends = await this.getFriends();
+    return parents.concat(children).concat(romantic).concat(friends);
   }
 
   /**
@@ -140,24 +181,12 @@ class Person extends Organ {
    * @returns {Promise<Relation[]>} The parents of this person.
    */
   public async getParents (): Promise<Relation[]> {
-    const client = await pool.connect();
-    const res = await client.query(
-      `SELECT   person.*, relation.since, relation.until
-      FROM      relation
-                INNER JOIN person ON person.pid = relation.relative
-      WHERE     relation.person = $1
-                AND relation.relation = $2`,
-      [this.id, RelationType.PARENT],
-    );
-    client.release();
-    return Promise.all(res.rows.map(async (row) => new Relation(RelationType.CHILD, this, new Person(
-      +row.pid,
-      (await Organ.get(row.pid))!.bio,
-      row.firstname,
-      row.lastname,
-      row.birthdate,
-      row.deathdate,
-    ), row.since, row.until)));
+    if (!this._cache.relations[RelationType.PARENT]) {
+      log.info(`Missed parents cache ${this}`);
+      this._cache.relations[RelationType.PARENT] = await Relation.getAll(this, RelationType.PARENT);
+    }
+    log.debug(`Hit parents cache ${this._cache.relations[RelationType.PARENT]}`);
+    return this._cache.relations[RelationType.PARENT];
   }
 
   /**
@@ -166,24 +195,12 @@ class Person extends Organ {
    * @returns {Promise<Relation[]>} The children of this person.
    */
   public async getChildren (): Promise<Relation[]> {
-    const client = await pool.connect();
-    const res = await client.query(
-      `SELECT   person.*, relation.since, relation.until
-      FROM      relation
-                INNER JOIN person ON person.pid = relation.person
-      WHERE     relation.relative = $1
-                AND relation.relation = $2`,
-      [this.id, RelationType.PARENT],
-    );
-    client.release();
-    return Promise.all(res.rows.map(async (row) => new Relation(RelationType.PARENT, this, new Person(
-      +row.pid,
-      (await Organ.get(row.pid))!.bio,
-      row.firstname,
-      row.lastname,
-      row.birthdate,
-      row.deathdate,
-    ), row.since, row.until)));
+    if (!this._cache.relations[RelationType.CHILD]) {
+      log.info(`Missed children cache ${this}`);
+      this._cache.relations[RelationType.CHILD] = await Relation.getAll(this, RelationType.CHILD);
+    }
+    log.debug(`Hit children cache ${this._cache.relations[RelationType.CHILD]}`);
+    return this._cache.relations[RelationType.CHILD];
   }
 
   /**
@@ -192,40 +209,12 @@ class Person extends Organ {
    * @returns {Promise<Relation[]>} The romantic relationships of this person.
    */
   public async getRomantic (): Promise<Relation[]> {
-    const client = await pool.connect();
-    const res = await client.query(
-      `SELECT   person.*, relation.since, relation.until
-      FROM      relation
-                INNER JOIN person ON person.pid = relation.relative
-      WHERE     relation.person = $1
-                AND relation.relation = $2`,
-      [this.id, RelationType.ROMANTIC],
-    );
-    const ret = await Promise.all(res.rows.map(async (row) => new Relation(RelationType.ROMANTIC, this, new Person(
-      +row.pid,
-      (await Organ.get(row.pid))!.bio,
-      row.firstname,
-      row.lastname,
-      row.birthdate,
-      row.deathdate,
-    ), row.since, row.until)));
-    const res2 = await client.query(
-      `SELECT   person.*, relation.since, relation.until
-      FROM      relation
-                INNER JOIN person ON person.pid = relation.person
-      WHERE     relation.relative = $1
-                AND relation.relation = $2`,
-      [this.id, RelationType.ROMANTIC],
-    );
-    client.release();
-    return ret.concat(await Promise.all(res2.rows.map(async (row) => new Relation(RelationType.ROMANTIC, this, new Person(
-      +row.pid,
-      (await Organ.get(row.pid))!.bio,
-      row.firstname,
-      row.lastname,
-      row.birthdate,
-      row.deathdate,
-    ), row.since, row.until))));
+    if (!this._cache.relations[RelationType.ROMANTIC]) {
+      log.info(`Missed romantic cache ${this}`);
+      this._cache.relations[RelationType.ROMANTIC] = await Relation.getAll(this, RelationType.ROMANTIC);
+    }
+    log.debug(`Hit romantic cache ${this._cache.relations[RelationType.ROMANTIC]}`);
+    return this._cache.relations[RelationType.ROMANTIC];
   }
 
   /**
@@ -234,40 +223,128 @@ class Person extends Organ {
    * @returns {Promise<Relation[]>} The friends of this person.
    */
   public async getFriends (): Promise<Relation[]> {
-    const client = await pool.connect();
-    const res = await client.query(
-      `SELECT   person.*, relation.since, relation.until
-      FROM      relation
-                INNER JOIN person ON person.pid = relation.relative
-      WHERE     relation.person = $1
-                AND relation.relation = $2`,
-      [this.id, RelationType.FRIEND],
-    );
-    const ret = await Promise.all(res.rows.map(async (row) => new Relation(RelationType.FRIEND, this, new Person(
-      +row.pid,
-      (await Organ.get(row.pid))!.bio,
-      row.firstname,
-      row.lastname,
-      row.birthdate,
-      row.deathdate,
-    ), row.since, row.until)));
-    const res2 = await client.query(
-      `SELECT   person.*, relation.since, relation.until
-      FROM      relation
-                INNER JOIN person ON person.pid = relation.person
-      WHERE     relation.relative = $1
-                AND relation.relation = $2`,
-      [this.id, RelationType.FRIEND],
-    );
-    client.release();
-    return ret.concat(await Promise.all(res2.rows.map(async (row) => new Relation(RelationType.FRIEND, this, new Person(
-      +row.pid,
-      (await Organ.get(row.pid))!.bio,
-      row.firstname,
-      row.lastname,
-      row.birthdate,
-      row.deathdate,
-    ), row.since, row.until))));
+    if (!this._cache.relations[RelationType.FRIEND]) {
+      log.info(`Missed friends cache ${this}`);
+      this._cache.relations[RelationType.FRIEND] = await Relation.getAll(this, RelationType.FRIEND);
+    }
+    log.debug(`Hit friends cache ${this._cache.relations[RelationType.FRIEND]}`);
+    return this._cache.relations[RelationType.FRIEND];
+  }
+
+  /**
+   * Add a relation to this person.
+   * @param {string[]} sources The sources of the relation.
+   * @param {RelationType} type The type of the relation.
+   * @param {Person} relative The relative of the relation.
+   * @param {Date} since The since date of the relation.
+   * @param {Date} until The until date of the relation.
+   * @returns {Promise<Relation|null>} A promise that resolves with the created relation, or null if it already exists.
+   */
+  public async addRelation (sources: string[], type: RelationType, relative: Person, since?: Date, until?: Date): Promise<Relation|null> {
+    const Relation = (await import('./Relation')).default;
+    const relation = await Relation.create(type, this, relative, since, until);
+    if (!relation) return null;
+    this._cache.relations[type] = [...this._cache.relations[type]||[], relation];
+    switch (type) {
+      case RelationType.PARENT:
+        if (relative._cache.relations[RelationType.CHILD]) {
+          relative._cache.relations[RelationType.CHILD] = [
+            ...relative._cache.relations[RelationType.CHILD],
+            relation,
+          ];
+        }
+        break;
+      case RelationType.CHILD:
+        if (relative._cache.relations[RelationType.PARENT]) {
+          relative._cache.relations[RelationType.PARENT] = [
+            ...relative._cache.relations[RelationType.PARENT],
+            relation,
+          ];
+        }
+        break;
+      case RelationType.ROMANTIC:
+      case RelationType.FRIEND:
+        if (relative._cache.relations[type]) {
+          relative._cache.relations[type] = [
+            ...relative._cache.relations[type]!,
+            relation,
+          ];
+        }
+        break;
+    }
+    return relation;
+  }
+
+  /**
+   * Update a relation of this person.
+   * @param {Relation} relation The relation to update.
+   * @returns {Promise<void>} A promise that resolves when the relation is updated.
+   */
+  public async updateRelation (relation: Relation): Promise<void> {
+    if (relation.from !== this) 
+      return relation.to.updateRelation(relation);
+    await relation.update();
+    this._cache.relations[relation.type] = [
+      ...this._cache.relations[relation.type]!.filter(r => r.id !== relation.id),
+      relation,
+    ];
+    switch (relation.type) {
+      case RelationType.PARENT:
+        if (relation.to._cache.relations[RelationType.CHILD]) {
+          relation.to._cache.relations[RelationType.CHILD] = [
+            ...relation.to._cache.relations[RelationType.CHILD]!.filter(r => r.id !== relation.id),
+            relation,
+          ];
+        }
+        break;
+      case RelationType.CHILD:
+        if (relation.to._cache.relations[RelationType.PARENT]) {
+          relation.to._cache.relations[RelationType.PARENT] = [
+            ...relation.to._cache.relations[RelationType.PARENT]!.filter(r => r.id !== relation.id),
+            relation,
+          ];
+        }
+        break;
+      case RelationType.ROMANTIC:
+      case RelationType.FRIEND:
+        if (relation.to._cache.relations[relation.type]) {
+          relation.to._cache.relations[relation.type] = [
+            ...relation.to._cache.relations[relation.type]!.filter(r => r.id !== relation.id),
+            relation,
+          ];
+        }
+        break;
+    }
+  }
+
+  /**
+   * Remove a relation from this person.
+   * @param {Relation} relation The relation to remove.
+   * @returns {Promise<void>} A promise that resolves when the relation is removed.
+   */
+  public async removeRelation (relation: Relation): Promise<void> {
+    if (relation.from !== this) 
+      return relation.to.removeRelation(relation);
+    await relation.remove();
+    this._cache.relations[relation.type] = this._cache.relations[relation.type]!.filter(r => r.id !== relation.id);
+    switch (relation.type) {
+      case RelationType.PARENT:
+        if (relation.to._cache.relations[RelationType.CHILD]) {
+          relation.to._cache.relations[RelationType.CHILD] = relation.to._cache.relations[RelationType.CHILD]!.filter(r => r.id !== relation.id);
+        }
+        break;
+      case RelationType.CHILD:
+        if (relation.to._cache.relations[RelationType.PARENT]) {
+          relation.to._cache.relations[RelationType.PARENT] = relation.to._cache.relations[RelationType.PARENT]!.filter(r => r.id !== relation.id);
+        }
+        break;
+      case RelationType.ROMANTIC:
+      case RelationType.FRIEND:
+        if (relation.to._cache.relations[relation.type]) {
+          relation.to._cache.relations[relation.type] = relation.to._cache.relations[relation.type]!.filter(r => r.id !== relation.id);
+        }
+        break;
+    }
   }
 
   /**
@@ -313,23 +390,32 @@ class Person extends Organ {
    * @returns {Promise<Person|null>} A promise that resolves with the person, or null if not found.
    */
   public static async get (id: number): Promise<Person|null> {
+    id = +id;
     const organ = await super.get(id);
     if (!organ) return null;
-    const client = await pool.connect();
-    const res = await client.query(
-      'SELECT * FROM person WHERE pid = $1',
-      [id],
-    );
-    client.release();
-    if (res.rows.length === 0) return null;
-    return new Person(
-      organ.id,
-      organ.bio,
-      res.rows[0].firstname,
-      res.rows[0].lastname,
-      res.rows[0].birthdate,
-      res.rows[0].deathdate,
-    );
+    if (!PERSON_CACHE.has(id)) {
+      log.info(`Missed person cache for ${id}`);
+      const client = await pool.connect();
+      const res = await client.query(
+        'SELECT * FROM person WHERE pid = $1',
+        [id],
+      );
+      client.release();
+      if (res.rows.length === 0) {
+        PERSON_CACHE.set(id, null);
+      } else {
+        return new Person(
+          organ.id,
+          organ.bio,
+          res.rows[0].firstname,
+          res.rows[0].lastname,
+          res.rows[0].birthdate,
+          res.rows[0].deathdate,
+        );
+      }
+    }
+    log.debug(`Hit person cache ${PERSON_CACHE.get(id)}`);
+    return PERSON_CACHE.get(id)!;
   }
 
   /**

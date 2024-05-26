@@ -74,11 +74,12 @@ class Relation {
    */
   public async create (sources: string[]): Promise<void> {
     const client = await pool.connect();
-    await client.query(
-      'INSERT INTO relation (person, relative, relation, since, until) VALUES ($1, $2, $3, $4, $5)',
+    const res = await client.query(
+      'INSERT INTO relation (person, relative, relation, since, until) VALUES ($1, $2, $3, $4, $5) RETURNING rid',
       [this.from.id, this.to.id, this.type, this.since, this.until],
     );
-
+    if (!res.rows) return;
+    this.id = +res.rows[0].rid;
     for (const source of sources) {
       await client.query(
         'INSERT INTO relation_source (rid, url) VALUES ($1, $2, $3, $4)',
@@ -229,6 +230,7 @@ class Relation {
     const client = await pool.connect();
     let res;
     if (type === RelationType.PARENT) {
+      /*
       res = await client.query(
         `SELECT   person.*, relation.* 
         FROM      relation 
@@ -236,7 +238,15 @@ class Relation {
         WHERE     relation.person = $1 AND relation.relation = $2`,
         [person.id, type],
       );
+      */
+      res = await client.query(
+        `SELECT   *
+        FROM      relation
+        WHERE     person = $1 AND relation = $2`,
+        [person.id, type],
+      );
     } else if (type === RelationType.CHILD) {
+      /*
       res = await client.query(
         `SELECT   person.*, relation.*
         FROM      relation
@@ -244,7 +254,15 @@ class Relation {
         WHERE     relation.relative = $1 AND relation.relation = $2`,
         [person.id, RelationType.PARENT],
       );
+      */
+      res = await client.query(
+        `SELECT   *
+        FROM      relation
+        WHERE     relative = $1 AND relation = $2`,
+        [person.id, RelationType.PARENT],
+      ); 
     } else {
+      /*
       res = await client.query(
         `SELECT   person.*, relation.*
         FROM      relation
@@ -256,10 +274,21 @@ class Relation {
                   INNER JOIN person ON relation.person = person.pid
         WHERE     relation.relative = $1 AND relation.relation = $2`,
         [person.id, type],
+      );*/
+      res = await client.query(
+        `SELECT   *
+        FROM      relation
+        WHERE     person = $1 AND relation = $2
+        UNION
+        SELECT   *
+        FROM      relation
+        WHERE     relative = $1 AND relation = $2`,
+        [person.id, type],
       );
     }
     client.release();
     if (res.rows.length === 0) return [];
+    /*
     return await Promise.all(res.rows.map(async (row) => new Relation(
       +row.rid, 
       row.relation, 
@@ -286,6 +315,24 @@ class Relation {
       row.since, 
       row.until,
     )));
+    */
+    return (await Promise.all(res.rows.map(async (row) => {
+      const from = (person.id === +row.person)
+                  ? person
+                  : await Person.get(+row.person);
+      const to = (person.id === +row.person)
+                  ? await Person.get(+row.relative)
+                  : person;
+      if (!from || !to) return null;
+      return new Relation(
+        +row.rid,
+        +row.relation,
+        from,
+        to,
+        row.since,
+        row.until,
+      );
+    }))).filter((r) => r !== null) as Relation[];
   }
 
   public static async sources (id: number): Promise<RelationSource[]>;

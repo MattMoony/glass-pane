@@ -218,8 +218,8 @@ export const removeRelation = async (req: Request, res: Response): Promise<void>
  */
 export const getParents = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  // const parents = await person.getParents();
-  const parents = await Relation.getAll(person, RelationType.PARENT);
+  const parents = await person.getParents();
+  // const parents = await Relation.getAll(person, RelationType.PARENT);
   res.send({ 'success': true, 'parents': parents.map((p) => p.json(person)) });
 };
 
@@ -230,8 +230,8 @@ export const getParents = async (req: Request, res: Response): Promise<void> => 
  */
 export const getChildren = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  // const children = await person.getChildren();
-  const children = await Relation.getAll(person, RelationType.CHILD);
+  const children = await person.getChildren();
+  // const children = await Relation.getAll(person, RelationType.CHILD);
   res.send({ 'success': true, 'children': children.map((p) => p.json(person)) });
 };
 
@@ -242,8 +242,8 @@ export const getChildren = async (req: Request, res: Response): Promise<void> =>
  */
 export const getRomantic = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  // const romantic = await person.getRomantic();
-  const romantic = await Relation.getAll(person, RelationType.ROMANTIC);
+  const romantic = await person.getRomantic();
+  // const romantic = await Relation.getAll(person, RelationType.ROMANTIC);
   res.send({ 'success': true, 'romantic': romantic.map((p) => p.json(person)) });
 };
 
@@ -254,8 +254,8 @@ export const getRomantic = async (req: Request, res: Response): Promise<void> =>
  */
 export const getFriends = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  // const friends = await person.getFriends();
-  const friends = await Relation.getAll(person, RelationType.FRIEND);
+  const friends = await person.getFriends();
+  // const friends = await Relation.getAll(person, RelationType.FRIEND);
   res.send({ 'success': true, 'friends': friends.map((p) => p.json(person)) });
 };
 

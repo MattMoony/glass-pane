@@ -5,11 +5,22 @@ import fsPromises from 'fs/promises';
 import OrganSource from './OrganSource';
 import SocialsPlatforms from './SocialsPlatforms';
 import Socials from './Socials';
+import log from '../log/organ';
+import type Membership from './Membership';
+import type Organization from './Organization';
+import type Role from './Role';
 
 /**
  * A cache of all organs in order not to overload the DB.
  */
 const ORGAN_CACHE: Map<number, Organ|null> = new Map();
+
+/**
+ * Cache of an organ.
+ */
+export interface OrganCache {
+  memberships?: Membership[];
+}
 
 /**
  * Represents a member of an organ. That member
@@ -20,13 +31,16 @@ class Organ {
   public id: number;
   public bio: string;
 
+  public _cache: OrganCache = {};
+
   public constructor (id: number, bio: string) {
     this.id = id;
     this.bio = bio;
     this.cache();
   }
 
-  private cache (): void {
+  public cache (): void {
+    log.info(`Caching organ ${this}`);
     ORGAN_CACHE.set(this.id, this);
   }
 
@@ -114,6 +128,7 @@ class Organ {
     const client = await pool.connect();
     await client.query('DELETE FROM organ WHERE oid = $1', [this.id]);
     client.release();
+    log.debug(`Nulling organ cache ${this}`);
     ORGAN_CACHE.set(this.id, null);
   }
 
@@ -137,6 +152,75 @@ class Organ {
     const res = await client.query('SELECT sid, platform, url FROM socials WHERE organ = $1', [this.id]);
     client.release();
     return res.rows.map(row => new Socials(+row.sid, +row.platform, row.url));
+  }
+
+  /**
+   * Returns all memberships for the organ.
+   * @returns A promise that resolves with all memberships for the organ.
+   */
+  public async getMemberships (): Promise<Membership[]> {
+    if (!this._cache.memberships) {
+      log.info(`Missed memberships cache ${this}`);
+      const Membership = (await import('./Membership')).default;
+      // force cast to Organ because of organizations
+      this._cache.memberships = await Membership.get(new Organ(this.id, this.bio));
+    }
+    log.debug(`Hit memberships cache ${this}`);
+    return this._cache.memberships;
+  }
+
+  /**
+   * Add a new membership to the organ.
+   * @param sources The sources of the membership.
+   * @param organization The organization of the membership.
+   * @param role The role of the membership.
+   * @param since The since date of the membership.
+   * @param until The until date of the membership.
+   * @returns A promise that resolves with the created membership.
+   */
+  public async addMembership (sources: string[], organization: Organization, role: Role, since?: Date|null, until?: Date|null): Promise<Membership> {
+    const Membership = (await import('./Membership')).default;
+    const membership = await Membership.create(sources, this, organization, role, since, until);
+    this._cache.memberships = [...this._cache.memberships||[], membership];
+    if (organization._cache.members) {
+      organization._cache.members = [
+        ...organization._cache.members, 
+        membership
+      ];
+    }
+    return membership;
+  }
+
+  /**
+   * Updates a membership of the organ.
+   * @param membership The membership to update.
+   * @returns A promise that resolves when the membership has been updated.
+   */
+  public async updateMembership (membership: Membership): Promise<void> {
+    await membership.update();
+    this._cache.memberships = [
+      ...this._cache.memberships!.filter(m => m.id !== membership.id),
+      membership,
+    ];
+    if (membership.organization._cache.members) {
+      membership.organization._cache.members = [
+        ...membership.organization._cache.members.filter(m => m.id !== membership.id),
+        membership,
+      ];
+    }
+  }
+
+  /**
+   * Removes a membership from the organ.
+   * @param membership The membership to remove.
+   * @returns A promise that resolves when the membership has been removed.
+   */
+  public async removeMembership (membership: Membership): Promise<void> {
+    await membership.remove();
+    this._cache.memberships = this._cache.memberships!.filter(m => m.id !== membership.id);
+    if (membership.organization._cache.members) {
+      membership.organization._cache.members = membership.organization._cache.members.filter(m => m.id !== membership.id);
+    }
   }
 
   /**
@@ -168,6 +252,7 @@ class Organ {
     const _id = +id;
     if (isNaN(_id)) return null;
     if (!ORGAN_CACHE.has(_id)) {
+      log.info(`Missed organ cache ${_id}`);
       const client = await pool.connect();
       const res = await client.query('SELECT * FROM organ WHERE oid = $1', [_id]);
       client.release();
@@ -178,6 +263,7 @@ class Organ {
         return new Organ(+res.rows[0].oid, fs.readFileSync(`${process.env.DATA_DIR}/${_id}.md`, 'utf8'));
       }
     }
+    log.debug(`Hit organ cache ${_id}`);
     return ORGAN_CACHE.get(_id)||null;
   }
 }
