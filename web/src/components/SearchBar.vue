@@ -16,6 +16,10 @@ const props = defineProps<{
    * The result to display in the search bar.
    */
   result?: Organ;
+  /**
+   * Max result chars.
+   */
+  maxChars?: number;
 }>();
 
 const router: Router = useRouter();
@@ -32,6 +36,7 @@ const onSelect = (organ: Organ) => {
   <SelectSearch
     :qry="props.qry"
     :init-result="props.result"
+    :max-chars="props.maxChars"
     @select="onSelect"
   />
 </template>

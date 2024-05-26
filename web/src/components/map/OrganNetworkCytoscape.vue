@@ -60,6 +60,7 @@ const nodes: Ref<(PersonNode|OrganizationNode)[][]> = ref([]);
 const edges: Ref<(RelationEdge|MembershipEdge)[][]> = ref([]);
 const distance: Ref<number> = ref(1);
 const loading: Ref<boolean> = ref(true);
+const cuLayout: Ref<'cola'|'fcose'|'avsdf'|'euler'|'spread'> = ref(props.layout||'fcose');
 
 cytoscape.use(cola);
 cytoscape.use(fcose);
@@ -115,7 +116,7 @@ const refreshLayout = async (): Promise<void> => {
     // max loading ...
     window.setTimeout(() => resolve(), 2000);
     cy.value?.layout({
-      ...layoutConfigs[props.layout || 'fcose'],
+      ...layoutConfigs[cuLayout.value],
       stop: () => {
         resolve();
       },
@@ -258,9 +259,30 @@ watch(
 
 <template>
   <div class="controls">
-    <label for="distance">Distance</label>
-    <span>{{ distance }}</span>
-    <input id="distance" v-model="distance" type="range" min="1" max="3" step="1" />
+    <div>
+      <label for="layout-algo">Layout</label>
+      <select
+        id="layout-algo"
+        v-model="cuLayout"
+        title="Select layout"
+        @change="() => refreshLayout()"
+      >
+        <option v-for="l in Object.keys(layoutConfigs)" :value="l">
+          {{ l }}
+        </option>
+      </select>
+      <button
+        @click="() => refreshLayout()"
+        title="Refresh layout"
+      >
+        <font-awesome-icon icon="redo" />
+      </button>
+    </div>
+    <div>
+      <label for="distance">Distance</label>
+      <span>{{ distance }}</span>
+      <input id="distance" v-model="distance" type="range" min="1" max="3" step="1" />
+    </div>
   </div>
   <div
     ref="container"
@@ -285,13 +307,35 @@ watch(
   left: 0;
   right: 0;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   padding: .5em;
   gap: 1em;
   border-bottom: 2px dashed var(--color-border);
   z-index: 98;
   backdrop-filter: blur(10px);
+}
+
+.controls button,
+.controls select {
+  background-color: var(--color-background-soft);
+  padding: .5em;
+  border: none;
+  border-radius: .5em;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.controls button:focus,
+.controls select:focus {
+  outline: none;
+}
+
+.controls > div {
+  display: flex;
+  gap: .5em;
+  align-items: center
 }
 
 .loading {

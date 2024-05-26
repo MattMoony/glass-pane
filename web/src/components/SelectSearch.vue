@@ -27,6 +27,10 @@ const props = defineProps<{
    * The type of search results to display.
    */
   type?: string;
+  /**
+   * Max result chars.
+   */
+  maxChars?: number;
 }>();
 const emits = defineEmits<{
   /**
@@ -43,12 +47,18 @@ const query: Ref<string> = ref(props.qry || '');
 const suggestions: Ref<Organ[]> = ref([]);
 const open: Ref<boolean> = ref(false);
 const timeout: Ref<number|undefined> = ref(undefined);
+const maxResChars: Ref<number> = ref(props.maxChars || 32);
 
 const selectAndClose = (organ: Organ) => {
   open.value = false;
   suggestions.value = [];
   query.value = '';
   emits('select', organ);
+};
+
+const clipRes = (res: string): string => {
+  if (res.length > maxResChars.value) return res.slice(0, maxResChars.value) + ' ...';
+  return res;
 };
 
 watch(query, async () => {
@@ -86,11 +96,13 @@ onClickOutside(container, () => {
         ]"
       >
         {{ 
-          initResult instanceof Person 
-          ? initResult.firstname + ' ' + initResult.lastname
-          : initResult instanceof Organization
-          ? initResult.name
-          : ''
+          clipRes(
+            initResult instanceof Person 
+            ? initResult.firstname + ' ' + initResult.lastname
+            : initResult instanceof Organization
+            ? initResult.name
+            : ''
+          )
         }}
       </div>
       <input 
@@ -233,6 +245,14 @@ onClickOutside(container, () => {
     justify-content: flex-start;
     align-items: flex-start;
     gap: .5em;
+    font-size: .9em;
+  }
+
+  .init-result {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
   }
 }
 </style>

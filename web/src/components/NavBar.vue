@@ -19,7 +19,7 @@ const user = useUserStore();
       <RouterLink v-else to="/login">
         <div class="user">
           <font-awesome-icon icon="fa-solid fa-sign-in-alt" />
-          Login
+          <span>Login</span>
         </div>
       </RouterLink>
       <a class="github" href="//github.com/MattMoony/glass-pane">
@@ -65,7 +65,6 @@ nav {
   align-items: center;
   border-left: 2px solid var(--color-border);
   padding-left: 1em;
-  margin-left: 1em;
 }
 
 .social .user {
@@ -75,6 +74,10 @@ nav {
   padding: 0.25em 0.5em;
   margin-right: 1em;
   user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
 }
 
 .social a {
@@ -89,12 +92,19 @@ nav {
 
 @media only screen and (max-width: 600px) {
   nav {
-    height: 6rem;
     align-items: center;
   }
 
   .logo {
-    max-height: 3rem;
+    max-height: 2rem;
+  }
+  
+  .social {
+    margin: 0;
+  }
+
+  .social .user > span {
+    display: none;
   }
 }
 </style>

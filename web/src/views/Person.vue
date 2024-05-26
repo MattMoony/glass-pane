@@ -16,7 +16,6 @@ const person: Ref<Person | null> = shallowRef(null);
 const editing: ComputedRef<boolean> = computed(() => Object.keys(route.query).includes('edit'));
 
 watch(pid, async (newPid: number) => {
-  console.log('asdf');
   person.value = await Person.get(newPid);
 }, { immediate: true });
 </script>

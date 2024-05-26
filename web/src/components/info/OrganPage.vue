@@ -213,7 +213,7 @@ article {
     max-width: 100vw;
   }
 
-  .slots.edit .left-slot.constrained {
+  .slots .left-slot.constrained {
     max-width: 100vw;
   }
 

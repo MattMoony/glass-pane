@@ -167,6 +167,7 @@ const emits = defineEmits<{
   padding: 1rem;
   border-bottom: 2px solid var(--color-border);
   user-select: none;
+  flex-wrap: wrap;
 }
 
 .membership-details.centered {
@@ -209,6 +210,8 @@ const emits = defineEmits<{
 
 @media only screen and (max-width: 600px) {
   .membership-info {
+    flex-direction: column-reverse;
+    align-items: center;
     gap: 1rem;
   }
 

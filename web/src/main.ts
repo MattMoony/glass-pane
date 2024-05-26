@@ -16,7 +16,7 @@ import {
   faTelegram,
   faYoutube,
   faTiktok,
-  faXing, 
+  faXing,
 } from '@fortawesome/free-brands-svg-icons'
 import { 
   faMagnifyingGlass, 
@@ -43,6 +43,7 @@ import {
   faEye,
   faBook,
   faDiagramProject,
+  faRedo,
 } from '@fortawesome/free-solid-svg-icons'
 
 import VNetworkGraph from 'v-network-graph'
@@ -102,6 +103,7 @@ library.add(
   faEye,
   faBook,
   faDiagramProject,
+  faRedo,
 )
 app.component('font-awesome-icon', FontAwesomeIcon)
 
