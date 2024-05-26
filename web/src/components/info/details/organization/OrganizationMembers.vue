@@ -82,6 +82,7 @@ const groupMembers = () => {
 watch(() => props.organization, async () => {
   if (!props.organization) return;
   members.value = await props.organization.members.get();
+  roleMembers.value = {};
   if (!props.noGroup) groupMembers();
 }, { immediate: true, });
 </script>
