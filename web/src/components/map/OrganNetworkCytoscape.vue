@@ -211,7 +211,7 @@ onMounted(async () => {
     cy.value!.elements().removeClass('semitransp');
     edges.removeClass('highlight').connectedNodes().removeClass('highlight');
   });
-  cy.value.on('click', 'node', e => {
+  cy.value.on('tap', 'node', e => {
     const node = e.target;
     if (node.data().type === 'person') {
       router.push(`/p/${node.data().id}`);
