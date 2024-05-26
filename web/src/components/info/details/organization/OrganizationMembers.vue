@@ -9,6 +9,7 @@ import Role from '@/models/Role';
 
 import MembershipInfo from '@/components/info/MembershipInfo.vue';
 import SelectSearch from '@/components/SelectSearch.vue';
+import CollapseableSection from '@/components/CollapseableSection.vue';
 
 const props = defineProps<{
   /**
@@ -19,9 +20,14 @@ const props = defineProps<{
    * Whether to display in edit mode.
    */
   edit?: boolean;
+  /**
+   * Don't group by role.
+   */
+  noGroup?: boolean;
 }>();
 
 const members: Ref<Membership[]> = ref([]);
+const roleMembers: Ref<{ [role: string]: Membership[] }> = ref({});
 const newMember: Ref<Membership|null> = ref(null);
 
 const addMember = async () => {
@@ -48,50 +54,124 @@ const removeMember = async (member: Membership) => {
   props.organization._vref = Math.floor(Math.random() * 1000);
 };
 
+const groupMembers = () => {
+  members.value.forEach(member => {
+    if (!roleMembers.value[member.role.name])
+      roleMembers.value[member.role.name] = [];
+    roleMembers.value[member.role.name].push(member);
+  });
+  Object.keys(roleMembers.value).forEach(role => {
+    roleMembers.value[role].sort((a, b) => {
+      if (!a.since && b.since) return 1;
+      if (!b.since && a.since) return -1;
+      if (a.since && b.since) {
+        const diff = a.since.getTime() - b.since.getTime();
+        if (diff < 0) return -1;
+        if (diff > 0) return 1;
+      }
+      if (a.organ instanceof Person && !(b.organ instanceof Person))
+        return -1;
+      if (!(a.organ instanceof Person) && b.organ instanceof Person)
+        return 1;
+      return (a.organ instanceof Person ? a.organ.firstname + ' ' + a.organ.lastname : (a.organ as Organization).name)
+        .localeCompare(b.organ instanceof Person ? b.organ.firstname + ' ' + b.organ.lastname : (b.organ as Organization).name)
+    });
+  });
+};
+
 watch(() => props.organization, async () => {
   if (!props.organization) return;
   members.value = await props.organization.members.get();
+  if (!props.noGroup) groupMembers();
 }, { immediate: true, });
 </script>
 
 <template>
   <div class="members">
     <template v-if="members && members.length">
-      <template v-if="!edit">
-        <RouterLink
-          class="connection-wrapper"
-          v-for="member in members"
-          :key="member.organ.id"
-          :to="
-            member.organ instanceof Person
-            ? `/p/${member.organ.id}`
-            : `/o/${member.organ.id}`
-          "
+      <div 
+        class="grouped-members"
+        v-if="!noGroup"
+      >
+        <CollapseableSection
+          v-for="(members, role) in roleMembers"
+          :title="role.toString()"
         >
-          <MembershipInfo
-            :membership="member"
-            organization-members
-          />
-        </RouterLink>
-      </template>
+          <template v-if="!edit">
+            <RouterLink
+              class="connection-wrapper"
+              v-for="member in members"
+              :key="member.organ.id"
+              :to="
+                member.organ instanceof Person
+                ? `/p/${member.organ.id}`
+                : `/o/${member.organ.id}`
+              "
+            >
+              <MembershipInfo
+                :membership="member"
+                organization-members
+              />
+            </RouterLink>
+          </template>
+          <template v-else>
+            <div 
+              v-for="member in members" 
+              :key="member.organization.id"
+            >
+              <MembershipInfo
+                :membership="member"
+                organization-members
+                edit
+                @change="member => updateMember(member)"
+              />
+              <div class="button-wrapper">
+                <button @click="() => removeMember(member)">
+                  <font-awesome-icon icon="trash" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          </template>
+        </CollapseableSection>
+      </div>
       <template v-else>
-        <div 
-          v-for="member in members" 
-          :key="member.organization.id"
-        >
-          <MembershipInfo
-            :membership="member"
-            organization-members
-            edit
-            @change="member => updateMember(member)"
-          />
-          <div class="button-wrapper">
-            <button @click="() => removeMember(member)">
-              <font-awesome-icon icon="trash" />
-              Remove
-            </button>
+        <template v-if="!edit">
+          <RouterLink
+            class="connection-wrapper"
+            v-for="member in members"
+            :key="member.organ.id"
+            :to="
+              member.organ instanceof Person
+              ? `/p/${member.organ.id}`
+              : `/o/${member.organ.id}`
+            "
+          >
+            <MembershipInfo
+              :membership="member"
+              organization-members
+            />
+          </RouterLink>
+        </template>
+        <template v-else>
+          <div 
+            v-for="member in members" 
+            :key="member.organization.id"
+          >
+            <MembershipInfo
+              :membership="member"
+              organization-members
+              edit
+              @change="member => updateMember(member)"
+            />
+            <div class="button-wrapper">
+              <button @click="() => removeMember(member)">
+                <font-awesome-icon icon="trash" />
+                Remove
+              </button>
+            </div>
           </div>
-        </div>
+        </template>
       </template>
     </template>
     <template v-else-if="!edit">
@@ -136,6 +216,12 @@ watch(() => props.organization, async () => {
 .members * {
   text-decoration: none;
   color: inherit;
+}
+
+.grouped-members {
+  display: flex;
+  flex-direction: column;
+  gap: .5em;
 }
 
 button {
