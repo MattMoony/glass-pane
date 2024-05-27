@@ -372,11 +372,12 @@ watch(
       }" />
     </div>
     <div class="popover-contents">
-      <ul>
+      <ul v-if="edgeSources && edgeSources.length">
         <li v-for="s in edgeSources">
           <a :href="s.url" target="_blank">{{ s.url }}</a>
         </li>
       </ul>
+      <i v-else>No sources available</i>
     </div>
   </div>
 </template>
