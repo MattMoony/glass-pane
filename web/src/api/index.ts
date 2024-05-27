@@ -13,6 +13,18 @@ export interface APIResponse {
 }
 
 /**
+ * The response from the stats endpoint.
+ */
+export interface StatsResponse extends APIResponse {
+  stats?: {
+    people: number;
+    organizations: number;
+    relations: number;
+    memberships: number;
+  };
+}
+
+/**
  * Sends a JSON request to the API. All interactions with
  * the API should go through this function.
  * @param args The arguments to pass to fetch.
@@ -22,4 +34,8 @@ export const jreq = async (url: string, ...args: any[]): Promise<APIResponse> =>
   const res = await fetch(url, ...args);
   if (!res.ok) return { success: false, msg: res.statusText, };
   return await res.json();
+};
+
+export const stats = async (): Promise<StatsResponse> => {
+  return await jreq(`${API}/stats`) as StatsResponse;
 };

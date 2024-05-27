@@ -7,6 +7,7 @@ import fs from 'fs';
 import fileUpload from 'express-fileupload';
 import passport from 'passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
+import { pool } from './db';
 
 import searchRouter from './routes/search';
 import organRouter from './routes/organ';
@@ -40,6 +41,34 @@ app.use('/api/person/', personRouter);
 app.use('/api/organization/', organizationRouter);
 app.use('/api/role/', roleRouter);
 app.use('/api/auth/', authRouter);
+
+app.get('/api/stats', async (req: Request, res: Response) => {
+  const client = await pool.connect();
+  const result = await client.query(`
+    SELECT COUNT(*)
+    FROM person
+    UNION ALL
+    SELECT COUNT(*)
+    FROM organization
+    UNION ALL
+    SELECT COUNT(*)
+    FROM relation
+    UNION ALL
+    SELECT COUNT(*)
+    FROM membership;
+  `);
+  client.release();
+  if (result.rowCount != 4) return res.send({ 'success': false, 'msg': 'failed to get stats', });
+  res.send({
+    'success': true,
+    'stats': {
+      'people': parseInt(result.rows[0].count),
+      'organizations': parseInt(result.rows[1].count),
+      'relations': parseInt(result.rows[2].count),
+      'memberships': parseInt(result.rows[3].count),
+    },
+  });
+});
 
 app.use('/api/*', (req: Request, res: Response) => {
   res.status(404);
