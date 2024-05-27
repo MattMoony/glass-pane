@@ -14,6 +14,10 @@ class Relation {
    */
   public type: RelationType;
   /**
+   * The person who is in the relation.
+   */
+  public from?: Person;
+  /**
    * The other person in the relation.
    */
   public other: Person;
@@ -28,19 +32,29 @@ class Relation {
 
   public constructor (type: RelationType, other: Person, since?: Date|null, until?: Date|null);
   public constructor (id: number, type: RelationType, other: Person, since?: Date|null, until?: Date|null);
-  public constructor (id: number|RelationType, type: RelationType|Person, other?: Person|Date|null, since?: Date|null, until?: Date|null) {
-    if (typeof id === 'number') {
+  public constructor (id: number, type: RelationType, from: Person, other: Person, since?: Date|null, until?: Date|null);
+  public constructor (id: number|RelationType, type: RelationType|Person, other?: Person|Date|null, since?: Person|Date|null, until?: Date|null, last?: Date|null) {
+    if (typeof id === 'number' && (since instanceof Date || typeof since === 'undefined')) {
       this.id = id;
       this.type = type as RelationType;
       this.other = other as Person;
       this.since = since;
       this.until = until;
-    } else {
+    } 
+    else if (typeof id !== 'number') {
       this.id = -1;
       this.type = id as RelationType;
       this.other = type as Person;
       this.since = other as Date;
-      this.until = since;
+      this.until = since as Date;
+    }
+    else {
+      this.id = id;
+      this.type = type as RelationType;
+      this.from = other as Person;
+      this.other = since as Person;
+      this.since = until as Date;
+      this.until = last;
     }
   }
 }

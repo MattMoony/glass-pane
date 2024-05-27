@@ -250,6 +250,24 @@ class Membership {
     if (res.rows.length === 0) return null;
     return new Membership(+res.rows[0].mid, v, v2, v3, v4, res.rows[0].until);
   }
+
+  /**
+   * Gets all sources of the membership.
+   * @returns A promise that resolves with the sources of the membership.
+   */
+  public static async sources (mid: number): Promise<MembershipSource[]> {
+    const client = await pool.connect();
+    const res = await client.query(
+      'SELECT * FROM membership_source WHERE mid = $1',
+      [mid]
+    );
+    client.release();
+    const sources = [];
+    for (const row of res.rows) {
+      sources.push(new MembershipSource(+row.sid, row.url));
+    }
+    return sources;
+  }
 }
 
 export default Membership;

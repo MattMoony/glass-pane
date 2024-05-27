@@ -273,13 +273,7 @@ export const getFriends = async (req: Request, res: Response): Promise<void> => 
 export const getRelationSources = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
 
-  const relative = await Person.get(parseInt(req.query.other as string));
-  if (relative === null) {
-    res.send({ 'success': false, 'msg': 'not found' });
-    return;
-  }
-
-  const sources = await Relation.sources(person, relative, new Date(req.query.since as string));
+  const sources = await Relation.sources(parseInt(req.params.rid));
   res.send({ 'success': true, 'sources': sources });
 };
 

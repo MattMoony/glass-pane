@@ -60,4 +60,6 @@ router.delete('/:oid/memberships/:mid',
   controller.parseOid, controller.removeMembership
 );
 
+router.get('/:oid/memberships/:mid/sources', controller.parseOid, controller.getMembershipSources);
+
 export default router;

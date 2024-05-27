@@ -162,6 +162,17 @@ class Person extends Organ implements person.Person {
      * @returns A promise that resolves when the relation is removed.
      */
     remove: (rel: Relation) => Promise<void>;
+    /**
+     * The sources of relations.
+     */
+    sources: {
+      /**
+       * Gets the sources of a relation.
+       * @param rel The relation to get the sources of.
+       * @returns A promise that resolves to the sources of the relation.
+       */
+      get: (rel: Relation) => Promise<person.RelationSource[]>;
+    };
   };
 
   /**
@@ -197,6 +208,7 @@ class Person extends Organ implements person.Person {
           this.cache.parents = res.parents?.map(r => new Relation(
             r.id,
             RelationType.PARENT,
+            this,
             new Person(
               r.to.id,
               r.to.bio,
@@ -230,6 +242,7 @@ class Person extends Organ implements person.Person {
           this.cache.children = res.children?.map(r => new Relation(
             r.id,
             RelationType.CHILD,
+            this,
             new Person(
               r.to.id,
               r.to.bio,
@@ -263,6 +276,7 @@ class Person extends Organ implements person.Person {
           this.cache.romantic = res.romantic?.map(r => new Relation(
             r.id,
             RelationType.ROMANTIC,
+            this,
             new Person(
               r.to.id,
               r.to.bio,
@@ -296,6 +310,7 @@ class Person extends Organ implements person.Person {
           this.cache.friends = res.friends?.map(r => new Relation(
             r.id,
             RelationType.FRIEND,
+            this,
             new Person(
               r.to.id,
               r.to.bio,
@@ -349,6 +364,7 @@ class Person extends Organ implements person.Person {
         return new Relation(
           res.relation.id,
           _rel.type,
+          this,
           _rel.other,
           _rel.since,
           _rel.until
@@ -368,6 +384,12 @@ class Person extends Organ implements person.Person {
           rel.id,
         );
       },
+      sources: {
+        get: async (rel: Relation) => {
+          const res = await person.rel_sources(this.id, rel.id);
+          return res.sources ? res.sources : [];
+        },
+      },
     };
   }
 
@@ -380,6 +402,10 @@ class Person extends Organ implements person.Person {
     const deathdate = this.deathdate || new Date();
     const diff = deathdate.getUTCFullYear() - this.birthdate.getUTCFullYear();
     return this.birthdate.getUTCMonth() > deathdate.getUTCMonth() ? diff - 1 : diff;
+  }
+
+  public get fullName (): string {
+    return `${this.firstname} ${this.lastname}`;
   }
 
   /**

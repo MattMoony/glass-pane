@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch, type Ref } from 'vue';
+import { nextTick, onMounted, ref, watch, type Ref } from 'vue';
 import cytoscape from 'cytoscape';
 // @ts-ignore
 import cola from 'cytoscape-cola';
@@ -10,6 +10,7 @@ import euler from 'cytoscape-euler';
 import spread from 'cytoscape-spread';
 // @ts-ignore
 import BounceLoader from 'vue-spinner/src/BounceLoader.vue';
+import { useRouter } from 'vue-router';
 
 import Organ from '@/models/Organ';
 import Person from '@/models/Person';
@@ -26,7 +27,8 @@ import {
   groupRelations,
   GRAPH_STYLE,
 } from '@/lib/cytoscape';
-import { useRouter } from 'vue-router';
+import type { RelationSource } from '@/api/person';
+import type { MembershipSource } from '@/api/organ';
 
 const props = defineProps<{
   /**
@@ -61,6 +63,11 @@ const edges: Ref<(RelationEdge|MembershipEdge)[][]> = ref([]);
 const distance: Ref<number> = ref(1);
 const loading: Ref<boolean> = ref(true);
 const cuLayout: Ref<'cola'|'fcose'|'avsdf'|'euler'|'spread'> = ref(props.layout||'fcose');
+const edgeInfo: Ref<Relation|Membership|null> = ref(null);
+const edgeInfoContainer = ref<HTMLDivElement>();
+const edgeInfoShown = ref(false);
+const edgeClick = ref<cytoscape.EventObject>();
+const edgeSources = ref<(RelationSource|MembershipSource)[]>([]);
 
 cytoscape.use(cola);
 cytoscape.use(fcose);
@@ -219,9 +226,60 @@ onMounted(async () => {
       router.push(`/o/${node.data().id}`);
     }
   });
+  cy.value.on('tap', 'edge', e => {
+    edgeInfo.value = null;
+    nextTick(async () => {
+      edgeInfo.value = e.target.data().og;
+      edgeInfoShown.value = false;
+      edgeClick.value = e;
+      edgeSources.value = edgeInfo.value instanceof Relation 
+        ? await edgeInfo.value.from!.relations.sources.get(edgeInfo.value)
+        : await edgeInfo.value!.organ.memberships.sources.get(edgeInfo.value!);
+    });
+  });
+  cy.value.on('pan', e => {
+    edgeInfo.value = null;
+    edgeInfoShown.value = false;
+  });
+  
   await refresh();
   loading.value = false;
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      edgeInfo.value = null;
+      edgeInfoShown.value = false;
+    }
+  });
+  window.addEventListener('resize', () => {
+    edgeInfo.value = null;
+    edgeInfoShown.value = false;
+  });
 });
+
+watch(
+  edgeInfoContainer,
+  () => {
+    if (!edgeInfoContainer.value || !edgeInfo.value) return;
+    const contRect = edgeInfoContainer.value!.getBoundingClientRect();
+    edgeInfoContainer.value!.style.left = `0px`;
+    edgeInfoContainer.value!.style.top = `0px`;
+    nextTick(() => {
+      if (!edgeClick.value) {
+        edgeInfoShown.value = false;
+        edgeInfo.value = null;
+        return;
+      }
+      const rect = edgeInfoContainer.value!.getBoundingClientRect();
+      const overX = Math.ceil(contRect.x + edgeClick.value.renderedPosition.x + rect.width - window.innerWidth);
+      const overY = Math.ceil(contRect.y + edgeClick.value.renderedPosition.y + rect.height - window.innerHeight);
+      edgeInfoContainer.value!.style.left = `${edgeClick.value.renderedPosition.x - Math.max(overX, 0)}px`;
+      edgeInfoContainer.value!.style.top = `${edgeClick.value.renderedPosition.y - Math.max(overY, 0)}px`;
+      edgeInfoShown.value = true;
+    });
+  },
+  { immediate: true },
+);
 
 watch(
   distance,
@@ -293,6 +351,34 @@ watch(
     <BounceLoader color="#fff" />
     Loading ...
   </div>
+  <div 
+    :class="['popover-info', edgeInfoShown ? 'shown' : '', 'gp-scroll',]"
+    v-if="edgeInfo"
+    ref="edgeInfoContainer"
+  >
+    <div class="popover-controls">
+      <b>
+        <span>
+          {{ edgeInfo instanceof Relation ? edgeInfo.from!.fullName : edgeInfo?.organ.fullName }}
+        </span>
+        &amp;
+        <span>
+          {{ edgeInfo instanceof Relation ? edgeInfo.other.fullName : edgeInfo?.organization.fullName }}
+        </span>
+      </b>
+      <font-awesome-icon icon="times" @click="() => {
+        edgeInfo = null;
+        edgeInfoShown = false;
+      }" />
+    </div>
+    <div class="popover-contents">
+      <ul>
+        <li v-for="s in edgeSources">
+          <a :href="s.url" target="_blank">{{ s.url }}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -357,5 +443,46 @@ watch(
 
 .loading.hidden {
   display: none;
+}
+
+.popover-info {
+  position: absolute;
+  z-index: 97;
+  background-color: var(--color-background);
+  border: 2px solid var(--color-border);
+  border-radius: 0 0 .5em .5em;
+  box-shadow: 0 0 1em rgba(0, 0, 0, .5);
+  max-width: 50%;
+  max-height: 50%;
+  opacity: 0;
+}
+
+.popover-info.shown {
+  opacity: 1;
+}
+
+.popover-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: .5em;
+  background-color: var(--color-background-soft);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.popover-controls svg {
+  background-color: var(--color-caution);
+  font-size: .9em;
+  padding: .3em;
+  cursor: pointer;
+}
+
+.popover-contents {
+  padding: .5em;
+}
+
+.popover-contents ul {
+  list-style: circle;
+  padding: 0 1.5em;
 }
 </style>

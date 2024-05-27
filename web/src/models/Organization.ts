@@ -160,6 +160,10 @@ class Organization extends Organ implements organization.Organization {
     return `"${this.name}" (Organization#${this.id})`;
   }
 
+  public get fullName (): string {
+    return this.name;
+  }
+
   /**
    * Updates the organization.
    * @returns A promise that resolves when the organization has been updated.

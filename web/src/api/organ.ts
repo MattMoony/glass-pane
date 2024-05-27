@@ -462,3 +462,6 @@ memberships.remove = async (
   }) as APIResponse;
 };
 
+memberships.sources = async (organ: Organ, mid: number): Promise<OrganSourcesResponse> => {
+  return await jreq(`${API}/organ/${organ.id}/memberships/${mid}/sources`) as OrganSourcesResponse;
+};

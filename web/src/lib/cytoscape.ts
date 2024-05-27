@@ -101,6 +101,7 @@ export const GRAPH_STYLE: cytoscape.CytoscapeOptions = {
 class Node {
   public data: {
     id: string;
+    og: Node;
     label: string;
     parent?: string;
   };
@@ -108,6 +109,7 @@ class Node {
   constructor (id: number, label: string, parent?: string) {
     this.data = {
       id: id.toString(),
+      og: this,
       label,
       ...(parent ? {parent,} : {}),
     };
@@ -120,6 +122,7 @@ class Node {
 class Edge {
   public data: {
     id: string;
+    og: Edge;
     source: string;
     target: string;
     label: string;
@@ -128,6 +131,7 @@ class Edge {
   constructor (id: number, source: number, target: number, label: string) {
     this.data = {
       id: id.toString(),
+      og: this,
       source: source.toString(),
       target: target.toString(),
       label,
@@ -145,6 +149,7 @@ export class PersonNode extends Person {
     image: string;
     type: string;
     parent?: string;
+    og: PersonNode;
   };
 
   constructor (person: Person, parentNode?: any, center?: boolean) {
@@ -163,6 +168,7 @@ export class PersonNode extends Person {
       type: 'person',
       ...(parentNode ? {parent: parentNode.data.id,} : {}),
       ...(center ? {centerNode: true,} : {}),
+      og: this,
     };
   }
 }
@@ -178,16 +184,28 @@ export class RelationEdge extends Relation {
     label: string;
     color: string;
     type: string;
+    og: RelationEdge;
   };
 
   constructor (relation: Relation, person: Person) {
-    super(
-      relation.id,
-      relation.type,
-      relation.other,
-      relation.since,
-      relation.until,
-    );
+    if (relation.from) {
+      super(
+        relation.id,
+        relation.type,
+        relation.from,
+        relation.other,
+        relation.since,
+        relation.until,
+      );
+    } else {
+      super(
+        relation.id,
+        relation.type,
+        relation.other,
+        relation.since,
+        relation.until,
+      );
+    }
     this.data = {
       id: `r-${this.id}-${person.id}-${this.other.id}`,
       label: RelationType[this.type].toLowerCase() 
@@ -199,6 +217,7 @@ export class RelationEdge extends Relation {
       ),
       color: COLORS[this.type],
       type: 'relation',
+      og: this,
     };
   }
 }
@@ -213,6 +232,7 @@ export class OrganizationNode extends Organization {
     image: string;
     type: string;
     parent?: string;
+    og: OrganizationNode;
   };
 
   constructor (organization: Organization, parentNode?: any, center?: boolean) {
@@ -230,6 +250,7 @@ export class OrganizationNode extends Organization {
       type: 'organization',
       ...(parentNode ? {parent: parentNode.data.id,} : {}),
       ...(center ? {centerNode: true,} : {}),
+      og: this,
     };
   }
 }
@@ -246,6 +267,7 @@ export class MembershipEdge extends Membership {
     label: string;
     color: string;
     type: string;
+    og: MembershipEdge;
   };
 
   constructor (membership: Membership) {
@@ -266,6 +288,7 @@ export class MembershipEdge extends Membership {
       target: this.organization.id.toString(),
       color: 'rgba(84, 84, 84, 0.48)',
       type: 'membership',
+      og: this,
     };
   }
 }

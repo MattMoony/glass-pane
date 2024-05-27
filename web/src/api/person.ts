@@ -335,12 +335,11 @@ export const rel = {
 /**
  * Get the sources of a relation.
  * @param pid The ID of the person.
- * @param other The ID of the other person.
- * @param since The date the relation started.
+ * @param rid The ID of the relation.
  * @returns The response from the API containing the sources of the relation.
  */
-export const rel_sources = async (pid: number, other: number, since: Date): Promise<RelationSourcesResponse> => {
-  return await jreq(`${API}/person/${pid}/relation/sources?other=${other}&since=${since.toISOString()}`) as RelationSourcesResponse;
+export const rel_sources = async (pid: number, rid: number): Promise<RelationSourcesResponse> => {
+  return await jreq(`${API}/person/${pid}/relation/${rid}/sources`) as RelationSourcesResponse;
 };
 
 /**

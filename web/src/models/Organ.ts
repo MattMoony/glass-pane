@@ -176,6 +176,12 @@ class Organ implements organ.Organ {
      * @returns A promise that resolves when the membership is removed.
      */
     remove: (membership: Membership) => Promise<void>;
+    /**
+     * The sources of the membership.
+     */
+    sources: {
+      get: (membership: Membership) => Promise<organ.MembershipSource[]>;
+    };
   };
 
   /**
@@ -289,6 +295,12 @@ class Organ implements organ.Organ {
       remove: async (membership: Membership) => {
         await organ.memberships.remove(this, membership.id);
       },
+      sources: {
+        get: async (membership: Membership) => {
+          const res = await organ.memberships.sources(this, membership.id);
+          return res.sources ? res.sources : [];
+        },
+      },
     };
 
     this._vref = ref(Math.floor(Math.random() * 1000));
@@ -311,6 +323,10 @@ class Organ implements organ.Organ {
    */
   public async bioHTML (): Promise<string> {
     return marked(this.bio);
+  }
+
+  public get fullName (): string {
+    return '';
   }
 
   /**

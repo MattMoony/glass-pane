@@ -64,11 +64,7 @@ router.get('/:pid/children', controller.parsePid, controller.getChildren);
 router.get('/:pid/romantic', controller.parsePid, controller.getRomantic);
 router.get('/:pid/friends', controller.parsePid, controller.getFriends);
 
-router.get('/:pid/relation/sources', 
-  requireQuery({
-    other: { type: 'string', },
-    since: { type: 'string', },
-  }), 
+router.get('/:pid/relation/:rid/sources', 
   controller.parsePid, 
   controller.getRelationSources
 );
