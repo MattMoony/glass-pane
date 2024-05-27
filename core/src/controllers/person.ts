@@ -164,7 +164,13 @@ export const addRelation = async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
-  const relation = await Relation.create(req.body.type, person, relative, new Date(req.body.since), req.body.until ? new Date(req.body.until) : undefined);
+  const relation = await person.addRelation(
+    req.body.sources||[], 
+    req.body.type, 
+    relative, 
+    req.body.since ? new Date(req.body.since) : undefined, 
+    req.body.until ? new Date(req.body.until) : undefined
+  );
   if (relation == null) {
     res.send({ 'success': false, 'msg': 'couldn\'t create relation' });
     return;
@@ -189,7 +195,7 @@ export const updateRelation = async (req: Request, res: Response): Promise<void>
   if (req.body.since !== undefined) relation.since = req.body.since ? new Date(req.body.since) : null;
   if (req.body.until !== undefined) relation.until = req.body.until ? new Date(req.body.until) : null;
 
-  await relation.update();
+  await person.updateRelation(relation);
   res.send({ 'success': true, 'relation': relation.json() });
 }
 
@@ -207,7 +213,7 @@ export const removeRelation = async (req: Request, res: Response): Promise<void>
     return;
   }
 
-  await relation.remove();
+  await person.removeRelation(relation);
   res.send({ 'success': true });
 }
 

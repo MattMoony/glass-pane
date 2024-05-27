@@ -287,7 +287,8 @@ export const addMembership = async (req: Request, res: Response): Promise<void> 
   const until = req.body.until ? new Date(req.body.until) : undefined;
   const sources = req.body.sources as string[];
   try {
-    const membership = await Membership.create(sources, organ, organization, role, since, until);
+    // const membership = await Membership.create(sources, organ, organization, role, since, until);
+    const membership = await organ.addMembership(sources, organization, role, since, until);
     res.send({ 'success': true, membership, });
   } catch {
     res.send({ 'success': false, 'msg': 'membership already exists', });
@@ -312,7 +313,8 @@ export const updateMembership = async (req: Request, res: Response): Promise<voi
   }
   if (req.body.since !== undefined) membership.since = req.body.since ? new Date(req.body.since) : null;
   if (req.body.until !== undefined) membership.until = req.body.until ? new Date(req.body.until) : null;
-  await membership.update();
+  // await membership.update();
+  await organ.updateMembership(membership);
   res.send({ 'success': true });
 };
 
@@ -328,6 +330,7 @@ export const removeMembership = async (req: Request, res: Response): Promise<voi
     res.send({ 'success': false, 'msg': 'membership doesn\'t exist' });
     return;
   }
-  await membership.remove();
+  // await membership.remove();
+  await organ.removeMembership(membership);
   res.send({ 'success': true });
 };

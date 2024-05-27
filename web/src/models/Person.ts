@@ -332,6 +332,7 @@ class Person extends Organ implements person.Person {
         const _rel = rel.type !== RelationType.CHILD 
                          ? rel
                          : new Relation(
+                            rel.id,
                             RelationType.PARENT,
                             this,
                             rel.since,

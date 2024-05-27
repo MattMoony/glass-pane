@@ -106,7 +106,7 @@ watch(() => props.relations, () => {
           type="person"
           @select="(organ: Organ) => {
             if (organ)
-              newRelation = new Relation(-1, type, organ as Person, new Date());
+              newRelation = new Relation(-1, type, organ as Person);
           }"
         />
       </template>
