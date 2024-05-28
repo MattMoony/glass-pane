@@ -238,6 +238,17 @@ class Organization extends Organ {
   }
 
   /**
+   * Get a random organization.
+   * @returns A promise that resolves with a random organization.
+   */
+  public static async getRandom (): Promise<Organization|null> {
+    const client = await pool.connect();
+    const res = await client.query('SELECT oid FROM organization ORDER BY RANDOM() LIMIT 1');
+    client.release();
+    return res.rows.length === 0 ? null : await Organization.get(res.rows[0].oid);
+  }
+
+  /**
    * Finds organizations by their name.
    * @param query The name to search for.
    * @returns A promise that resolves with the organizations found.

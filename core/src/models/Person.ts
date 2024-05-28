@@ -419,6 +419,19 @@ class Person extends Organ {
   }
 
   /**
+   * Get a random person.
+   * @returns {Promise<Person|null>} A promise that resolves with a random person, or null if not found.
+   */
+  public static async random (): Promise<Person|null> {
+    const client = await pool.connect();
+    const res = await client.query(
+      'SELECT pid FROM person ORDER BY RANDOM() LIMIT 1',
+    );
+    client.release();
+    return res.rows.length === 0 ? null : await Person.get(res.rows[0].pid);
+  }
+
+  /**
    * Find persons by name.
    * @param {string} query The query to search for.
    * @returns {Promise<Person[]>} A promise that resolves with the found persons.

@@ -207,6 +207,19 @@ export const search = async (query: string): Promise<PeopleResponse> => {
 }
 
 /**
+ * Gets a random person.
+ * @returns The response from the API containing the random person.
+ */
+export const random = async (): Promise<PersonResponse> => {
+  const res = await jreq(`${API}/person/random`) as PersonResponse;
+  if (res.person) {
+    res.person.birthdate = res.person.birthdate ? new Date(res.person.birthdate) : undefined;
+    res.person.deathdate = res.person.deathdate ? new Date(res.person.deathdate) : undefined;
+  }
+  return res;
+}
+
+/**
  * Gets a person's parents.
  * @param pid The ID of the person.
  * @returns The response from the API containing the parents of the person.

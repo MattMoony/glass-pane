@@ -39,6 +39,20 @@ export const search = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
+ * Gets a random person.
+ * @param req The request object.
+ * @param res The response object.
+ */
+export const getRandom = async (req: Request, res: Response): Promise<void> => {
+  const person = await Person.random();
+  if (!person) {
+    res.send({ 'success': false, 'msg': 'no people' });
+    return;
+  }
+  res.send({ 'success': true, 'person': person.json() });
+}
+
+/**
  * Creates a new person.
  * @param req The request object.
  * @param res The response object.

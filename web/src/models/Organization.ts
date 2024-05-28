@@ -229,6 +229,22 @@ class Organization extends Organ implements organization.Organization {
       org.dissolved,
     ));
   }
+
+  /**
+   * Gets a random organization.
+   * @returns A promise that resolves to a random organization.
+   */
+  public static async random (): Promise<Organization|null> {
+    const res = await organization.random();
+    if (!res.organization) return null;
+    return new Organization(
+      res.organization.id,
+      res.organization.bio,
+      res.organization.name,
+      res.organization.established,
+      res.organization.dissolved,
+    );
+  }
 }
 
 export default Organization;

@@ -6,6 +6,7 @@ import { requireAuth } from '../middleware/auth';
 const router: Router = Router();
 
 router.get('/', requireQuery({ q: { type: 'string', } }), controller.search);
+router.get('/random', controller.getRandom);
 router.post('/', requireAuth, controller.create);
 router.get('/:oid', controller.parseOid, controller.get);
 router.patch('/:oid', requireAuth, controller.parseOid, controller.update);

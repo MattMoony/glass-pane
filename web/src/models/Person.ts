@@ -498,6 +498,23 @@ class Person extends Organ implements person.Person {
       p.deathdate ? new Date(p.deathdate) : undefined,
     ));
   }
+
+  /**
+   * Gets a random person.
+   * @returns A promise that resolves to a random person.
+   */
+  public static async random (): Promise<Person|null> {
+    const res = await person.random();
+    if (!res.person) return null;
+    return new Person(
+      res.person.id,
+      res.person.bio,
+      res.person.firstname,
+      res.person.lastname,
+      res.person.birthdate ? new Date(res.person.birthdate) : undefined,
+      res.person.deathdate ? new Date(res.person.deathdate) : undefined,
+    );
+  }
 }
 
 export default Person;

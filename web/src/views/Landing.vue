@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/user';
 import NavBar from '@/components/NavBar.vue';
 import BigSearch from '@/components/BigSearch.vue';
 import DataStats from '@/components/DataStats.vue';
+import RandomPreview from '@/components/info/RandomPreview.vue';
 
 const user = useUserStore();
 </script>
@@ -66,6 +67,13 @@ const user = useUserStore();
             We believe that <span class="gp-highlight-text">transparency is key</span> - not only to understanding the political landscape,
             that's why you can find the source code for this project on <a href="https://github.com/MattMoony/glass-pane">GitHub</a>.
           </p>
+        </div>
+        <div class="preview">
+          <h2>Random Entries</h2>
+          <p>
+            And now for a <span class="gp-highlight-text">random selection of entries</span> from our database - in case you don't yet know where to start.
+          </p>
+          <RandomPreview />
         </div>
       </div>
     </article>

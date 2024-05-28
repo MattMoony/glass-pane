@@ -34,6 +34,20 @@ export const search = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
+ * Get a random organization.
+ * @param req The request object.
+ * @param res The response object.
+ */
+export const getRandom = async (req: Request, res: Response): Promise<void> => {
+  const organization = await Organization.getRandom();
+  if (!organization) {
+    res.send({ 'success': false, 'msg': 'no organizations', });
+    return;
+  }
+  res.send({ 'success': true, 'organization': organization.json(), });
+}
+
+/**
  * Creates a new organization.
  * @param req The request object.
  * @param res The response object.

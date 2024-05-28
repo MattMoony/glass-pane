@@ -17,6 +17,7 @@ router.post('/',
   controller.create
 );
 router.get('/', requireQuery({ q: { type: 'string', }, }), controller.search);
+router.get('/random', controller.getRandom);
 router.get('/:pid', controller.parsePid, controller.get);
 router.get('/:pid/name', controller.parsePid, controller.getName);
 router.patch('/:pid', 

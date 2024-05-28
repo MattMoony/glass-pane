@@ -97,6 +97,19 @@ export const search = async (name: string): Promise<OrganizationsResponse> => {
 }
 
 /**
+ * Gets a random organization.
+ * @returns The response from the API containing the organization.
+ */
+export const random = async (): Promise<OrganizationResponse> => {
+  const res = await jreq(`${API}/organization/random`) as OrganizationResponse;
+  if (res.organization) {
+    res.organization.established = res.organization.established ? new Date(res.organization.established) : undefined;
+    res.organization.dissolved = res.organization.dissolved ? new Date(res.organization.dissolved) : undefined;
+  }
+  return res;
+}
+
+/**
  * Updates an organization.
  * @param oid The ID of the organization.
  * @param name The name of the organization.
