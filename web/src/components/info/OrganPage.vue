@@ -22,9 +22,17 @@ const props = defineProps<{
    */
   leftIcon?: string;
   /**
+   * Label for the left section.
+   */
+  leftLabel?: string;
+  /**
    * Icon for the right section.
    */
   rightIcon?: string;
+  /**
+   * Label for the right section.
+   */
+  rightLabel?: string;
   /**
    * Whether to launch in edit mode.
    */
@@ -74,15 +82,19 @@ watch(() => props.edit, (newEdit: boolean) => {
         <div class="section-switch" v-if="switchable">
           <button 
             :title="`${shown.left ? 'Hide' : 'Show'} left section`" 
+            :class="shown.left ? '' : 'hidden'"
             @click="() => toggleShown('left')"
           >
-            <font-awesome-icon :class="shown.left ? '' : 'hidden'" :icon="leftIcon || 'fa-book'" />
+            <font-awesome-icon :icon="leftIcon || 'fa-book'" />
+            {{ leftLabel || 'Details' }}
           </button>
           <button 
             :title="`${shown.right ? 'Hide' : 'Show'} right section`" 
+            :class="shown.right ? '' : 'hidden'"
             @click="() => toggleShown('right')"
           >
-            <font-awesome-icon :class="shown.right ? '' : 'hidden'" :icon="rightIcon || 'fa-diagram-project'" />
+            <font-awesome-icon :icon="rightIcon || 'fa-diagram-project'" />
+            {{ rightLabel || 'Network' }}
           </button>
         </div>
         <button 
