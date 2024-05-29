@@ -8,8 +8,8 @@ types.setTypeParser(types.builtins.DATE, val => {
 
 export const pool: Pool = new Pool({
   max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 0,
 });
 
 pool.on('connect', (client: PoolClient) => {
