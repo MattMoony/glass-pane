@@ -25,7 +25,7 @@ import {
   groupMembers,
   groupMemberships,
   groupRelations,
-  GRAPH_STYLE,
+  graphOptions,
 } from '@/lib/cytoscape';
 import type { RelationSource } from '@/api/person';
 import type { MembershipSource } from '@/api/organ';
@@ -206,7 +206,7 @@ onMounted(async () => {
   loading.value = true;
   cy.value = cytoscape({
     container: container.value,
-    ...GRAPH_STYLE,
+    ...graphOptions(),
   });
   cy.value.on('mouseover', 'node', e => {
     const edges = e.target.connectedEdges();

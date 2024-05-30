@@ -1,4 +1,4 @@
-import cytoscape from "cytoscape";
+import cytoscape, { type CytoscapeOptions } from "cytoscape";
 
 import Person from "@/models/Person";
 import Relation from "@/models/Relation";
@@ -6,94 +6,6 @@ import Organization from "@/models/Organization";
 import Membership from "@/models/Membership";
 import RelationType, { COLORS } from "@/models/RelationTypes";
 import Role from "@/models/Role";
-
-export const GRAPH_STYLE: cytoscape.CytoscapeOptions = {
-  wheelSensitivity: .1,
-  style: [
-    {
-      selector: 'node[type]',
-      style: {
-        'content': 'data(label)',
-        'text-wrap': 'wrap',
-        'line-height': 1.1,
-        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
-        'background-image': 'data(image)',
-        'background-repeat': 'no-repeat',
-        'background-fit': 'cover',
-        'background-color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
-        'border-color': getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
-        'border-width': '1.5px',
-        'font-size': '.6em',
-        'text-valign': 'bottom',
-        'text-margin-y': 5,
-      },
-    },
-    {
-      selector: 'node[centerNode]',
-      style: {
-        'border-width': '3px',
-        'width': 50,
-        'height': 50,
-      },
-    },
-    {
-      selector: 'node:parent',
-      css: {
-        'content': 'data(label)',
-        'text-wrap': 'wrap',
-        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
-        'font-size': '.8em',
-        'background-opacity': 0.2,
-        'background-color': 'data(color)',
-        'border-color': 'data(color)',
-        'shape': 'roundrectangle'
-      },
-    },
-    {
-      selector: 'node.highlight',
-      style: {
-      },
-    },
-    {
-      selector: 'node.semitransp',
-      style: {
-        opacity: .5,
-      },
-    },
-    {
-      selector: 'edge',
-      style: {
-        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
-        'width': '1.5px',
-        'curve-style': 'bezier',
-        'target-arrow-shape': 'triangle',
-        'line-color': 'data(color)',
-        'target-arrow-color': 'data(color)',
-        'font-size': '.6em',
-      },
-    },
-    {
-      selector: 'edge[label]',
-      style: {
-        'content': 'data(label)',
-        'text-wrap': 'wrap',
-        'text-rotation': 'autorotate',
-        'line-height': 1.1,
-      },
-    },
-    {
-      selector: 'edge.highlight',
-      style: {
-      },
-    },
-    {
-      selector: 'edge.semitransp',
-      style: {
-        'opacity': .2,
-      },
-    },
-  ],
-};
 
 /**
  * Represents a Cytoscape node.
@@ -440,3 +352,91 @@ export const groupRelations = (relations: Relation[], person: Person, ignore?: (
   }
   return [nodes, edges];
 };
+
+export const graphOptions: () => cytoscape.CytoscapeOptions = () => ({
+  wheelSensitivity: .1,
+  style: [
+    {
+      selector: 'node[type]',
+      style: {
+        'content': 'data(label)',
+        'text-wrap': 'wrap',
+        'line-height': 1.1,
+        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'background-image': 'data(image)',
+        'background-repeat': 'no-repeat',
+        'background-fit': 'cover',
+        'background-color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'border-color': getComputedStyle(document.documentElement).getPropertyValue('--color-border'),
+        'border-width': '1.5px',
+        'font-size': '.6em',
+        'text-valign': 'bottom',
+        'text-margin-y': 5,
+      },
+    },
+    {
+      selector: 'node[centerNode]',
+      style: {
+        'border-width': '3px',
+        'width': 50,
+        'height': 50,
+      },
+    },
+    {
+      selector: 'node:parent',
+      css: {
+        'content': 'data(label)',
+        'text-wrap': 'wrap',
+        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'font-size': '.8em',
+        'background-opacity': 0.2,
+        'background-color': 'data(color)',
+        'border-color': 'data(color)',
+        'shape': 'roundrectangle'
+      },
+    },
+    {
+      selector: 'node.highlight',
+      style: {
+      },
+    },
+    {
+      selector: 'node.semitransp',
+      style: {
+        opacity: .5,
+      },
+    },
+    {
+      selector: 'edge',
+      style: {
+        'color': getComputedStyle(document.documentElement).getPropertyValue('--color-text'),
+        'width': '1.5px',
+        'curve-style': 'bezier',
+        'target-arrow-shape': 'triangle',
+        'line-color': 'data(color)',
+        'target-arrow-color': 'data(color)',
+        'font-size': '.6em',
+      },
+    },
+    {
+      selector: 'edge[label]',
+      style: {
+        'content': 'data(label)',
+        'text-wrap': 'wrap',
+        'text-rotation': 'autorotate',
+        'line-height': 1.1,
+      },
+    },
+    {
+      selector: 'edge.highlight',
+      style: {
+      },
+    },
+    {
+      selector: 'edge.semitransp',
+      style: {
+        'opacity': .2,
+      },
+    },
+  ],
+});

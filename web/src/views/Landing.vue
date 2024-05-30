@@ -1,12 +1,27 @@
 <script setup lang="ts">
+import { onMounted, shallowRef, type Ref } from 'vue';
+
 import { useUserStore } from '@/stores/user';
+import Organ from '@/models/Organ';
+import Person from '@/models/Person';
+import Organization from '@/models/Organization';
 
 import NavBar from '@/components/NavBar.vue';
 import BigSearch from '@/components/BigSearch.vue';
 import DataStats from '@/components/DataStats.vue';
-import RandomPreview from '@/components/info/RandomPreview.vue';
+import PersonNetwork from '@/components/map/person/PersonNetwork.vue';
+import OrganizationNetwork from '@/components/map/organization/OrganizationNetwork.vue';
 
 const user = useUserStore();
+const organ: Ref<Organ|null> = shallowRef(null);
+
+onMounted(async () => {
+  if (Math.random() > 0.5) {
+    organ.value = await Person.random();
+  } else {
+    organ.value = await Organization.random();
+  }
+});
 </script>
 
 <template>
@@ -73,7 +88,22 @@ const user = useUserStore();
           <p>
             And now for a <span class="gp-highlight-text">random selection of entries</span> from our database - in case you don't yet know where to start.
           </p>
-          <RandomPreview />
+          <div 
+            class="random-network"
+            v-if="organ"
+          >
+            <PersonNetwork
+              v-if="organ instanceof Person"
+              :person="(organ as Person)"
+              show-memberships
+              cytoscape
+            />
+            <OrganizationNetwork
+              v-else-if="organ instanceof Organization"
+              :organization="(organ as Organization)"
+              cytoscape
+            />
+          </div>
         </div>
       </div>
     </article>
@@ -156,5 +186,15 @@ article {
   cursor: pointer;
   background-color: var(--color-background-mute);
   color: var(--color-text);
+}
+
+.preview .random-network {
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
+  height: 40rem;
+  max-height: 80vh;
+  overflow: hidden;
+  margin-top: 1rem;
 }
 </style>
