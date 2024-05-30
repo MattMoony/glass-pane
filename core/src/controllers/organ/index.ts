@@ -10,12 +10,34 @@ import Organ from '../../models/Organ';
 import Organization from '../../models/Organization';
 import Person from '../../models/Person';
 
+import { CheckTemplate } from '../../middleware';
+
 export * as pic from './pic';
 export * as biopic from './biopic';
 export * as socials from './socials';
 export * as sources from './sources';
 export * as memberships from './memberships';
 
+/**
+ * The required query formats for the endpoints defined here.
+ */
+export const QUERIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required body formats for the endpoints defined here.
+ */
+export const BODIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required query format for the search endpoint.
+ */
+QUERIES.SEARCH = {
+  q: { type: 'string', },
+};
 
 /**
  * Searches for organs.
@@ -27,6 +49,13 @@ export const search = async (req: Request, res: Response): Promise<void> => {
   const people = await Person.find(query);
   const organizations = await Organization.find(query);
   res.send({ 'success': true, people, organizations, });
+};
+
+/**
+ * The required body format for the create endpoint.
+ */
+BODIES.CREATE = {
+  bio: { type: 'string', optional: true, },
 };
 
 /**

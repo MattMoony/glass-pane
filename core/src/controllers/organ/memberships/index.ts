@@ -11,8 +11,24 @@ import Organization from '../../../models/Organization';
 import Membership from '../../../models/Membership';
 import Role from '../../../models/Role';
 
+import { CheckTemplate } from '../../../middleware';
+
 export * as sources from './sources';
 
+
+/**
+ * The required query formats for the endpoints defined here.
+ */
+export const QUERIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required body formats for the endpoints defined here.
+ */
+export const BODIES: {
+  [name: string]: CheckTemplate,
+} = {};
 
 /**
  * Gets the memberships of the target organ.
@@ -24,6 +40,17 @@ export const get = async (req: Request, res: Response): Promise<void> => {
   // const memberships = await Membership.get(organ);
   const memberships = await organ.getMemberships();
   res.send({ 'success': true, 'memberships': memberships.map(m => ({ ...m.json(), organ: undefined, })) });
+};
+
+/**
+ * The required body format for the add endpoint.
+ */
+BODIES.ADD = {
+  sources: { type: 'array', items: 'string', },
+  organization: { type: 'number', },
+  role: { type: 'number', },
+  since: { type: 'string', optional: true, nullable: true, },
+  until: { type: 'string', optional: true, nullable: true, },
 };
 
 /**
@@ -53,6 +80,15 @@ export const add = async (req: Request, res: Response): Promise<void> => {
   } catch {
     res.send({ 'success': false, 'msg': 'membership already exists', });
   }
+};
+
+/**
+ * The required body format for the update endpoint.
+ */
+BODIES.UPDATE = {
+  role: { type: 'number', optional: true, },
+  since: { type: 'string', optional: true, nullable: true, },
+  until: { type: 'string', optional: true, nullable: true, },
 };
 
 /**

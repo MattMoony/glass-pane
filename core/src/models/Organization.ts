@@ -27,8 +27,8 @@ export interface OrganizationCache extends OrganCache {
  */
 class Organization extends Organ {
   public name: string;
-  public established?: Date;
-  public dissolved?: Date;
+  public established?: Date|null;
+  public dissolved?: Date|null;
 
   public _cache: OrganizationCache = {};
 

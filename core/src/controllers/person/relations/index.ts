@@ -10,7 +10,35 @@ import Person from '../../../models/Person';
 import Relation from '../../../models/Relation';
 import RelationType from '../../../models/RelationshipType';
 
+import { CheckTemplate } from '../../../middleware';
+
 export * as sources from './sources';
+
+
+/**
+ * The required query formats for the endpoints defined here.
+ */
+export const QUERIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required body formats for the endpoints defined here.
+ */
+export const BODIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required body format for the add endpoint.
+ */
+BODIES.ADD = {
+  type: { type: 'number', },
+  other: { type: 'number', },
+  sources: { type: 'array', items: 'string', },
+  since: { type: 'string', optional: true, nullable: true, },
+  until: { type: 'string', optional: true, nullable: true, },
+};
 
 /**
  * Adds a relation to the target person.
@@ -43,6 +71,14 @@ export const add = async (req: Request, res: Response): Promise<void> => {
     return;
   }
   res.send({ 'success': true, 'relation': relation.json() });
+};
+
+/**
+ * The required body format for the update endpoint.
+ */
+BODIES.UPDATE = {
+  since: { type: 'string', optional: true, nullable: true, },
+  until: { type: 'string', optional: true, nullable: true, },
 };
 
 /**

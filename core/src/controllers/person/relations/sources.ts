@@ -10,6 +10,23 @@ import Person from '../../../models/Person';
 import Relation from '../../../models/Relation';
 import RelationSource from '../../../models/RelationSource';
 
+import { CheckTemplate } from '../../../middleware';
+
+
+/**
+ * The required query formats for the endpoints defined here.
+ */
+export const QUERIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required body formats for the endpoints defined here.
+ */
+export const BODIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
 /**
  * Gets the sources of the relation between the target person and another person.
  * @param req The request object.
@@ -20,6 +37,15 @@ export const get = async (req: Request, res: Response): Promise<void> => {
 
   const sources = await Relation.sources(parseInt(req.params.rid));
   res.send({ 'success': true, 'sources': sources });
+};
+
+/**
+ * The required body format for the add endpoint.
+ */
+BODIES.ADD = {
+  other: { type: 'number', },
+  since: { type: 'string', },
+  url: { type: 'string', },
 };
 
 /**
@@ -44,6 +70,13 @@ export const add = async (req: Request, res: Response): Promise<void> => {
   
   const source = await relation.add(req.body.url);
   res.send({ 'success': true, source, });
+};
+
+/**
+ * The required body format for the update endpoint.
+ */
+BODIES.UPDATE = {
+  url: { type: 'string', },
 };
 
 /**

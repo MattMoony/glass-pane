@@ -32,8 +32,8 @@ export interface PersonCache extends OrganCache {
 class Person extends Organ {
   public firstname: string;
   public lastname: string;
-  public birthdate?: Date;
-  public deathdate?: Date;
+  public birthdate?: Date|null;
+  public deathdate?: Date|null;
 
   public _cache: PersonCache = { relations: {}, };
 

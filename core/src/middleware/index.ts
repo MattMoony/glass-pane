@@ -10,7 +10,7 @@ import { Request, Response } from 'express';
  * A template for checking the body of a request.
  * @interface CheckTemplate
  */
-interface CheckTemplate {
+export interface CheckTemplate {
   [ key: string ]: {
     type: string|CheckTemplate;
     optional?: boolean;

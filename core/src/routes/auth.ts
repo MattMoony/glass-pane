@@ -6,6 +6,6 @@ import { requireBody } from '../middleware';
 const router: Router = Router();
 
 router.get('/status', requireAuth, controller.status);
-router.post('/login', requireBody({ username: { type: 'string', }, password: { type: 'string', }, }), controller.login);
+router.post('/login', requireBody(controller.BODIES.LOGIN), controller.login);
 
 export default router;

@@ -8,7 +8,31 @@ import { Request, Response } from 'express';
 
 import Person from '../../models/Person';
 
+import { CheckTemplate } from '../../middleware';
+
 export * as relations from './relations';
+
+
+/**
+ * The required query formats for the endpoints defined here.
+ */
+export const QUERIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required body formats for the endpoints defined here.
+ */
+export const BODIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required query format for the search endpoint.
+ */
+QUERIES.SEARCH = {
+  q: { type: 'string', },
+};
 
 /**
  * Searches for people.
@@ -35,6 +59,17 @@ export const random = async (req: Request, res: Response): Promise<void> => {
 }
 
 /**
+ * The required body format for the create endpoint.
+ */
+BODIES.CREATE = {
+  firstname: { type: 'string', },
+  lastname: { type: 'string', },
+  bio: { type: 'string', optional: true, },
+  birthdate: { type: 'string', optional: true, nullable: true, },
+  deathdate: { type: 'string', optional: true, nullable: true, },
+};
+
+/**
  * Creates a new person.
  * @param req The request object.
  * @param res The response object.
@@ -57,6 +92,17 @@ export const get = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
+ * The required body format for the update endpoint.
+ */
+BODIES.UPDATE = {
+  firstname: { type: 'string', optional: true, },
+  lastname: { type: 'string', optional: true, },
+  bio: { type: 'string', optional: true, },
+  birthdate: { type: 'string', optional: true, nullable: true, },
+  deathdate: { type: 'string', optional: true, nullable: true, },
+};
+
+/**
  * Updates the target person.
  * @param req The request object.
  * @param res The response object (with `res.locals.person`).
@@ -67,8 +113,8 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   if (req.body.bio) person.bio = req.body.bio;
   if (req.body.firstname) person.firstname = req.body.firstname;
   if (req.body.lastname) person.lastname = req.body.lastname;
-  if (req.body.birthdate) person.birthdate = new Date(req.body.birthdate);
-  if (req.body.deathdate) person.deathdate = new Date(req.body.deathdate);
+  if (req.body.birthdate !== undefined) person.birthdate = req.body.birthdate ? new Date(req.body.birthdate) : null;
+  if (req.body.deathdate !== undefined) person.deathdate = req.body.deathdate ? new Date(req.body.deathdate) : null;
 
   await person.update();
   res.send({ 'success': true, 'person': person.json() });

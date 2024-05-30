@@ -9,6 +9,22 @@ import { Request, Response } from 'express';
 import Organ from '../../models/Organ';
 import Socials from '../../models/Socials';
 
+import { CheckTemplate } from '../../middleware';
+
+/**
+ * The required query formats for the endpoints defined here.
+ */
+export const QUERIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
+/**
+ * The required body formats for the endpoints defined here.
+ */
+export const BODIES: {
+  [name: string]: CheckTemplate,
+} = {};
+
 /**
  * Gets the social media accounts of the target organ.
  * @param req The request object.
@@ -18,6 +34,14 @@ export const get = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
   const socials = await organ.socials();
   res.send({ 'success': true, 'socials': socials });
+};
+
+/**
+ * The required body format for the add endpoint.
+ */
+BODIES.ADD = {
+  platform: { type: 'number', }, 
+  url: { type: 'string', },
 };
 
 /**
@@ -31,6 +55,13 @@ export const add = async (req: Request, res: Response): Promise<void> => {
   const url = req.body.url;
   const social = await organ.add(platform, url);
   res.send({ 'success': true, social });
+};
+
+/**
+ * The required body format for the update endpoint.
+ */
+BODIES.UPDATE = { 
+  url: { type: 'string', }, 
 };
 
 /**
