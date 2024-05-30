@@ -9,7 +9,6 @@ import passport from 'passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { pool } from './db';
 
-import searchRouter from './routes/search';
 import organRouter from './routes/organ';
 import personRouter from './routes/person';
 import organizationRouter from './routes/organization';
@@ -35,7 +34,6 @@ app.use(cookieParser());
 app.use(cors({ origin: [ 'http://localhost:5173', 'https://watchthe.top', ], credentials: true, }));
 app.use(fileUpload());
 
-app.use('/api/search/', searchRouter);
 app.use('/api/organ/', organRouter);
 app.use('/api/person/', personRouter);
 app.use('/api/organization/', organizationRouter);
