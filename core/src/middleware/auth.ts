@@ -1,3 +1,9 @@
+/**
+ * @module middleware/auth
+ * @desc Provides authentication middleware.
+ * @requires express
+ */
+
 import { Request, Response } from 'express';
 import passport from 'passport';
 

@@ -1,27 +1,14 @@
+/**
+ * @module controllers/organization
+ * @desc Provides controllers for organization management.
+ * @requires express
+ */
+
 import { Request, Response } from 'express';
 
-import Organization from '../models/Organization';
-import Membership from '../models/Membership';
+import Organization from '../../models/Organization';
 
-/**
- * Parses the organization ID from the request parameters to
- * an `Organization` object and stores it in `res.locals.organization`.
- * @param req The request object.
- * @param res The response object.
- */
-export const parseOid = async (req: Request, res: Response, next: Function): Promise<void> => {
-  if (isNaN(parseInt(req.params.oid))) {
-    res.send({ 'success': false, 'msg': 'bad organizationid', });
-    return;
-  }
-  const organization = await Organization.get(parseInt(req.params.oid));
-  if (!organization) {
-    res.send({ 'success': false, 'msg': 'organization not found', });
-    return;
-  }
-  res.locals.organization = organization;
-  next();
-};
+export * as members from './members';
 
 /**
  * Searches for organizations.
@@ -38,7 +25,7 @@ export const search = async (req: Request, res: Response): Promise<void> => {
  * @param req The request object.
  * @param res The response object.
  */
-export const getRandom = async (req: Request, res: Response): Promise<void> => {
+export const random = async (req: Request, res: Response): Promise<void> => {
   const organization = await Organization.getRandom();
   if (!organization) {
     res.send({ 'success': false, 'msg': 'no organizations', });
@@ -99,16 +86,4 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
   const organization = res.locals.organization as Organization;
   await organization.remove();
   res.send({ 'success': true, });
-}
-
-/**
- * Gets the members of an organization.
- * @param req The request object.
- * @param res The response object (with `res.locals.organization`).
- */
-export const getMembers = async (req: Request, res: Response): Promise<void> => {
-  const organization = res.locals.organization as Organization;
-  // const members = await Membership.get(organization);
-  const members = await organization.getMembers();
-  res.send({ 'success': true, 'members': members.map(member => ({ ...member.json(), organization: undefined, })), });
 }

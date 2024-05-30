@@ -1,7 +1,9 @@
 import { Router } from 'express';
+
 import * as controller from '../controllers/person';
 import { requireBody, requireQuery } from '../middleware';
 import { requireAuth } from '../middleware/auth';
+import { pid2person } from '../middleware/person';
 
 const router: Router = Router();
 
@@ -17,9 +19,8 @@ router.post('/',
   controller.create
 );
 router.get('/', requireQuery({ q: { type: 'string', }, }), controller.search);
-router.get('/random', controller.getRandom);
-router.get('/:pid', controller.parsePid, controller.get);
-router.get('/:pid/name', controller.parsePid, controller.getName);
+router.get('/random', controller.random);
+router.get('/:pid', pid2person, controller.get);
 router.patch('/:pid', 
   requireAuth,
   requireBody({
@@ -29,14 +30,10 @@ router.patch('/:pid',
     birthdate: { type: 'string', optional: true, },
     deathdate: { type: 'string', optional: true, },
   }), 
-  controller.parsePid, 
+  pid2person, 
   controller.update
 );
-router.delete('/:pid', requireAuth, controller.parsePid, controller.remove);
-
-router.get('/:pid/pic', controller.parsePid, controller.getPic);
-router.post('/:pid/pic', requireAuth, controller.parsePid, controller.setPic);
-router.delete('/:pid/pic', requireAuth, controller.parsePid, controller.removePic);
+router.delete('/:pid', requireAuth, pid2person, controller.remove);
 
 router.post('/:pid/relation', 
   requireAuth,
@@ -47,8 +44,8 @@ router.post('/:pid/relation',
     since: { type: 'string', optional: true, nullable: true, },
     until: { type: 'string', optional: true, nullable: true, },
   }), 
-  controller.parsePid, 
-  controller.addRelation
+  pid2person, 
+  controller.relations.add
 );
 router.patch('/:pid/relation/:rid', 
   requireAuth,
@@ -56,18 +53,18 @@ router.patch('/:pid/relation/:rid',
     since: { type: 'string', optional: true, nullable: true, },
     until: { type: 'string', optional: true, nullable: true, },
   }),
-  controller.parsePid, 
-  controller.updateRelation
+  pid2person, 
+  controller.relations.update
 );
-router.delete('/:pid/relation/:rid', requireAuth, controller.parsePid, controller.removeRelation);
-router.get('/:pid/parents', controller.parsePid, controller.getParents);
-router.get('/:pid/children', controller.parsePid, controller.getChildren);
-router.get('/:pid/romantic', controller.parsePid, controller.getRomantic);
-router.get('/:pid/friends', controller.parsePid, controller.getFriends);
+router.delete('/:pid/relation/:rid', requireAuth, pid2person, controller.relations.remove);
+router.get('/:pid/parents', pid2person, controller.relations.parents);
+router.get('/:pid/children', pid2person, controller.relations.children);
+router.get('/:pid/romantic', pid2person, controller.relations.romantic);
+router.get('/:pid/friends', pid2person, controller.relations.friends);
 
 router.get('/:pid/relation/:rid/sources', 
-  controller.parsePid, 
-  controller.getRelationSources
+  pid2person, 
+  controller.relations.sources.get
 );
 router.post('/:pid/relation/sources', 
   requireAuth,
@@ -76,17 +73,17 @@ router.post('/:pid/relation/sources',
     since: { type: 'string', },
     url: { type: 'string', },
   }), 
-  controller.parsePid, 
-  controller.addRelationSource
+  pid2person, 
+  controller.relations.sources.add
 );
 router.patch('/:pid/relation/sources/:sid', 
   requireAuth,
   requireBody({
     url: { type: 'string', },
   }), 
-  controller.parsePid, 
-  controller.updateRelationSource
+  pid2person, 
+  controller.relations.sources.update
 );
-router.delete('/:pid/relation/sources/:sid', requireAuth, controller.parsePid, controller.removeRelationSource);
+router.delete('/:pid/relation/sources/:sid', requireAuth, pid2person, controller.relations.sources.remove);
 
 export default router;
