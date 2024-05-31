@@ -120,7 +120,9 @@ const emits = defineEmits<{
 }
 
 .pic img {
+  width: 4em;
   height: 4em;
+  object-fit: cover;
 }
 
 .edit input {
