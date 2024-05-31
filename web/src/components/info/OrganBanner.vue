@@ -440,20 +440,24 @@ watch(
 }
 
 .banner-image img {
-  width: auto;
+  object-fit: cover;
+  width: 12em;
   height: 12em;
   border-radius: 5px;
 }
 
 .small .banner-image img {
+  width: 4em;
   height: 4em;
 }
 
 .extra-small .banner-image img {
+  width: 2em;
   height: 2em;
 }
 
 .edit img {
+  width: 8em;
   height: 8em;
   margin: 1em;
 }

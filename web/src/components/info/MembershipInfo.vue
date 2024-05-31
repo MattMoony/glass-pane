@@ -19,6 +19,10 @@ const props = defineProps<{
    */
   organizationMembers?: boolean;
   /**
+   * Whether to hide the role of members.
+   */
+  hideRole?: boolean;
+  /**
    * Whether to allow editing the membership.
    */
   edit?: boolean;
@@ -59,26 +63,25 @@ const emits = defineEmits<{
             ? (membership.organ as Person).firstname + ' ' + (membership.organ as Person).lastname
             : (membership.organ as Organization).name 
           }}
-          :
         </span>
-        <span class="role" v-if="!edit">
+        <span class="role" v-if="!edit && !hideRole">
           {{ membership.role.name }}
         </span>
-        <RoleSelect
-          v-else
-          :init-role="membership.role"
-          @select="role => {
-            if (membership) {
-              membership.role = role;
-              $emit('change', membership);
-            }
-          }"
-        />
+        <span class="role" v-else-if="!hideRole">
+          <RoleSelect
+            :init-role="membership.role"
+            @select="role => {
+              if (membership) {
+                membership.role = role;
+                $emit('change', membership);
+              }
+            }"
+          />
+        </span>
         <span 
           v-if="!organizationMembers"
           class="organization"
         >
-          @
           {{ membership.organization.name }}
         </span>
       </h3>
@@ -178,19 +181,26 @@ const emits = defineEmits<{
 }
 
 .membership-details h3 {
-  font-weight: normal;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: .5em;
 }
 
 .role {
   display: inline-block;
   background-color: var(--color-background-soft);
   padding: .3em .5em;
-  border-radius: 5px;
+  font-size: .9em;
+  font-weight: normal;
 }
 
 .dates {
   margin: .2em 0;
   font-size: .9em;
+  padding: .3em 0;
 }
 
 .edit .dates {
@@ -198,6 +208,8 @@ const emits = defineEmits<{
 }
 
 .pic img {
+  object-fit: cover;
+  width: 4em;
   height: 4em;
 }
 
@@ -232,6 +244,7 @@ const emits = defineEmits<{
   }
 
   .pic img {
+    width: 6em;
     height: 6em;
   }
 }

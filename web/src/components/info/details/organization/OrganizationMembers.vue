@@ -112,6 +112,7 @@ watch(() => props.organization, async () => {
               <MembershipInfo
                 :membership="member"
                 organization-members
+                hide-role
               />
             </RouterLink>
           </template>
