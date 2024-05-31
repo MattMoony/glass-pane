@@ -14,7 +14,8 @@ const user = useUserStore();
     </div>
     <div class="social">
       <div v-if="user.user" class="user">
-        {{ user.user.username }}
+        <font-awesome-icon icon="fa-solid fa-user" />
+        <span>{{ user.user.username }}</span>
       </div>
       <RouterLink v-else to="/login">
         <div class="user">
@@ -70,8 +71,8 @@ nav {
 .social .user {
   font-size: 1em;
   background-color: var(--color-background-mute);
-  border-radius: 0.5em;
-  padding: 0.25em 0.5em;
+  border-radius: .5em;
+  padding: .5em;
   margin-right: 1em;
   user-select: none;
   display: flex;
