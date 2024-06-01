@@ -7,9 +7,12 @@ DROP TABLE relation;
 DROP TABLE membership_source;
 DROP TABLE membership;
 DROP TABLE organ_source;
+DROP TABLE payment_donee;
+DROP TABLE payment_donor;
 DROP TABLE event_source;
 DROP TABLE event_participant;
 DROP TABLE organ_tag;
+DROP TABLE payment;
 DROP TABLE event;
 DROP TABLE socials_follower;
 DROP TABLE socials;
@@ -123,6 +126,14 @@ CREATE TABLE event (
     PRIMARY KEY     (eid)
 );
 
+CREATE TABLE payment (
+    pid             BIGINT             REFERENCES event(eid),
+    amount          DOUBLE PRECISION   NOT NULL,
+    currency        BIGINT             REFERENCES currency(cid) NOT NULL,
+
+    PRIMARY KEY    (pid)
+);
+
 -- ====================================================================================================================================================== --
 
 CREATE TABLE organ_tag (
@@ -147,6 +158,22 @@ CREATE TABLE event_source (
     url             TEXT                NOT NULL,
 
     PRIMARY KEY     (sid)
+);
+
+CREATE TABLE payment_donor (
+    pid             BIGSERIAL,
+    payment         BIGINT              REFERENCES payment(pid) NOT NULL,
+    organ           BIGINT              REFERENCES organ(oid) NOT NULL,
+
+    PRIMARY KEY     (pid)
+);
+
+CREATE TABLE payment_donee (
+    pid             BIGSERIAL,
+    payment         BIGINT              REFERENCES payment(pid) NOT NULL,
+    organ           BIGINT              REFERENCES organ(oid) NOT NULL,
+
+    PRIMARY KEY     (pid)
 );
 
 CREATE TABLE organ_source (
