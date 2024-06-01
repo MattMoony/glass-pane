@@ -1,14 +1,14 @@
 import { pool } from '../db';
 
+import Organ from './Organ';
 import Organization, { OrganizationCache } from './Organization';
 import Location from './Location';
-import { baseLogger } from '../log';
-
-import ORGAN_CACHE from '../cache/organ';
 import OrganSource from './OrganSource';
 import Socials from './Socials';
-import Membership from './Membership';
-import Organ from './Organ';
+import type Membership from './Membership';
+
+import { baseLogger } from '../log';
+import ORGAN_CACHE from '../cache/organ';
 
 
 const log = baseLogger('nation');
@@ -90,6 +90,8 @@ class Nation extends Organization {
    */
   public async update (membership: Membership): Promise<void>;
   public async update (v?: Membership|OrganSource|Socials): Promise<void> {
+    // Lazy load to prevent circular dependencies
+    const Membership = (await import('./Membership')).default;
     if (v instanceof Membership) return super.update(v);
     else if (v instanceof OrganSource) return super.update(v);
     else if (v instanceof Socials) return super.update(v);
@@ -122,6 +124,7 @@ class Nation extends Organization {
    */
   public async remove (membership: Membership): Promise<void>;
   public async remove (v?: OrganSource|Membership|Socials): Promise<void> {
+    const Membership = (await import('./Membership')).default;
     if (v instanceof OrganSource) return super.remove(v);
     else if (v instanceof Membership) return super.remove(v);
     else if (v instanceof Socials) return super.remove(v);

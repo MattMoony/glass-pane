@@ -3,9 +3,9 @@ import { pool } from '../db';
 import Organ from './Organ';
 import OrganSource from './OrganSource';
 import Role from './Role';
-import Organization from './Organization';
+import type Organization from './Organization';
+import type Person from './Person';
 import MembershipSource from './MembershipSource';
-import Person from './Person';
 
 /**
  * Represents a membership in an organization.
@@ -186,6 +186,9 @@ class Membership {
    */
   public static async get (organ: Organ, organization: Organization, role: Role, since: Date): Promise<Membership|null>;
   public static async get (v: number|Organ|Organization, v2?: Organization, v3?: Role, v4?: Date): Promise<Membership|Membership[]|null> {
+    // Lazy loading to prevent circular dependencies
+    const Organization = (await import('./Organization')).default;
+    const Person = (await import('./Person')).default;
     if (v instanceof Organization) {
       const client = await pool.connect();
       const res = await client.query(

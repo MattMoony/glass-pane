@@ -11,6 +11,8 @@ import log from '../log/person';
 import type Role from './Role';
 import type Organization from './Organization';
 import type Membership from './Membership';
+import Location from './Location';
+import Nation from './Nation';
 
 import ORGAN_CACHE from '../cache/organ';
 
@@ -30,10 +32,25 @@ class Person extends Organ {
   public lastname: string;
   public birthdate?: Date|null;
   public deathdate?: Date|null;
+  public birthlocation?: Location|null;
+  public birthnation?: Nation|null;
+  public deathlocation?: Location|null;
+  public deathnation?: Nation|null;
 
   protected _cache: PersonCache = {};
 
-  public constructor (id: number, bio: string, firstname: string, lastname: string, birthdate?: Date, deathdate?: Date) {
+  public constructor (
+    id: number, 
+    bio: string, 
+    firstname: string, 
+    lastname: string, 
+    birthdate?: Date|null, 
+    deathdate?: Date|null,
+    birthlocation?: Location|null,
+    birthnation?: Nation|null,
+    deathlocation?: Location|null,
+    deathnation?: Nation|null,
+  ) {
     super(id, bio);
     this.firstname = firstname;
     this.lastname = lastname;
@@ -69,6 +86,10 @@ class Person extends Organ {
       lastname: this.lastname,
       birthdate: this.birthdate?.toISOString(),
       deathdate: this.deathdate?.toISOString(),
+      birthlocation: this.birthlocation?.json(),
+      birthnation: this.birthnation?.json(),
+      deathlocation: this.deathlocation?.json(),
+      deathnation: this.deathnation?.json(),
     };
   }
 
@@ -177,8 +198,27 @@ class Person extends Organ {
     await super.update();
     const client = await pool.connect();
     await client.query(
-      'UPDATE person SET firstname = $1, lastname = $2, birthdate = $3, deathdate = $4 WHERE pid = $5',
-      [this.firstname, this.lastname, this.birthdate, this.deathdate, this.id],
+      `UPDATE     person
+       SET         firstname = $1,
+                   lastname = $2,
+                   birthdate = $3,
+                   deathdate = $4,
+                   birthlocation = $5,
+                   birthnation = $6,
+                   deathlocation = $7,
+                   deathnation = $8
+       WHERE       pid = $9`,
+       [
+        this.firstname,
+        this.lastname,
+        this.birthdate,
+        this.deathdate,
+        this.birthlocation?.id,
+        this.birthnation?.id,
+        this.deathlocation?.id,
+        this.deathnation?.id,
+        this.id,
+       ]
     );
     client.release();
     this.cache();
@@ -305,21 +345,56 @@ class Person extends Organ {
    * @param {Date} birthdate The birthdate of the person.
    * @param {Date} deathdate The deathdate of the person.
    * @param {string} bio The biography of the person.
+   * @param {Location} birthlocation The birth location of the person.
+   * @param {Nation} birthnation The birth nation of the person.
+   * @param {Location} deathlocation The death location of the person.
+   * @param {Nation} deathnation The death nation of the person.
    * @returns {Promise<Person>} A promise that resolves with the created person.
    */
-  public static async create (firstname: string, lastname: string, birthdate?: Date, deathdate?: Date, bio?: string): Promise<Person>;
-  public static async create (v?: string, v2?: string, v3?: Date, v4?: Date, v5?: string): Promise<Person|Organ> {
+  public static async create (
+    firstname: string, 
+    lastname: string, 
+    birthdate?: Date, 
+    deathdate?: Date, 
+    bio?: string,
+    birthlocation?: Location,
+    birthnation?: Nation,
+    deathlocation?: Location,
+    deathnation?: Nation,
+  ): Promise<Person>;
+  public static async create (
+    v?: string, 
+    v2?: string, 
+    v3?: Date, 
+    v4?: Date, 
+    v5?: string,
+    v6?: Location,
+    v7?: Nation,
+    v8?: Location,
+    v9?: Nation,
+  ): Promise<Person|Organ> {
     if (v === undefined) return await super.create();
     if (typeof v === 'string' && v2 === undefined) return await super.create(v);
     if (typeof v === 'string' && typeof v2 === 'string') {
       const organ = v5 ? await super.create(v5) : await super.create();
       const client = await pool.connect();
       await client.query(
-        'INSERT INTO person (pid, firstname, lastname, birthdate, deathdate) VALUES ($1, $2, $3, $4, $5)',
-        [organ.id, v, v2, v3, v4,],
+        `INSERT INTO person (pid, firstname, lastname, birthdate, deathdate, birthlocation, birthnation, deathlocation, deathnation)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [
+          organ.id,
+          v,
+          v2,
+          v3,
+          v4,
+          v6?.id,
+          v7?.id,
+          v8?.id,
+          v9?.id,
+        ],
       );
       client.release();
-      return new Person(organ.id, organ.bio, v, v2, v3, v4);
+      return new Person(organ.id, organ.bio, v, v2, v3, v4, v6, v7, v8, v9);
     }
     throw new Error('Invalid argument types');
   }
@@ -351,6 +426,10 @@ class Person extends Organ {
           res.rows[0].lastname,
           res.rows[0].birthdate,
           res.rows[0].deathdate,
+          res.rows[0].birthlocation ? await Location.get(res.rows[0].birthlocation) : undefined,
+          res.rows[0].birthnation ? await Nation.get(res.rows[0].birthnation) : undefined,
+          res.rows[0].deathlocation ? await Location.get(res.rows[0].deathlocation) : undefined,
+          res.rows[0].deathnation ? await Nation.get(res.rows[0].deathnation) : undefined,
         );
       }
     }

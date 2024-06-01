@@ -1,6 +1,6 @@
 import { pool } from '../db';
 
-import Membership from './Membership';
+import type Membership from './Membership';
 
 /**
  * Represents a source for a membership.

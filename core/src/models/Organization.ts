@@ -3,11 +3,8 @@ import { pool } from '../db';
 import Organ, { OrganCache } from './Organ';
 import OrganSource from './OrganSource';
 import Membership from './Membership';
-import MembershipSource from './MembershipSource';
-import SocialsPlatforms from './SocialsPlatforms';
 import Socials from './Socials';
 import log from '../log/organization';
-import type Role from './Role';
 
 import ORGAN_CACHE from '../cache/organ';
 
