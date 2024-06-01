@@ -31,7 +31,7 @@ class Organization extends Organ {
 
   protected _cache: OrganizationCache = {};
 
-  public constructor (id: number, bio: string, name: string, established?: Date, dissolved?: Date) {
+  public constructor (id: number, bio: string, name: string, established?: Date|null, dissolved?: Date|null) {
     super(id, bio);
     this.name = name;
     this.established = established;
@@ -187,8 +187,8 @@ class Organization extends Organ {
    */
   public static async create (name: string, bio: string, established?: Date, dissolved?: Date): Promise<Organization>;
   public static async create (v?: string, v2?: string, v3?: Date, v4?: Date): Promise<Organ|Organization> {
-    if (typeof v === 'undefined') return await super.create();
-    if (typeof v === 'string' && typeof v2 === 'undefined') return await super.create(v);
+    if (typeof v === 'undefined') return super.create();
+    if (typeof v === 'string' && typeof v2 === 'undefined') return super.create(v);
     if (typeof v === 'string' && typeof v2 === 'string') {
       const organ = v2 ? await Organ.create(v2) : await super.create();
       const client = await pool.connect();
