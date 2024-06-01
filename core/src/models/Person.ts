@@ -56,6 +56,10 @@ class Person extends Organ {
     this.lastname = lastname;
     this.birthdate = birthdate;
     this.deathdate = deathdate;
+    this.birthlocation = birthlocation;
+    this.birthnation = birthnation;
+    this.deathlocation = deathlocation;
+    this.deathnation = deathnation;
     this.cache();
   }
   
