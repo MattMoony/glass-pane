@@ -65,6 +65,7 @@ BODIES.UPDATE = {
  * Updates a source of the target organ.
  * @param req The request object.
  * @param res The response object (with `res.locals.organ`).
+ * @deprecated Will probably make this immutable in the future.
  */
 export const update = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;

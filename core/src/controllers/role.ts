@@ -40,6 +40,7 @@ export const get = async (req: Request, res: Response): Promise<void> => {
  * Updates a role.
  * @param req The request object.
  * @param res The response object (with `res.locals.role`).
+ * @deprecated Will probably make this immutable in the future.
  */
 export const update = async (req: Request, res: Response): Promise<void> => {
   const role = res.locals.role as Role;
