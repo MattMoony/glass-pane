@@ -16,6 +16,6 @@ import Organization from '../../models/Organization';
 export const get = async (req: Request, res: Response): Promise<void> => {
   const organization = res.locals.organization as Organization;
   // const members = await Membership.get(organization);
-  const members = await organization.getMembers();
+  const members = await organization.members();
   res.send({ 'success': true, 'members': members.map(member => ({ ...member.json(), organization: undefined, })), });
 }

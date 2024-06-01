@@ -38,7 +38,7 @@ export const BODIES: {
 export const get = async (req: Request, res: Response): Promise<void> => {
   const organ = res.locals.organ as Organ;
   // const memberships = await Membership.get(organ);
-  const memberships = await organ.getMemberships();
+  const memberships = await organ.memberships();
   res.send({ 'success': true, 'memberships': memberships.map(m => ({ ...m.json(), organ: undefined, })) });
 };
 
@@ -75,7 +75,7 @@ export const add = async (req: Request, res: Response): Promise<void> => {
   const sources = req.body.sources as string[];
   try {
     // const membership = await Membership.create(sources, organ, organization, role, since, until);
-    const membership = await organ.addMembership(sources, organization, role, since, until);
+    const membership = await organ.add(role, organization, sources, since, until);
     res.send({ 'success': true, membership, });
   } catch {
     res.send({ 'success': false, 'msg': 'membership already exists', });
@@ -110,7 +110,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   if (req.body.since !== undefined) membership.since = req.body.since ? new Date(req.body.since) : null;
   if (req.body.until !== undefined) membership.until = req.body.until ? new Date(req.body.until) : null;
   // await membership.update();
-  await organ.updateMembership(membership);
+  await organ.update(membership);
   res.send({ 'success': true });
 };
 
@@ -127,6 +127,6 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
     return;
   }
   // await membership.remove();
-  await organ.removeMembership(membership);
+  await organ.remove(membership);
   res.send({ 'success': true });
 };

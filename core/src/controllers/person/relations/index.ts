@@ -59,10 +59,10 @@ export const add = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const relation = await person.addRelation(
-    req.body.sources||[], 
-    req.body.type, 
+  const relation = await person.add(
     relative, 
+    req.body.type, 
+    req.body.sources||[], 
     req.body.since ? new Date(req.body.since) : undefined, 
     req.body.until ? new Date(req.body.until) : undefined
   );
@@ -98,7 +98,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   if (req.body.since !== undefined) relation.since = req.body.since ? new Date(req.body.since) : null;
   if (req.body.until !== undefined) relation.until = req.body.until ? new Date(req.body.until) : null;
 
-  await person.updateRelation(relation);
+  await person.update(relation);
   res.send({ 'success': true, 'relation': relation.json() });
 }
 
@@ -116,7 +116,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  await person.removeRelation(relation);
+  await person.remove(relation);
   res.send({ 'success': true });
 }
 
@@ -127,7 +127,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
  */
 export const parents = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const parents = await person.getParents();
+  const parents = await person.parents();
   // const parents = await Relation.getAll(person, RelationType.PARENT);
   res.send({ 'success': true, 'parents': parents.map((p) => p.json(person)) });
 };
@@ -139,7 +139,7 @@ export const parents = async (req: Request, res: Response): Promise<void> => {
  */
 export const children = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const children = await person.getChildren();
+  const children = await person.children();
   // const children = await Relation.getAll(person, RelationType.CHILD);
   res.send({ 'success': true, 'children': children.map((p) => p.json(person)) });
 };
@@ -151,7 +151,7 @@ export const children = async (req: Request, res: Response): Promise<void> => {
  */
 export const romantic = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const romantic = await person.getRomantic();
+  const romantic = await person.romantic();
   // const romantic = await Relation.getAll(person, RelationType.ROMANTIC);
   res.send({ 'success': true, 'romantic': romantic.map((p) => p.json(person)) });
 };
@@ -163,7 +163,7 @@ export const romantic = async (req: Request, res: Response): Promise<void> => {
  */
 export const friends = async (req: Request, res: Response): Promise<void> => {
   const person = res.locals.person as Person;
-  const friends = await person.getFriends();
+  const friends = await person.friends();
   // const friends = await Relation.getAll(person, RelationType.FRIEND);
   res.send({ 'success': true, 'friends': friends.map((p) => p.json(person)) });
 };

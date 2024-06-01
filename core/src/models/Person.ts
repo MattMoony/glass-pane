@@ -8,22 +8,18 @@ import RelationSource from './RelationSource';
 import Socials from './Socials';
 import SocialsPlatforms from './SocialsPlatforms';
 import log from '../log/person';
+import type Role from './Role';
+import type Organization from './Organization';
+import type Membership from './Membership';
 
-/**
- * A cache of all organs in order not to overload the DB.
- */
-const PERSON_CACHE: Map<number, Person|null> = new Map();
+import ORGAN_CACHE from '../cache/organ';
+
 
 /**
  * Cache of a person.
  */
 export interface PersonCache extends OrganCache {
-  relations: {
-    [RelationType.PARENT]?: Relation[];
-    [RelationType.CHILD]?: Relation[];
-    [RelationType.ROMANTIC]?: Relation[];
-    [RelationType.FRIEND]?: Relation[];
-  }
+  relations?: Relation[];
 }
 
 /**
@@ -35,7 +31,7 @@ class Person extends Organ {
   public birthdate?: Date|null;
   public deathdate?: Date|null;
 
-  public _cache: PersonCache = { relations: {}, };
+  protected _cache: PersonCache = {};
 
   public constructor (id: number, bio: string, firstname: string, lastname: string, birthdate?: Date, deathdate?: Date) {
     super(id, bio);
@@ -46,9 +42,20 @@ class Person extends Organ {
     this.cache();
   }
   
-  public cache (): void {
-    log.info(`Caching person ${this}`);
-    PERSON_CACHE.set(this.id, this);
+  protected cache (key?: string, value?: any): void {
+    if (key && value) return super.cache(key, value);
+    const cached = ORGAN_CACHE.get(this.id);
+    if (cached === undefined 
+        || !(cached instanceof Person) 
+        || cached.bio !== this.bio 
+        || cached.firstname !== this.firstname 
+        || cached.lastname !== this.lastname 
+        || cached.birthdate !== this.birthdate 
+        || cached.deathdate !== this.deathdate
+    ) {
+      log.debug(`Caching person ${this}`);
+      ORGAN_CACHE.set(this.id, this);
+    }
   }
 
   /**
@@ -87,17 +94,37 @@ class Person extends Organ {
    */
   public async add (platform: SocialsPlatforms, url: string): Promise<Socials>;
   /**
-   * Add a relation to this person.
-   * @param {Relation} relation The relation to add.
-   * @param {string[]} sources The sources of the relation.
-   * @returns {Promise<void>} A promise that resolves when the relation is added.
+   * Adds a membership to the organ.
+   * @param role The role of the membership.
+   * @param organization The organization of the membership.
+   * @param sources The sources of the membership.
+   * @param since The since date of the membership.
+   * @param until The until date of the membership.
+   * @returns A promise that resolves with the added membership.
    */
-  public async add (relation: Relation, sources: string[]): Promise<void>;
-  public async add (v: Relation|string|SocialsPlatforms, v2?: string|string[]): Promise<void|OrganSource|Socials> {
-    if (v instanceof Relation && typeof v2 === 'object') return await v.create(v2);
-    if (typeof v === 'string') return await super.add(v);
-    if (typeof v === 'number' && typeof v2 === 'string') return await super.add(v, v2);
-    throw new Error('Invalid argument type');
+  public async add (role: Role, organization: Organization, sources: string[], since?: Date|null, until?: Date|null): Promise<Membership>;
+  /**
+   * Add a relation to this person.
+   * @param other The other person in the relation.
+   * @param relation The type of the relation.
+   * @param sources The sources of the relation.
+   * @param since The since date of the relation.
+   * @param until The until date of the relation.
+   * @returns A promise that resolves with the added relation.
+   */
+  public async add (other: Person, relation: RelationType, sources: string[], since?: Date, until?: Date): Promise<Relation|null>;
+  public async add (v: string|SocialsPlatforms|Role|Person, v2?: string|Organization|RelationType, v3?: string[], v4?: Date|null, v5?: Date|null): Promise<OrganSource|Socials|Membership|Relation|null> {
+    const Role = (await import('./Role')).default;
+    if (typeof v === 'string') return super.add(v);
+    else if (typeof v === 'number' && typeof v2 === 'string') return super.add(v, v2);
+    else if (v instanceof Role) return super.add(v as Role, v2 as Organization, v3 as string[], v4, v5);
+    else if (v instanceof Person) {
+      const relation = await Relation.create(v2 as RelationType, this, v, v4, v5);
+      const relations = await this.cached('relations') as Relation[];
+      if (relations && relation) relations.push(relation);
+      return relation;
+    }
+    throw new Error('Invalid argument types');
   }
 
   /**
@@ -105,6 +132,24 @@ class Person extends Organ {
    * @returns {Promise<void>} A promise that resolves when the person is updated.
    */
   public async update (): Promise<void>;
+  /**
+   * Updates a source for the organ.
+   * @param source The source to update.
+   * @returns A promise that resolves when the source has been updated.
+   */
+  public async update (source: OrganSource): Promise<void>;
+  /**
+   * Updates a social media account for the organ.
+   * @param socials The social media account to update.
+   * @returns A promise that resolves when the social media accounts have been updated.
+   */
+  public async update (socials: Socials): Promise<void>;
+  /**
+   * Updates a membership of the organ.
+   * @param membership The membership to update.
+   * @returns A promise that resolves when the membership has been updated.
+   */
+  public async update (membership: Membership): Promise<void>;
   /**
    * Update a relation of this person.
    * @param {Relation} relation The relation to update.
@@ -118,9 +163,17 @@ class Person extends Organ {
    * @returns {Promise<void>} A promise that resolves when the relation is updated.
    */
   public async update (relation: Relation, source: RelationSource): Promise<void>;
-  public async update (v?: Relation, v2?: RelationSource): Promise<void> {
-    if (v instanceof Relation && v2 instanceof RelationSource) return await v.update(v2);
-    else if (v instanceof Relation) return await v.update();
+  public async update (v?: Relation|OrganSource|Socials|Membership, v2?: RelationSource): Promise<void> {
+    const Membership = (await import('./Membership')).default;
+    if (v instanceof Relation && v2 instanceof RelationSource) return v.update(v2);
+    else if (v instanceof OrganSource) return super.update(v);
+    else if (v instanceof Socials) return super.update(v);
+    else if (v instanceof Membership) return super.update(v);
+    else if (v instanceof Relation) {
+      const relations = await this.cached('relations') as Relation[];
+      if (relations) this.cache('relations', (relations as Relation[]).map(r => r.id === v.id ? v : r));
+      return v.update();
+    }
     await super.update();
     const client = await pool.connect();
     await client.query(
@@ -144,14 +197,33 @@ class Person extends Organ {
    */
   public async remove (source: OrganSource): Promise<void>;
   /**
+   * Removes a social media account from the organ.
+   * @param socials The social media account to remove.
+   * @returns A promise that resolves when the social media account has been removed.
+   */
+  public async remove (socials: Socials): Promise<void>;
+  /**
+   * Removes a membership from the organ.
+   * @param membership The membership to remove.
+   * @returns A promise that resolves when the membership has been removed.
+   */
+  public async remove (membership: Membership): Promise<void>;
+  /**
    * Remove a relation from this person.
    * @param {Relation} relation The relation to remove.
    * @returns {Promise<void>} A promise that resolves when the relation is removed.
    */
   public async remove (relation: Relation): Promise<void>;
-  public async remove (v?: Relation|OrganSource): Promise<void> {
-    if (v instanceof OrganSource) return await super.remove(v);
-    if (v instanceof Relation) return await v.remove();
+  public async remove (v?: Relation|OrganSource|Socials|Membership): Promise<void> {
+    const Membership = (await import('./Membership')).default;
+    if (v instanceof OrganSource) return super.remove(v);
+    else if (v instanceof Socials) return super.remove(v);
+    else if (v instanceof Membership) return super.remove(v);
+    else if (v instanceof Relation) {
+      const relations = await this.cached('relations') as Relation[];
+      if (relations) this.cache('relations', (relations as Relation[]).filter(r => r.id !== v.id));
+      return v.remove();
+    }
     const client = await pool.connect();
     await client.query(
       'DELETE FROM person WHERE pid = $1',
@@ -160,19 +232,21 @@ class Person extends Organ {
     client.release();
     super.remove();
     log.debug(`Nulling person cache ${this}`);
-    PERSON_CACHE.set(this.id, null);
+    ORGAN_CACHE.delete(this.id);
   }
 
   /**
    * Get all relations of this person.
    * @returns {Promise<Relation[]>} The relations of this person.
    */
-  public async getRelations (): Promise<Relation[]> {
-    const parents = await this.getParents();
-    const children = await this.getChildren();
-    const romantic = await this.getRomantic();
-    const friends = await this.getFriends();
-    return parents.concat(children).concat(romantic).concat(friends);
+  public async relations (): Promise<Relation[]> {
+    return this.cached('relations', async () => {
+      const parents = await Relation.getAll(this, RelationType.PARENT);
+      const children = await Relation.getAll(this, RelationType.CHILD);
+      const romantic = await Relation.getAll(this, RelationType.ROMANTIC);
+      const friends = await Relation.getAll(this, RelationType.FRIEND);
+      return parents.concat(children).concat(romantic).concat(friends);
+    });
   }
 
   /**
@@ -180,13 +254,8 @@ class Person extends Organ {
    * @deprecated Planning on removing this - not really good coding.
    * @returns {Promise<Relation[]>} The parents of this person.
    */
-  public async getParents (): Promise<Relation[]> {
-    if (!this._cache.relations[RelationType.PARENT]) {
-      log.info(`Missed parents cache ${this}`);
-      this._cache.relations[RelationType.PARENT] = await Relation.getAll(this, RelationType.PARENT);
-    }
-    log.debug(`Hit parents cache ${this._cache.relations[RelationType.PARENT]}`);
-    return this._cache.relations[RelationType.PARENT];
+  public async parents (): Promise<Relation[]> {
+    return (await this.relations()).filter(r => r.type === RelationType.PARENT && r.from === this);
   }
 
   /**
@@ -194,13 +263,10 @@ class Person extends Organ {
    * @deprecated Planning on removing this - not really good coding.
    * @returns {Promise<Relation[]>} The children of this person.
    */
-  public async getChildren (): Promise<Relation[]> {
-    if (!this._cache.relations[RelationType.CHILD]) {
-      log.info(`Missed children cache ${this}`);
-      this._cache.relations[RelationType.CHILD] = await Relation.getAll(this, RelationType.CHILD);
-    }
-    log.debug(`Hit children cache ${this._cache.relations[RelationType.CHILD]}`);
-    return this._cache.relations[RelationType.CHILD];
+  public async children (): Promise<Relation[]> {
+    // TODO: need to finally fucking fix shit
+    // TODO: with these special, non-existent relation types :(
+    return (await this.relations()).filter(r => r.type === RelationType.PARENT && r.to === this);
   }
 
   /**
@@ -208,13 +274,8 @@ class Person extends Organ {
    * @deprecated Planning on removing this - not really good coding.
    * @returns {Promise<Relation[]>} The romantic relationships of this person.
    */
-  public async getRomantic (): Promise<Relation[]> {
-    if (!this._cache.relations[RelationType.ROMANTIC]) {
-      log.info(`Missed romantic cache ${this}`);
-      this._cache.relations[RelationType.ROMANTIC] = await Relation.getAll(this, RelationType.ROMANTIC);
-    }
-    log.debug(`Hit romantic cache ${this._cache.relations[RelationType.ROMANTIC]}`);
-    return this._cache.relations[RelationType.ROMANTIC];
+  public async romantic (): Promise<Relation[]> {
+    return (await this.relations()).filter(r => r.type === RelationType.ROMANTIC);
   }
 
   /**
@@ -222,129 +283,8 @@ class Person extends Organ {
    * @deprecated Planning on removing this - not really good coding.
    * @returns {Promise<Relation[]>} The friends of this person.
    */
-  public async getFriends (): Promise<Relation[]> {
-    if (!this._cache.relations[RelationType.FRIEND]) {
-      log.info(`Missed friends cache ${this}`);
-      this._cache.relations[RelationType.FRIEND] = await Relation.getAll(this, RelationType.FRIEND);
-    }
-    log.debug(`Hit friends cache ${this._cache.relations[RelationType.FRIEND]}`);
-    return this._cache.relations[RelationType.FRIEND];
-  }
-
-  /**
-   * Add a relation to this person.
-   * @param {string[]} sources The sources of the relation.
-   * @param {RelationType} type The type of the relation.
-   * @param {Person} relative The relative of the relation.
-   * @param {Date} since The since date of the relation.
-   * @param {Date} until The until date of the relation.
-   * @returns {Promise<Relation|null>} A promise that resolves with the created relation, or null if it already exists.
-   */
-  public async addRelation (sources: string[], type: RelationType, relative: Person, since?: Date, until?: Date): Promise<Relation|null> {
-    const Relation = (await import('./Relation')).default;
-    const relation = await Relation.create(type, this, relative, since, until);
-    if (!relation) return null;
-    this._cache.relations[type] = [...this._cache.relations[type]||[], relation];
-    switch (type) {
-      case RelationType.PARENT:
-        if (relative._cache.relations[RelationType.CHILD]) {
-          relative._cache.relations[RelationType.CHILD] = [
-            ...relative._cache.relations[RelationType.CHILD],
-            relation,
-          ];
-        }
-        break;
-      case RelationType.CHILD:
-        if (relative._cache.relations[RelationType.PARENT]) {
-          relative._cache.relations[RelationType.PARENT] = [
-            ...relative._cache.relations[RelationType.PARENT],
-            relation,
-          ];
-        }
-        break;
-      case RelationType.ROMANTIC:
-      case RelationType.FRIEND:
-        if (relative._cache.relations[type]) {
-          relative._cache.relations[type] = [
-            ...relative._cache.relations[type]!,
-            relation,
-          ];
-        }
-        break;
-    }
-    return relation;
-  }
-
-  /**
-   * Update a relation of this person.
-   * @param {Relation} relation The relation to update.
-   * @returns {Promise<void>} A promise that resolves when the relation is updated.
-   */
-  public async updateRelation (relation: Relation): Promise<void> {
-    if (relation.from !== this) 
-      return relation.to.updateRelation(relation);
-    await relation.update();
-    this._cache.relations[relation.type] = [
-      ...this._cache.relations[relation.type]!.filter(r => r.id !== relation.id),
-      relation,
-    ];
-    switch (relation.type) {
-      case RelationType.PARENT:
-        if (relation.to._cache.relations[RelationType.CHILD]) {
-          relation.to._cache.relations[RelationType.CHILD] = [
-            ...relation.to._cache.relations[RelationType.CHILD]!.filter(r => r.id !== relation.id),
-            relation,
-          ];
-        }
-        break;
-      case RelationType.CHILD:
-        if (relation.to._cache.relations[RelationType.PARENT]) {
-          relation.to._cache.relations[RelationType.PARENT] = [
-            ...relation.to._cache.relations[RelationType.PARENT]!.filter(r => r.id !== relation.id),
-            relation,
-          ];
-        }
-        break;
-      case RelationType.ROMANTIC:
-      case RelationType.FRIEND:
-        if (relation.to._cache.relations[relation.type]) {
-          relation.to._cache.relations[relation.type] = [
-            ...relation.to._cache.relations[relation.type]!.filter(r => r.id !== relation.id),
-            relation,
-          ];
-        }
-        break;
-    }
-  }
-
-  /**
-   * Remove a relation from this person.
-   * @param {Relation} relation The relation to remove.
-   * @returns {Promise<void>} A promise that resolves when the relation is removed.
-   */
-  public async removeRelation (relation: Relation): Promise<void> {
-    if (relation.from !== this) 
-      return relation.to.removeRelation(relation);
-    await relation.remove();
-    this._cache.relations[relation.type] = this._cache.relations[relation.type]!.filter(r => r.id !== relation.id);
-    switch (relation.type) {
-      case RelationType.PARENT:
-        if (relation.to._cache.relations[RelationType.CHILD]) {
-          relation.to._cache.relations[RelationType.CHILD] = relation.to._cache.relations[RelationType.CHILD]!.filter(r => r.id !== relation.id);
-        }
-        break;
-      case RelationType.CHILD:
-        if (relation.to._cache.relations[RelationType.PARENT]) {
-          relation.to._cache.relations[RelationType.PARENT] = relation.to._cache.relations[RelationType.PARENT]!.filter(r => r.id !== relation.id);
-        }
-        break;
-      case RelationType.ROMANTIC:
-      case RelationType.FRIEND:
-        if (relation.to._cache.relations[relation.type]) {
-          relation.to._cache.relations[relation.type] = relation.to._cache.relations[relation.type]!.filter(r => r.id !== relation.id);
-        }
-        break;
-    }
+  public async friends (): Promise<Relation[]> {
+    return (await this.relations()).filter(r => r.type === RelationType.FRIEND);
   }
 
   /**
@@ -393,7 +333,8 @@ class Person extends Organ {
     id = +id;
     const organ = await super.get(id);
     if (!organ) return null;
-    if (!PERSON_CACHE.has(id)) {
+    const cached = ORGAN_CACHE.get(id);
+    if (cached === undefined || !(cached instanceof Person)) {
       log.info(`Missed person cache for ${id}`);
       const client = await pool.connect();
       const res = await client.query(
@@ -402,7 +343,6 @@ class Person extends Organ {
       );
       client.release();
       if (res.rows.length === 0) {
-        PERSON_CACHE.set(id, null);
       } else {
         return new Person(
           organ.id,
@@ -414,8 +354,8 @@ class Person extends Organ {
         );
       }
     }
-    log.debug(`Hit person cache ${PERSON_CACHE.get(id)}`);
-    return PERSON_CACHE.get(id)!;
+    log.debug(`Hit person cache ${ORGAN_CACHE.get(id)}`);
+    return (ORGAN_CACHE.get(id) as Person)||null;
   }
 
   /**

@@ -7,11 +7,11 @@ import Organ from './Organ';
  * website, a document, or any other kind of resource.
  */
 export class OrganSource {
-  public sid: number;
+  public id: number;
   public url: string;
 
   public constructor (sid: number, url: string) {
-    this.sid = sid;
+    this.id = sid;
     this.url = url;
   }
 
@@ -21,7 +21,7 @@ export class OrganSource {
    */
   public json (): Object {
     return {
-      sid: this.sid,
+      sid: this.id,
       url: this.url,
     };
   }
@@ -31,7 +31,7 @@ export class OrganSource {
    * @returns The string representation of the source.
    */
   public toString (): string {
-    return `OrganSource#${this.sid}`;
+    return `OrganSource#${this.id}`;
   }
 
   /**
@@ -40,7 +40,7 @@ export class OrganSource {
    */
   public async update (): Promise<void> {
     const client = await pool.connect();
-    await client.query('UPDATE organ_source SET url = $1 WHERE sid = $2', [this.url, this.sid]);
+    await client.query('UPDATE organ_source SET url = $1 WHERE sid = $2', [this.url, this.id]);
     client.release();
   };
 
@@ -50,7 +50,7 @@ export class OrganSource {
    */
   public async remove (): Promise<void> {
     const client = await pool.connect();
-    await client.query('DELETE FROM organ_source WHERE sid = $1', [this.sid]);
+    await client.query('DELETE FROM organ_source WHERE sid = $1', [this.id]);
     client.release();
   };
 

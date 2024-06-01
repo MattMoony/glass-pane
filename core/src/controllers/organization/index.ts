@@ -50,7 +50,7 @@ export const search = async (req: Request, res: Response): Promise<void> => {
  * @param res The response object.
  */
 export const random = async (req: Request, res: Response): Promise<void> => {
-  const organization = await Organization.getRandom();
+  const organization = await Organization.random();
   if (!organization) {
     res.send({ 'success': false, 'msg': 'no organizations', });
     return;

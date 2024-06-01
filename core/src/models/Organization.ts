@@ -7,11 +7,10 @@ import MembershipSource from './MembershipSource';
 import SocialsPlatforms from './SocialsPlatforms';
 import Socials from './Socials';
 import log from '../log/organization';
+import type Role from './Role';
 
-/**
- * A cache of all organizations in order not to overload the DB.
- */
-const ORGANIZATION_CACHE: Map<number, Organization|null> = new Map();
+import ORGAN_CACHE from '../cache/organ';
+
 
 /**
  * Cache of an organization.
@@ -30,7 +29,7 @@ class Organization extends Organ {
   public established?: Date|null;
   public dissolved?: Date|null;
 
-  public _cache: OrganizationCache = {};
+  protected _cache: OrganizationCache = {};
 
   public constructor (id: number, bio: string, name: string, established?: Date, dissolved?: Date) {
     super(id, bio);
@@ -40,9 +39,18 @@ class Organization extends Organ {
     this.cache();
   }
 
-  public cache(): void {
-    log.info(`Caching organization ${this}`);
-    ORGANIZATION_CACHE.set(this.id, this);    
+  protected cache(key?: string, value?: string): void {
+    if (key && value) return super.cache(key, value);
+    const cached = ORGAN_CACHE.get(this.id);
+    if (cached === undefined 
+        || !(cached instanceof Organization) 
+        || cached.name !== this.name 
+        || cached.established !== this.established 
+        || cached.dissolved !== this.dissolved
+    ) {
+      log.debug(`Caching organization ${this}`);
+      ORGAN_CACHE.set(this.id, this);
+    }
   }
 
   /**
@@ -67,52 +75,32 @@ class Organization extends Organ {
   }
 
   /**
-   * Adds a source to the organization.
-   * @param source The source to add.
-   * @returns A promise that resolves with the new source.
-   */
-  public async add (source: string): Promise<OrganSource>;
-  /**
-   * Adds a social media account to the organ.
-   * @param platform The platform of the account.
-   * @param url The URL of the account.
-   * @returns A promise that resolves with the added source.
-   */
-  public async add (platform: SocialsPlatforms, url: string): Promise<Socials>;
-  /**
-   * Adds a membership to the organization.
-   * @param membership The membership to add.
-   * @returns A promise that resolves with the new membership.
-   */
-  public async add (membership: Membership, sources: string[]): Promise<void>;
-  public async add (v: string|SocialsPlatforms|Membership, v2?: string|string[]): Promise<void|OrganSource|Socials> {
-    if (typeof v === 'string') return await super.add(v);
-    if (typeof v === 'number' && typeof v2 === 'string') return await super.add(v, v2);
-    if (v instanceof Membership && typeof v2 === 'object') return await v.create(v2);
-    throw new Error('Invalid argument type');
-  }
-
-  /**
    * Updates the organization in the database.
    * @returns A promise that resolves when the organization has been updated.
    */
   public async update (): Promise<void>;
   /**
-   * Updates a membership for this organization.
+   * Updates a source for the organ.
+   * @param source The source to update.
+   * @returns A promise that resolves when the source has been updated.
+   */
+  public async update (source: OrganSource): Promise<void>;
+  /**
+   * Updates a social media account for the organ.
+   * @param socials The social media account to update.
+   * @returns A promise that resolves when the social media accounts have been updated.
+   */
+  public async update (socials: Socials): Promise<void>;
+  /**
+   * Updates a membership of the organ.
    * @param membership The membership to update.
    * @returns A promise that resolves when the membership has been updated.
    */
   public async update (membership: Membership): Promise<void>;
-  /**
-   * Updates a membership source for this organization.
-   * @param membership The membership to update.
-   * @param source The source to update.
-   * @returns A promise that resolves when the source has been updated.
-   */
-  public async update (membership: Membership, source: MembershipSource): Promise<void>;
-  public async update (v?: Membership, v2?: MembershipSource): Promise<void> {
-    if (v instanceof Membership && v2 instanceof MembershipSource) return await v.update(v2);
-    if (v instanceof Membership) return await v.update();
+  public async update (v?: Membership|OrganSource|Socials): Promise<void> {
+    if (v instanceof Membership) return super.update(v);
+    else if (v instanceof OrganSource) return super.update(v);
+    else if (v instanceof Socials) return super.update(v);
     await super.update();
     const client = await pool.connect();
     await client.query(
@@ -129,20 +117,27 @@ class Organization extends Organ {
    */
   public async remove (): Promise<void>;
   /**
-   * Removes a source from the organization.
+   * Removes a source from the organ.
    * @param source The source to remove.
    * @returns A promise that resolves when the source has been removed.
    */
   public async remove (source: OrganSource): Promise<void>;
   /**
-   * Removes a membership from the organization.
+   * Removes a social media account from the organ.
+   * @param socials The social media account to remove.
+   * @returns A promise that resolves when the social media account has been removed.
+   */
+  public async remove (socials: Socials): Promise<void>;
+  /**
+   * Removes a membership from the organ.
    * @param membership The membership to remove.
    * @returns A promise that resolves when the membership has been removed.
    */
   public async remove (membership: Membership): Promise<void>;
-  public async remove (v?: OrganSource|Membership): Promise<void> {
-    if (v instanceof OrganSource) return await super.remove(v);
-    if (v instanceof Membership) return await v.remove();
+  public async remove (v?: OrganSource|Membership|Socials): Promise<void> {
+    if (v instanceof OrganSource) return super.remove(v);
+    else if (v instanceof Membership) return super.remove(v);
+    else if (v instanceof Socials) return super.remove(v);
     // TODO: not 100% correct - same as in person,
     // TODO: organ, etc. - fix this later
     const client = await pool.connect();
@@ -153,14 +148,14 @@ class Organization extends Organ {
     client.release();
     super.remove();
     log.debug(`Nulling organization cache ${this}`);
-    ORGANIZATION_CACHE.set(this.id, null);
+    ORGAN_CACHE.delete(this.id);
   }
 
   /**
    * Returns all members of the organization.
    * @returns A promise that resolves with all members for the organization.
    */
-  public async getMembers (): Promise<Membership[]> {
+  public async members (): Promise<Membership[]> {
     if (!this._cache.members) {
       log.info(`Missed members cache for ${this}`);
       const Membership = (await import('./Membership')).default;
@@ -216,7 +211,8 @@ class Organization extends Organ {
     id = +id;
     const organ = await super.get(id);
     if (!organ) return null;
-    if (!ORGANIZATION_CACHE.has(id)) {
+    const cached = ORGAN_CACHE.get(id);
+    if (cached === undefined || !(cached instanceof Organization)) {
       log.info(`Missed organization cache for ${id}`);
       const client = await pool.connect();
       const res = await client.query(
@@ -234,14 +230,14 @@ class Organization extends Organ {
       ); 
     }
     log.debug(`Hit organization cache ${id}`);
-    return ORGANIZATION_CACHE.get(id)!;
+    return (ORGAN_CACHE.get(id) as Organization) || null;
   }
 
   /**
    * Get a random organization.
    * @returns A promise that resolves with a random organization.
    */
-  public static async getRandom (): Promise<Organization|null> {
+  public static async random (): Promise<Organization|null> {
     const client = await pool.connect();
     const res = await client.query('SELECT oid FROM organization ORDER BY RANDOM() LIMIT 1');
     client.release();
