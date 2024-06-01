@@ -4,6 +4,7 @@ DROP TABLE business_turnover_source;
 DROP TABLE business_turnover;
 DROP TABLE relation_source;
 DROP TABLE relation;
+DROP TABLE shareholder;
 DROP TABLE membership_source;
 DROP TABLE membership;
 DROP TABLE organ_source;
@@ -106,6 +107,8 @@ CREATE TABLE person (
     deathdate       DATE,
     birthplace      BIGINT              REFERENCES location(lid),
     birthnation     BIGINT              REFERENCES nation(nid),
+    deathplace      BIGINT              REFERENCES location(lid),
+    deathnation     BIGINT              REFERENCES nation(nid),
 
     PRIMARY KEY     (pid)
 );
@@ -226,6 +229,14 @@ CREATE TABLE membership_source (
     mid             BIGINT              REFERENCES membership(mid) NOT NULL,
     since           DATE,
     url             TEXT                NOT NULL,
+
+    PRIMARY KEY     (sid)
+);
+
+-- NOTE: only for memberships in businesses
+CREATE TABLE shareholder (
+    sid             BIGINT              REFERENCES membership(mid) NOT NULL,
+    shares          DOUBLE PRECISION    NOT NULL,
 
     PRIMARY KEY     (sid)
 );
