@@ -30,6 +30,17 @@ export const BODIES: {
 } = {};
 
 /**
+ * Gets the relations of the target person.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.person`).
+ */
+export const get = async (req: Request, res: Response): Promise<void> => {
+  const person = res.locals.person as Person;
+  const relations = await person.relations();
+  res.send({ 'success': true, 'relations': relations.map((r) => r.json()) });
+};
+
+/**
  * The required body format for the add endpoint.
  */
 BODIES.ADD = {

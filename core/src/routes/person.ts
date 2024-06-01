@@ -16,6 +16,7 @@ router.patch('/:pid', requireAuth, pid2person, requireBody(controller.BODIES.UPD
 router.delete('/:pid', requireAuth, pid2person, controller.remove);
 
 // PERSON RELATION OPERATIONS
+router.get('/:pid/relation', pid2person, controller.relations.get);
 router.post('/:pid/relation', requireAuth, requireBody(controller.relations.BODIES.ADD), pid2person, controller.relations.add);
 router.patch('/:pid/relation/:rid', requireAuth, requireBody(controller.relations.BODIES.UPDATE), pid2person, controller.relations.update);
 router.delete('/:pid/relation/:rid', requireAuth, pid2person, controller.relations.remove);
