@@ -13,9 +13,10 @@ import organRouter from './routes/organ';
 import personRouter from './routes/person';
 import organizationRouter from './routes/organization';
 import roleRouter from './routes/role';
-import authRouter from './routes/auth';
 import locationRouter from './routes/location';
 import nationRouter from './routes/nation';
+import mediaRouter from './routes/media';
+import authRouter from './routes/auth';
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use('/api/organization/', organizationRouter);
 app.use('/api/role/', roleRouter);
 app.use('/api/location/', locationRouter);
 app.use('/api/nation/', nationRouter);
+app.use('/api/media/', mediaRouter);
 app.use('/api/auth/', authRouter);
 
 app.get('/api/stats', async (req: Request, res: Response) => {

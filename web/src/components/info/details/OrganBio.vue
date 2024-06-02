@@ -3,7 +3,7 @@ import { type Ref, ref, watch, type VNodeRef, nextTick } from 'vue';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { API } from '@/api';
-import * as api from '@/api/organ';
+import * as api from '@/api/media';
 import Organ from '@/models/Organ';
 
 const props = defineProps<{
@@ -104,7 +104,7 @@ watch(() => props.edit, () => {
         const type: string = img.types.find(t => t.includes('image/')) || '';
         const blob: Blob = await img.getType(type as 'image/png').catch(() => new Blob());
         if (!blob.size) return;
-        const res = await api.uploadBioPic(props.organ.id, blob);
+        const res = await api.upload(blob);
         if (!res.success) return;
         editor.executeEdits('pasteImage', [{
           range: selection,

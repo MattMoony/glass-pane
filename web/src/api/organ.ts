@@ -221,6 +221,7 @@ export const search = async (query: string): Promise<OrgansResponse> => {
  * @param oid The ID of the organ to upload the picture for.
  * @param pic The picture to upload.
  * @returns A promise that resolves to the response from the API.
+ * @deprecated Use the `media` API instead.
  */
 export const uploadBioPic = async (oid: number, pic: Blob): Promise<BioPicResponse> => {
   const formData = new FormData();
