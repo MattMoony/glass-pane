@@ -73,7 +73,6 @@ CREATE TABLE organization (
 
 CREATE TABLE nation (
     nid             BIGINT              REFERENCES organization(oid),
-    location        BIGINT              REFERENCES location(lid),
 
     PRIMARY KEY     (nid)
 );

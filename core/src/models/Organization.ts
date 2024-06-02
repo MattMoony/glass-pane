@@ -4,8 +4,9 @@ import Organ, { OrganCache } from './Organ';
 import OrganSource from './OrganSource';
 import Membership from './Membership';
 import Socials from './Socials';
-import log from '../log/organization';
+import Location from './Location';
 
+import log from '../log/organization';
 import ORGAN_CACHE from '../cache/organ';
 
 
@@ -25,14 +26,23 @@ class Organization extends Organ {
   public name: string;
   public established?: Date|null;
   public dissolved?: Date|null;
+  public location?: Location|null;
 
   protected _cache: OrganizationCache = {};
 
-  public constructor (id: number, bio: string, name: string, established?: Date|null, dissolved?: Date|null) {
+  public constructor (
+    id: number, 
+    bio: string, 
+    name: string, 
+    established?: Date|null, 
+    dissolved?: Date|null,
+    location?: Location|null
+  ) {
     super(id, bio);
     this.name = name;
     this.established = established;
     this.dissolved = dissolved;
+    this.location = location;
     this.cache();
   }
 
@@ -60,6 +70,7 @@ class Organization extends Organ {
       name: this.name,
       established: this.established?.toISOString(),
       dissolved: this.dissolved?.toISOString(),
+      location: this.location?.json(),
     };
   }
 
@@ -101,8 +112,8 @@ class Organization extends Organ {
     await super.update();
     const client = await pool.connect();
     await client.query(
-      'UPDATE organization SET name = $1, established = $2, dissolved = $3 WHERE oid = $4',
-      [this.name, this.established, this.dissolved, this.id]
+      'UPDATE organization SET name = $1, established = $2, dissolved = $3, location = $4 WHERE oid = $5',
+      [this.name, this.established, this.dissolved, this.location?.id, this.id]
     );
     client.release();
     this.cache();
@@ -180,21 +191,22 @@ class Organization extends Organ {
    * @param bio The bio of the organization.
    * @param established The date the organization was established.
    * @param dissolved The date the organization was dissolved.
+   * @param location The location of the organization.
    * @returns A promise that resolves with the new organization.
    */
-  public static async create (name: string, bio: string, established?: Date, dissolved?: Date): Promise<Organization>;
-  public static async create (v?: string, v2?: string, v3?: Date, v4?: Date): Promise<Organ|Organization> {
+  public static async create (name: string, bio: string, established?: Date, dissolved?: Date, location?: Location): Promise<Organization>;
+  public static async create (v?: string, v2?: string, v3?: Date, v4?: Date, v5?: Location): Promise<Organ|Organization> {
     if (typeof v === 'undefined') return super.create();
     if (typeof v === 'string' && typeof v2 === 'undefined') return super.create(v);
     if (typeof v === 'string' && typeof v2 === 'string') {
       const organ = v2 ? await Organ.create(v2) : await super.create();
       const client = await pool.connect();
       const res = await client.query(
-        'INSERT INTO organization (oid, name, established, dissolved) VALUES ($1, $2, $3, $4) RETURNING oid',
-        [organ.id, v, v3, v4]
+        'INSERT INTO organization (oid, name, established, dissolved) VALUES ($1, $2, $3, $4, $5) RETURNING oid',
+        [organ.id, v, v3, v4, v5,]
       );
       client.release();
-      return new Organization(organ.id, organ.bio, v, v3, v4);
+      return new Organization(organ.id, organ.bio, v, v3, v4, v5);
     }
     throw new Error('Invalid creation type');
   }
@@ -213,7 +225,7 @@ class Organization extends Organ {
       log.info(`Missed organization cache for ${id}`);
       const client = await pool.connect();
       const res = await client.query(
-        'SELECT name, established, dissolved FROM organization WHERE oid = $1', 
+        'SELECT name, established, dissolved, location FROM organization WHERE oid = $1', 
         [id]
       );
       client.release();
@@ -223,8 +235,9 @@ class Organization extends Organ {
         organ.bio,
         res.rows[0].name,
         res.rows[0].established,
-        res.rows[0].dissolved
-      ); 
+        res.rows[0].dissolved,
+        await Location.get(res.rows[0].location),
+      );
     }
     log.debug(`Hit organization cache ${id}`);
     return (ORGAN_CACHE.get(id) as Organization) || null;
@@ -260,7 +273,8 @@ class Organization extends Organ {
       (await Organ.get(+row.oid))!.bio,
       row.name,
       row.established,
-      row.dissolved
+      row.dissolved,
+      await Location.get(row.location),
     )));
   }
 }
