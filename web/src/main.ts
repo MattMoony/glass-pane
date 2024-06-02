@@ -46,6 +46,7 @@ import {
   faRedo,
   faTimeline,
   faMapLocation,
+  faMapMarkerAlt,
 } from '@fortawesome/free-solid-svg-icons'
 
 import VNetworkGraph from 'v-network-graph'
@@ -108,6 +109,7 @@ library.add(
   faRedo,
   faTimeline,
   faMapLocation,
+  faMapMarkerAlt,
 )
 app.component('font-awesome-icon', FontAwesomeIcon)
 

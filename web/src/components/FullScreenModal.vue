@@ -5,7 +5,11 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div :class="['full-screen-modal', $props.show ? 'show' : '',]" @click="$emit('close')">
+  <div 
+    v-if="props.show"
+    :class="['full-screen-modal', $props.show ? 'show' : '',]" 
+    @click="$emit('close')"
+  >
     <div class="modal-content" @click="e => e.stopImmediatePropagation()">
       <slot />
     </div>

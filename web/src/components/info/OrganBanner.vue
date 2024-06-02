@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { type Ref, ref, watch } from 'vue';
+import { onClickOutside } from '@vueuse/core';
 
 import Organ from '@/models/Organ';
 import Person from '@/models/Person';
 import Organization from '@/models/Organization';
 import SocialsPlatform from '@/models/SocialsPlatform';
+import Location from '@/models/Location';
+import Nation from '@/models/Nation';
 
 import PopDropDown from '@/components/PopDropDown.vue';
-import { onClickOutside } from '@vueuse/core';
+import LocationPicker from '@/components/map/LocationPicker.vue';
+import NationSelect from '@/components/NationSelect.vue';
 
 const props = defineProps<{
   /**
@@ -27,6 +31,22 @@ const props = defineProps<{
    */
   to?: Date;
   /**
+   * The origin location of the organ.
+   */
+  fromLocation?: Location;
+  /**
+   * The origin nation of the organ.
+   */
+  fromNation?: Nation;
+  /**
+   * The end location of the organ.
+   */
+  toLocation?: Location;
+  /**
+   * The end nation of the organ.
+   */
+  toNation?: Nation;
+  /**
    * The age of the organ.
    */
   age?: number;
@@ -38,6 +58,10 @@ const props = defineProps<{
    * Whether to show social media links.
    */
   showSocials?: boolean;
+  /**
+   * Whether to show extended info (locations, etc.).
+   */
+  extended?: boolean;
   /**
    * Whether to show the banner in a small size.
    */
@@ -153,6 +177,7 @@ watch(
   <div 
     :class="[
       'banner', 
+      props.extended ? 'extended' : '',
       props.small||props.extraSmall ? 'small' : '',
       props.extraSmall ? 'extra-small' : '',
       props.edit ? 'edit' : '',
@@ -220,10 +245,20 @@ watch(
           <span v-if="props.from">
             <font-awesome-icon icon="fa-solid fa-baby" />
             {{ props.from.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+            <span v-if="props.fromLocation || props.fromNation">
+              <font-awesome-icon icon="fa-solid fa-map-marker-alt" />
+              {{ props.fromLocation ? props.fromLocation.name : '' }}
+              {{ props.fromNation ? props.fromNation.name : '' }}
+            </span>
           </span>
           <span v-if="props.to">
             <font-awesome-icon icon="fa-solid fa-skull" />
             {{ props.to.toLocaleDateString('en-us', { weekday:undefined, year:"numeric", month:"short", day:"numeric"}) }}
+            <span v-if="props.toLocation || props.toNation">
+              <font-awesome-icon icon="fa-solid fa-map-marker-alt" />
+              {{ props.toLocation ? props.toLocation.name : '' }}
+              {{ props.toNation ? props.toNation.name : '' }}
+            </span>
           </span>
           <span v-if="props.age">
             (Age: {{ props.age }})
@@ -248,6 +283,22 @@ watch(
                   }
                 }"
               />
+              <LocationPicker 
+                v-if="(organ instanceof Person)"
+                :init-location="organ.birthplace"
+                @change="(location: Location) => {
+                  (organ as Person).birthplace = location;
+                  organ && $emit('change', organ);
+                }"
+              />
+              <NationSelect 
+                v-if="(organ instanceof Person)"
+                :init-nation="organ.birthnation"
+                @change="(nation: Nation) => {
+                  (organ as Person).birthnation = nation;
+                  organ && $emit('change', organ);
+                }"
+              />
             </div>
             <div>
               <font-awesome-icon icon="fa-solid fa-skull" />
@@ -261,6 +312,22 @@ watch(
                     (organ as Person).deathdate = d;
                     organ && $emit('change', organ);
                   }
+                }"
+              />
+              <LocationPicker 
+                v-if="(organ instanceof Person)"
+                :init-location="organ.deathplace"
+                @change="(location: Location) => {
+                  (organ as Person).deathplace = location;
+                  organ && $emit('change', organ);
+                }"
+              />
+              <NationSelect 
+                v-if="(organ instanceof Person)"
+                :init-nation="organ.deathnation"
+                @change="(nation: Nation) => {
+                  (organ as Person).deathnation = nation;
+                  organ && $emit('change', organ);
                 }"
               />
             </div>
@@ -443,6 +510,14 @@ watch(
   width: 12em;
   height: 12em;
   border-radius: 5px;
+}
+
+.extended .banner-birth-death {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: flex-start;
+  gap: .5em;
 }
 
 .small .banner-image img {

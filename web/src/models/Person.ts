@@ -470,6 +470,9 @@ class Person extends Organ implements person.Person {
    * @returns A promise that resolves to the person with the given ID, or null if no such person exists.
    */
   public static async get (id: number): Promise<Person|null> {
+    // lazy loading to avoid circular dependencies
+    const Nation = (await import('./Nation')).default;
+    const Location = (await import('./Location')).default;
     const res = await person.get(id);
     return res.person ? new Person(
       res.person.id,
@@ -478,6 +481,42 @@ class Person extends Organ implements person.Person {
       res.person.lastname,
       res.person.birthdate ? new Date(res.person.birthdate) : undefined,
       res.person.deathdate ? new Date(res.person.deathdate) : undefined,
+      res.person.birthplace ? new Location(
+        res.person.birthplace.id,
+        res.person.birthplace.name,
+        res.person.birthplace.coords,
+      ) : undefined,
+      res.person.birthnation ? new Nation(
+        res.person.birthnation.id,
+        res.person.birthnation.bio,
+        res.person.birthnation.name,
+        res.person.birthnation.established,
+        res.person.birthnation.dissolved,
+        res.person.birthnation.location ? new Location(
+          res.person.birthnation.location.id,
+          res.person.birthnation.location.name,
+          res.person.birthnation.location.coords,
+        ) : undefined,
+        res.person.birthnation.geo,
+      ) : undefined,
+      res.person.deathplace ? new Location(
+        res.person.deathplace.id,
+        res.person.deathplace.name,
+        res.person.deathplace.coords,
+      ) : undefined,
+      res.person.deathnation ? new Nation(
+        res.person.deathnation.id,
+        res.person.deathnation.bio,
+        res.person.deathnation.name,
+        res.person.deathnation.established,
+        res.person.deathnation.dissolved,
+        res.person.deathnation.location ? new Location(
+          res.person.deathnation.location.id,
+          res.person.deathnation.location.name,
+          res.person.deathnation.location.coords,
+        ) : undefined,
+        res.person.deathnation.geo,
+      ) : undefined,
     ) : null;
   }
 
@@ -495,7 +534,11 @@ class Person extends Organ implements person.Person {
     lastname: string, 
     bio: string,
     birthdate?: Date,
-    deathdate?: Date
+    deathdate?: Date,
+    birthplace?: Location,
+    birthnation?: Nation,
+    deathplace?: Location,
+    deathnation?: Nation,
   ): Promise<Person|null> {
     const res = await person.create(firstname, lastname, bio, birthdate, deathdate);
     return res.person ? new Person(
@@ -504,7 +547,11 @@ class Person extends Organ implements person.Person {
       firstname, 
       lastname, 
       birthdate, 
-      deathdate
+      deathdate,
+      birthplace,
+      birthnation,
+      deathplace,
+      deathnation,
     ) : null;
   }
 
@@ -514,6 +561,8 @@ class Person extends Organ implements person.Person {
    * @returns A promise that resolves to the people that match the query.
    */
   public static async search (query: string): Promise<Person[]> {
+    const Nation = (await import('./Nation')).default;
+    const Location = (await import('./Location')).default;
     const res = await person.search(query);
     return res.people.map(p => new Person(
       p.id,
@@ -522,6 +571,42 @@ class Person extends Organ implements person.Person {
       p.lastname,
       p.birthdate ? new Date(p.birthdate) : undefined,
       p.deathdate ? new Date(p.deathdate) : undefined,
+      p.birthplace ? new Location(
+        p.birthplace.id,
+        p.birthplace.name,
+        p.birthplace.coords,
+      ) : undefined,
+      p.birthnation ? new Nation(
+        p.birthnation.id,
+        p.birthnation.bio,
+        p.birthnation.name,
+        p.birthnation.established,
+        p.birthnation.dissolved,
+        p.birthnation.location ? new Location(
+          p.birthnation.location.id,
+          p.birthnation.location.name,
+          p.birthnation.location.coords,
+        ) : undefined,
+        p.birthnation.geo,
+      ) : undefined,
+      p.deathplace ? new Location(
+        p.deathplace.id,
+        p.deathplace.name,
+        p.deathplace.coords,
+      ) : undefined,
+      p.deathnation ? new Nation(
+        p.deathnation.id,
+        p.deathnation.bio,
+        p.deathnation.name,
+        p.deathnation.established,
+        p.deathnation.dissolved,
+        p.deathnation.location ? new Location(
+          p.deathnation.location.id,
+          p.deathnation.location.name,
+          p.deathnation.location.coords,
+        ) : undefined,
+        p.deathnation.geo,
+      ) : undefined,
     ));
   }
 
@@ -530,6 +615,8 @@ class Person extends Organ implements person.Person {
    * @returns A promise that resolves to a random person.
    */
   public static async random (): Promise<Person|null> {
+    const Nation = (await import('./Nation')).default;
+    const Location = (await import('./Location')).default;
     const res = await person.random();
     if (!res.person) return null;
     return new Person(
@@ -539,6 +626,42 @@ class Person extends Organ implements person.Person {
       res.person.lastname,
       res.person.birthdate ? new Date(res.person.birthdate) : undefined,
       res.person.deathdate ? new Date(res.person.deathdate) : undefined,
+      res.person.birthplace ? new Location(
+        res.person.birthplace.id,
+        res.person.birthplace.name,
+        res.person.birthplace.coords,
+      ) : undefined,
+      res.person.birthnation ? new Nation(
+        res.person.birthnation.id,
+        res.person.birthnation.bio,
+        res.person.birthnation.name,
+        res.person.birthnation.established,
+        res.person.birthnation.dissolved,
+        res.person.birthnation.location ? new Location(
+          res.person.birthnation.location.id,
+          res.person.birthnation.location.name,
+          res.person.birthnation.location.coords,
+        ) : undefined,
+        res.person.birthnation.geo,
+      ) : undefined,
+      res.person.deathplace ? new Location(
+        res.person.deathplace.id,
+        res.person.deathplace.name,
+        res.person.deathplace.coords,
+      ) : undefined,
+      res.person.deathnation ? new Nation(
+        res.person.deathnation.id,
+        res.person.deathnation.bio,
+        res.person.deathnation.name,
+        res.person.deathnation.established,
+        res.person.deathnation.dissolved,
+        res.person.deathnation.location ? new Location(
+          res.person.deathnation.location.id,
+          res.person.deathnation.location.name,
+          res.person.deathnation.location.coords,
+        ) : undefined,
+        res.person.deathnation.geo,
+      ) : undefined,
     );
   }
 }

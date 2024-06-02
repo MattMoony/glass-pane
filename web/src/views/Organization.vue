@@ -42,6 +42,7 @@ watch(oid, async (newOid: number) => {
         :organization="organization"
         :edit="editing"
         show-socials
+        extended
         @change="async (newOrganization) => await newOrganization.update()"
       />
       <div class="organization-details gp-scroll">

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { ref, type Ref } from 'vue';
+
 import Role from '@/models/Role';
 
 import Select from './Select.vue';
-import { ref, type Ref } from 'vue';
 
 const props = defineProps<{
   /**

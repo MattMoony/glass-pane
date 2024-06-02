@@ -15,6 +15,10 @@ const props = defineProps<{
    */
   socials?: boolean;
   /**
+   * Whether to show extended info (locations, etc.).
+   */
+  extended?: boolean;
+  /**
    * Whether to show the banner in a small size.
    */
   small?: boolean;
@@ -66,9 +70,11 @@ const socials: Ref<{[name: string]: string[]}> = ref({
     :organ="organization"
     :name="organization ? organization.name : ''"
     :from="organization?.established"
+    :fromLocation="organization?.location"
     :to="organization?.dissolved"
     :socials="socials"
     :showSocials="props.socials"
+    :extended="props.extended"
     :small="props.small"
     :extraSmall="props.extraSmall"
     :edit="props.edit"

@@ -170,6 +170,10 @@ export interface RelationSourceResponse extends APIResponse {
  * @param bio The biography of the person.
  * @param birthdate The date of birth of the person.
  * @param deathdate The date of death of the person.
+ * @param birthplace The birthplace of the person.
+ * @param birthnation The birthnation of the person.
+ * @param deathplace The deathplace of the person.
+ * @param deathnation The deathnation of the person.
  * @returns The response from the API containing the person.
  */
 export const create = async (
@@ -177,12 +181,26 @@ export const create = async (
   lastname: string, 
   bio: string,
   birthdate?: Date,
-  deathdate?: Date
+  deathdate?: Date,
+  birthplace?: Location,
+  birthnation?: Nation,
+  deathplace?: Location,
+  deathnation?: Nation,
 ): Promise<PersonResponse> => {
   return await jreq(`${API}/person`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ firstname, lastname, bio, birthdate, deathdate, }),
+    body: JSON.stringify({ 
+      firstname, 
+      lastname, 
+      bio, 
+      birthdate, 
+      deathdate,
+      birthplace: birthplace?.id,
+      birthnation: birthnation?.id,
+      deathplace: deathplace?.id,
+      deathnation: deathnation?.id,
+    }),
     credentials: 'include',
   }) as PersonResponse;
 }
@@ -207,12 +225,26 @@ export const update = async (
   lastname: string,
   bio: string,
   birthdate?: Date,
-  deathdate?: Date
+  deathdate?: Date,
+  birthplace?: Location,
+  birthnation?: Nation,
+  deathplace?: Location,
+  deathnation?: Nation,
 ): Promise<PersonResponse> => {
   return await jreq(`${API}/person/${pid}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ firstname, lastname, bio, birthdate, deathdate }),
+    body: JSON.stringify({ 
+      firstname, 
+      lastname, 
+      bio, 
+      birthdate, 
+      deathdate,
+      birthplace: birthplace?.id,
+      birthnation: birthnation?.id,
+      deathplace: deathplace?.id,
+      deathnation: deathnation?.id, 
+    }),
     credentials: 'include',
   }) as PersonResponse;
 }
