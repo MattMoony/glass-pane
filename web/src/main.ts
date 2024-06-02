@@ -44,6 +44,8 @@ import {
   faBook,
   faDiagramProject,
   faRedo,
+  faTimeline,
+  faMapLocation,
 } from '@fortawesome/free-solid-svg-icons'
 
 import VNetworkGraph from 'v-network-graph'
@@ -104,6 +106,8 @@ library.add(
   faBook,
   faDiagramProject,
   faRedo,
+  faTimeline,
+  faMapLocation,
 )
 app.component('font-awesome-icon', FontAwesomeIcon)
 

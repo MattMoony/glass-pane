@@ -9,8 +9,8 @@ import Organization from '@/models/Organization';
 import NavBar from '@/components/NavBar.vue';
 import BigSearch from '@/components/BigSearch.vue';
 import DataStats from '@/components/DataStats.vue';
-import PersonNetwork from '@/components/map/person/PersonNetwork.vue';
-import OrganizationNetwork from '@/components/map/organization/OrganizationNetwork.vue';
+import PersonNetwork from '@/components/net/person/PersonNetwork.vue';
+import OrganizationNetwork from '@/components/net/organization/OrganizationNetwork.vue';
 
 const user = useUserStore();
 const organ: Ref<Organ|null> = shallowRef(null);

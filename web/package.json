@@ -63,6 +63,8 @@
     "@types/cytoscape-euler": "^1.2.3",
     "@types/cytoscape-fcose": "^2.2.4",
     "@types/dompurify": "^3.0.5",
+    "@types/geojson": "^7946.0.14",
+    "@types/leaflet": "^1.9.12",
     "@types/marked": "^6.0.0",
     "@types/node": "^20.11.10",
     "@types/vue-writer": "^1.2.0",

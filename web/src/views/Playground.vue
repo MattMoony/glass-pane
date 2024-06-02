@@ -2,17 +2,19 @@
 // @ts-nocheck
 import { ref } from 'vue';
 
+import * as nominatim from '@/lib/nominatim';
 import Person from '@/models/Person';
 import Organization from '@/models/Organization';
 
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
-import PersonNetworkNew from '@/components/map/person/PersonNetwork.vue';
+import PersonNetworkNew from '@/components/net/person/PersonNetwork.vue';
 import OrganDetails from '@/components/info/details/OrganDetails.vue';
 import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 import OrganizationDetails from '@/components/info/details/organization/OrganizationDetails.vue';
 import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
-import OrganNetworkCytoscape from '@/components/map/OrganNetworkCytoscape.vue';
-import OrganizationNetwork from '@/components/map/organization/OrganizationNetwork.vue';
+import OrganNetworkCytoscape from '@/components/net/OrganNetworkCytoscape.vue';
+import OrganizationNetwork from '@/components/net/organization/OrganizationNetwork.vue';
+import BaseMap from '@/components/map/BaseMap.vue';
 
 const person = ref<Person | null>(null);
 const organization = ref<Organization | null>(null);
@@ -27,6 +29,8 @@ const edit = ref(false);
 
 window.Person = Person;
 window.Organization = Organization;
+
+window.nominatim = nominatim;
 </script>
 
 <template>
@@ -47,27 +51,28 @@ window.Organization = Organization;
       />
       <input type="button" :value="edit ? 'Stop' : 'Edit'" @click="edit=!edit" />
     </div>
-    <div>
-      <!-- <PersonBanner 
+    <!-- <div>
+      <PersonBanner 
         :person="person" 
         socials
         :edit="edit"
-      /> -->
+      />
       <OrganizationBanner
         :organization="organization"
         socials
         :edit="edit"
       />
-    </div>
+    </div> -->
     <div class="netw-wrapper">
       <!-- <PersonNetworkNew
         :person="person"
         show-memberships
-      /> -->
+      />
       <OrganizationNetwork
         :organization="organization"
         cytoscape
-      />
+      /> -->
+      <BaseMap />
     </div>
     <!-- <div class="details-wrapper gp-scroll">
       <PersonDetails
@@ -78,8 +83,8 @@ window.Organization = Organization;
       <OrganizationDetails
         :organization="organization"
         :edit="edit"
-      />
-    </div> -->
+      /> -->
+    <!-- </div> -->
   </div>
 </template>
 

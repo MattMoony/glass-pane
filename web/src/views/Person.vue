@@ -5,7 +5,7 @@ import { useRoute, useRouter, type RouteLocationNormalized, type Router } from '
 import Person from '@/models/Person';
 
 import OrganPage from '@/components/info/OrganPage.vue';
-import PersonNetwork from '@/components/map/person/PersonNetwork.vue';
+import PersonNetwork from '@/components/net/person/PersonNetwork.vue';
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
 import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 
