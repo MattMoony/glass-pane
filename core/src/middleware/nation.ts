@@ -23,7 +23,7 @@ export const nid2nation = async (req: Request, res: Response, next: () => void):
     return;
   }
   const nation = await Nation.get(parseInt(req.params.nid));
-  if (location === null) {
+  if (nation === null) {
     res.send({ 'success': false, 'msg': 'nation not found' });
     return;
   }

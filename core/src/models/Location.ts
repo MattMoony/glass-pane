@@ -13,12 +13,11 @@ const log = baseLogger('location');
 class Location {
   public id: number;
   public name: string;
-  public coords?: [number, number]|null;
+  public coords?: GeoJSON.Point|null;
 
-  public constructor (id: number, name: string, coords?: [number, number]|null) {
+  public constructor (id: number, name: string, coords?: GeoJSON.Point|null) {
     this.id = id;
     this.name = name;
-    if (coords && coords.length !== 2) throw new Error('Location coordinates must be a tuple of two numbers.');
     this.coords = coords;
     this.cache();
   }
@@ -43,8 +42,7 @@ class Location {
     return {
       id: this.id,
       name: this.name,
-      lat: this.coords?.at(0),
-      lng: this.coords?.at(1),
+      coords: this.coords,
     };
   }
 
@@ -61,7 +59,7 @@ class Location {
    * @returns A promise that resolves when the location has been updated.
    */
   public async update (): Promise<void> {
-    await pool.query('UPDATE location SET name = $1, coords = $2 WHERE lid = $3', [this.name, this.coords, this.id]);
+    await pool.query('UPDATE location SET name = $1, coords = st_geomfromgeojson($2) WHERE lid = $3', [this.name, this.coords, this.id]);
     log.debug(`Updated location ${this}`);
     this.cache();
   }
@@ -82,8 +80,8 @@ class Location {
    * @param coords The coordinates of the location.
    * @returns A promise that resolves with the new location.
    */
-  public static async create (name: string, coords?: [number, number]): Promise<Location> {
-    const { rows } = await pool.query('INSERT INTO locations (name, coords) VALUES ($1, $2) RETURNING lid', [name, coords]);
+  public static async create (name: string, coords?: GeoJSON.Point): Promise<Location> {
+    const { rows } = await pool.query('INSERT INTO locations (name, coords) VALUES ($1, st_geomfromgeojson($2)) RETURNING lid', [name, coords]);
     return new Location(+rows[0].lid, name, coords);
   }
 
@@ -96,10 +94,10 @@ class Location {
     id = +id;
     const cached = LOCATION_CACHE.get(id);
     if (cached === undefined || !(cached instanceof Location)) {
-      const { rows } = await pool.query('SELECT * FROM location WHERE lid = $1', [id,]);
+      const { rows } = await pool.query('SELECT lid, name, st_asgeojson(coords) "coords" FROM location WHERE lid = $1', [id,]);
       if (rows.length === 0) return null;
       const { name, coords } = rows[0];
-      return new Location(+id, name, coords);
+      return new Location(+id, name, JSON.parse(coords));
     }
     log.debug(`Hit location cache ${id}`);
     return (cached as Location) || null;
@@ -111,8 +109,8 @@ class Location {
    * @returns A promise that resolves with the locations found.
    */
   public static async find (query: string): Promise<Location[]> {
-    const { rows } = await pool.query('SELECT * FROM location WHERE name ILIKE $1', [`%${query}%`]);
-    return rows.map(({ lid, name, coords }) => new Location(+lid, name, coords));
+    const { rows } = await pool.query('SELECT lid, name, st_asgeojson(coords) "coords" FROM location WHERE name ILIKE $1', [`%${query}%`]);
+    return rows.map(({ lid, name, coords }) => new Location(+lid, name, JSON.parse(coords)));
   }
 }
 

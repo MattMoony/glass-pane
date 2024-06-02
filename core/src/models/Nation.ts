@@ -22,10 +22,13 @@ export interface NationCache extends OrganizationCache {}
  * Represents a political nation.
  */
 class Nation extends Organization {
+  public geo?: GeoJSON.Polygon|null;
+
   protected _cache: NationCache = {};
 
-  public constructor (id: number, bio: string, name: string, established?: Date|null, dissolved?: Date|null, location?: Location|null) {
+  public constructor (id: number, bio: string, name: string, established?: Date|null, dissolved?: Date|null, location?: Location|null, geo?: GeoJSON.Polygon|null) {
     super(id, bio, name, established, dissolved, location);
+    this.geo = geo;
     this.cache();
   }
 
@@ -51,7 +54,7 @@ class Nation extends Organization {
   public json (): Object {
     return {
       ...super.json(),
-      location: this.location?.json(),
+      geo: this.geo,
     };
   }
 
@@ -110,19 +113,20 @@ class Nation extends Organization {
     if (cached === undefined || !(cached instanceof Nation)) {
       const client = await pool.connect();
       const result = await client.query(
-        'SELECT * FROM nation WHERE nid = $1',
+        'SELECT st_asgeojson(geo) "geo" FROM nation WHERE nid = $1',
         [id]
       );
       client.release();
       if (result.rowCount === 0) return null;
-      const location = result.rows[0].location;
+      const geo = result.rows[0].geo;
       return new Nation(
         id, 
         organization.bio, 
         organization.name, 
         organization.established, 
         organization.dissolved, 
-        location ? await Location.get(location) : undefined
+        organization.location,
+        geo ? JSON.parse(geo) : null
       );
     }
     log.debug(`Hit nation cache ${id}`);

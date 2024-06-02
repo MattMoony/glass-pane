@@ -56,7 +56,7 @@ CREATE TABLE tag (
 CREATE TABLE location (
     lid             BIGSERIAL,
     name            VARCHAR(256)        NOT NULL,
-    coords          POINT,
+    coords          GEOGRAPHY(POINT),
 
     PRIMARY KEY     (lid)
 );
@@ -73,6 +73,7 @@ CREATE TABLE organization (
 
 CREATE TABLE nation (
     nid             BIGINT              REFERENCES organization(oid),
+    geo             GEOGRAPHY(POLYGON),
 
     PRIMARY KEY     (nid)
 );
