@@ -2,6 +2,7 @@ import { API, jreq } from './index';
 import type { APIResponse } from './index';
 import type { Organ, OrganizationMember } from './organ';
 import type { Person } from './person';
+import type { Location } from './location';
 
 /**
  * Represents an organization.
@@ -23,6 +24,10 @@ export interface Organization extends Organ {
    * The date the organization was dissolved.
    */
   dissolved?: Date;
+  /**
+   * The location of the organization.
+   */
+  location?: Location;
 }
 
 /**

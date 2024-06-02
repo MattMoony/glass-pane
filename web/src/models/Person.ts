@@ -5,6 +5,8 @@ import * as person from '@/api/person';
 import Organ, { type OrganCache } from './Organ';
 import Relation from './Relation';
 import RelationType from './RelationTypes';
+import type Location from './Location';
+import type Nation from './Nation';
 
 export interface PersonCache extends OrganCache {
   /**
@@ -45,6 +47,22 @@ class Person extends Organ implements person.Person {
    * The deathdate of the person.
    */
   public deathdate?: Date;
+  /**
+   * The birthplace of the person.
+   */
+  public birthplace?: Location;
+  /**
+   * The birthnation of the person.
+   */
+  public birthnation?: Nation;
+  /**
+   * The deathplace of the person.
+   */
+  public deathplace?: Location;
+  /**
+   * The deathnation of the person.
+   */
+  public deathnation?: Nation;
 
   /**
    * The parents of the person.
@@ -191,7 +209,11 @@ class Person extends Organ implements person.Person {
     firstname: string, 
     lastname: string, 
     birthdate?: Date, 
-    deathdate?: Date
+    deathdate?: Date,
+    birthplace?: Location,
+    birthnation?: Nation,
+    deathplace?: Location,
+    deathnation?: Nation,
   ) {
     super(id, bio);
 
@@ -199,6 +221,10 @@ class Person extends Organ implements person.Person {
     this.lastname = lastname;
     this.birthdate = birthdate;
     this.deathdate = deathdate;
+    this.birthplace = birthplace;
+    this.birthnation = birthnation;
+    this.deathplace = deathplace;
+    this.deathnation = deathnation;
 
     this.parents = {
       get: async (refresh?: boolean) => {

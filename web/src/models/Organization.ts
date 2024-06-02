@@ -1,3 +1,5 @@
+import { Mutex } from 'async-mutex';
+
 import * as organ from '@/api/organ';
 import * as person from '@/api/person';
 import * as organization from '@/api/organization';
@@ -5,8 +7,8 @@ import * as organization from '@/api/organization';
 import Organ, { type OrganCache } from './Organ';
 import type Membership from './Membership';
 import type Person from './Person';
-import { Mutex } from 'async-mutex';
 import Role from './Role';
+import Location from './Location';
 
 export interface OrganizationCache extends OrganCache {
   members?: Membership[];
@@ -28,6 +30,10 @@ class Organization extends Organ implements organization.Organization {
    * The date the organization was dissolved.
    */
   public dissolved?: Date;
+  /**
+   * The location of the organization.
+   */
+  public location?: Location;
 
   /**
    * The members of the organization.
@@ -70,12 +76,13 @@ class Organization extends Organ implements organization.Organization {
    */
   protected cache: OrganizationCache = {};
 
-  public constructor (id: number, bio: string, name: string, established?: Date, dissolved?: Date) {
+  public constructor (id: number, bio: string, name: string, established?: Date, dissolved?: Date, location?: Location) {
     super(id, bio);
 
     this.name = name;
     this.established = established;
     this.dissolved = dissolved;
+    this.location = location;
 
     this.members = {
       get: async (refresh?: boolean) => {
@@ -196,13 +203,17 @@ class Organization extends Organ implements organization.Organization {
    * @param bio The bio of the organization.
    * @param established The date the organization was established.
    * @param dissolved The date the organization was dissolved.
+   * @param location The location of the organization.
+   * @param args Any additional arguments (for children to use).
    * @returns A promise that resolves to the new organization, or null if the organization could not be created.
    */
   public static async create (
     name: string, 
     bio: string,
     established?: Date, 
-    dissolved?: Date
+    dissolved?: Date,
+    location?: Location,
+    ...args: any[]
   ): Promise<Organization|null> {
     const res = await organization.create(name, bio, established, dissolved);
     return res.organization ? new Organization(

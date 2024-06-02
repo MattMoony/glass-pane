@@ -1,6 +1,8 @@
 import { API, jreq } from './index';
 import type { Organ } from './organ';
 import type { APIResponse } from './index';
+import type { Location } from './location';
+import type { Nation } from './nation';
 
 /**
  * Represents a person.
@@ -26,6 +28,22 @@ export interface Person extends Organ {
    * The date of death of the person.
    */
   deathdate?: Date;
+  /**
+   * The birthplace of the person.
+   */
+  birthplace?: Location;
+  /**
+   * The birthnation of the person.
+   */
+  birthnation?: Nation;
+  /**
+   * The deathplace of the person.
+   */
+  deathplace?: Location;
+  /**
+   * The deathnation of the person.
+   */
+  deathnation?: Nation;
 }
 
 /**
