@@ -97,6 +97,13 @@ export interface RelationResponse extends APIResponse {
 }
 
 /**
+ * Represents a response from the API for a person's relations.
+ */
+export interface RelationsResponse extends APIResponse {
+  relations?: Relation[];
+}
+
+/**
  * Represents a response from the API for the parents of a person.
  */
 export interface ParentsResponse extends APIResponse {
@@ -223,6 +230,7 @@ export const random = async (): Promise<PersonResponse> => {
  * Gets a person's parents.
  * @param pid The ID of the person.
  * @returns The response from the API containing the parents of the person.
+ * @deprecated Use `rel.get` instead.
  */
 export const parents = async (pid: number): Promise<ParentsResponse> => {
   const res = await jreq(`${API}/person/${pid}/parents`) as ParentsResponse;
@@ -241,6 +249,7 @@ export const parents = async (pid: number): Promise<ParentsResponse> => {
  * Gets a person's children.
  * @param pid The ID of the person.
  * @returns The response from the API containing the children of the person.
+ * @deprecated Use `rel.get` instead.
  */
 export const children = async (pid: number): Promise<ChildrenResponse> => {
   const res = await jreq(`${API}/person/${pid}/children`) as ChildrenResponse;
@@ -259,6 +268,7 @@ export const children = async (pid: number): Promise<ChildrenResponse> => {
  * Gets a person's romantic relations.
  * @param pid The ID of the person.
  * @returns The response from the API containing the romantic relations of the person.
+ * @deprecated Use `rel.get` instead.
  */
 export const romantic = async (pid: number): Promise<RomanticResponse> => {
   const res = await jreq(`${API}/person/${pid}/romantic`) as RomanticResponse;
@@ -277,6 +287,7 @@ export const romantic = async (pid: number): Promise<RomanticResponse> => {
  * Gets a person's friends.
  * @param pid The ID of the person.
  * @returns The response from the API containing the friends of the person.
+ * @deprecated Use `rel.get` instead.
  */
 export const friends = async (pid: number): Promise<FriendsResponse> => {
   const res = await jreq(`${API}/person/${pid}/friends`) as FriendsResponse;
@@ -295,6 +306,10 @@ export const friends = async (pid: number): Promise<FriendsResponse> => {
  * Interact with the person's relations.
  */
 export const rel = {
+  get: async (pid: number): Promise<RelationsResponse> => {
+    return await jreq(`${API}/person/${pid}/relation`) as RelationsResponse;
+  },
+
   /**
    * Adds a relation to a person.
    * @param type The type of relation.
