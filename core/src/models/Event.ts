@@ -2,6 +2,7 @@ import { pool } from '../db';
 import { baseLogger } from '../log';
 import EVENT_CACHE from '../cache/event';
 import fs from 'fs';
+import fsPromises from 'fs/promises';
 
 import Location from './Location';
 import type Organ from './Organ';
@@ -71,6 +72,7 @@ class Event {
     );
     log.debug(`Updated event ${this}`);
     this.cache();
+    return fsPromises.writeFile(`${process.env.DATA_DIR}/events/${this.id}.md`, this.desc);
   }
 
   /**

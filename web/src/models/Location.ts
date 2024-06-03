@@ -49,6 +49,19 @@ class Location implements location.Location {
   }
 
   /**
+   * Parses a location from JSON.
+   * @param json The JSON to parse.
+   * @returns The parsed location.
+   */
+  public static parse (json: any): Location {
+    return new Location(
+      json.id,
+      json.name,
+      json.coords,
+    );
+  }
+
+  /**
    * Gets a location by its ID.
    * @param id The ID of the location to get.
    * @returns A promise that resolves to the location with the given ID, or null if no such location exists.
