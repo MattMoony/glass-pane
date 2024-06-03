@@ -96,7 +96,7 @@ export const searchByParticipant = async (
   participant: Organ, 
   query?: string
 ): Promise<EventsResponse> => {
-  return await jreq(`${API}/event?participant=${participant.id}${query ? '?q='+query : ''}`, {
+  return await jreq(`${API}/event?participant=${participant.id}${query ? '&q='+query : ''}`, {
     method: 'GET',
   }) as EventsResponse;
 };
@@ -111,7 +111,7 @@ export const searchByDate = async (
   date: Date, 
   days?: number
 ): Promise<EventsResponse> => {
-  return await jreq(`${API}/event?date=${date}${days ? '?days='+days : ''}`, {
+  return await jreq(`${API}/event?date=${date.toISOString()}${days ? '&days='+days : ''}`, {
     method: 'GET',
   }) as EventsResponse;
 };
