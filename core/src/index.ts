@@ -16,6 +16,7 @@ import roleRouter from './routes/role';
 import locationRouter from './routes/location';
 import nationRouter from './routes/nation';
 import mediaRouter from './routes/media';
+import eventRouter from './routes/event';
 import authRouter from './routes/auth';
 
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/role/', roleRouter);
 app.use('/api/location/', locationRouter);
 app.use('/api/nation/', nationRouter);
 app.use('/api/media/', mediaRouter);
+app.use('/api/event/', eventRouter);
 app.use('/api/auth/', authRouter);
 
 app.get('/api/stats', async (req: Request, res: Response) => {
@@ -59,10 +61,13 @@ app.get('/api/stats', async (req: Request, res: Response) => {
     FROM relation
     UNION ALL
     SELECT COUNT(*)
-    FROM membership;
+    FROM membership
+    UNION ALL
+    SELECT COUNT(*)
+    FROM event;
   `);
   client.release();
-  if (result.rowCount != 4) return res.send({ 'success': false, 'msg': 'failed to get stats', });
+  if (result.rowCount != 5) return res.send({ 'success': false, 'msg': 'failed to get stats', });
   res.send({
     'success': true,
     'stats': {
@@ -70,6 +75,7 @@ app.get('/api/stats', async (req: Request, res: Response) => {
       'organizations': parseInt(result.rows[1].count),
       'relations': parseInt(result.rows[2].count),
       'memberships': parseInt(result.rows[3].count),
+      'events': parseInt(result.rows[4].count),
     },
   });
 });

@@ -75,6 +75,19 @@ class Location {
   }
 
   /**
+   * Parses a location from JSON.
+   * @param json The JSON to parse.
+   * @returns The parsed location.
+   */
+  public static parse (json: any): Location {
+    return new Location(
+      json.id, 
+      json.name, 
+      json.coords
+    );
+  }
+
+  /**
    * Creates a new location in the database.
    * @param name The name of the location.
    * @param coords The coordinates of the location.
