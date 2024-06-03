@@ -36,3 +36,6 @@ venv/
 # Import data stuff
 db/data/organizations
 db/data/people
+
+# Testing stuff
+tmp/
