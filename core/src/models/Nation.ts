@@ -141,8 +141,8 @@ class Nation extends Organization {
   public static async find (name: string): Promise<Nation[]> {
     const client = await pool.connect();
     const result = await client.query(
-      'SELECT nid FROM nation WHERE name = $1',
-      [name]
+      'SELECT nid FROM nation n INNER JOIN organization o ON n.nid = o.oid WHERE name ILIKE $1',
+      [`%${name}%`,]
     );
     client.release();
     return (await Promise.all(result.rows.map(row => Nation.get(row.nid))))

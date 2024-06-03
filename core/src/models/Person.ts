@@ -207,9 +207,9 @@ class Person extends Organ {
                    lastname = $2,
                    birthdate = $3,
                    deathdate = $4,
-                   birthlocation = $5,
+                   birthplace = $5,
                    birthnation = $6,
-                   deathlocation = $7,
+                   deathplace = $7,
                    deathnation = $8
        WHERE       pid = $9`,
        [
@@ -383,7 +383,7 @@ class Person extends Organ {
       const organ = v5 ? await super.create(v5) : await super.create();
       const client = await pool.connect();
       await client.query(
-        `INSERT INTO person (pid, firstname, lastname, birthdate, deathdate, birthlocation, birthnation, deathlocation, deathnation)
+        `INSERT INTO person (pid, firstname, lastname, birthdate, deathdate, birthplace, birthnation, deathplace, deathnation)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           organ.id,
@@ -430,9 +430,9 @@ class Person extends Organ {
           res.rows[0].lastname,
           res.rows[0].birthdate,
           res.rows[0].deathdate,
-          res.rows[0].birthlocation ? await Location.get(res.rows[0].birthlocation) : undefined,
+          res.rows[0].birthplace ? await Location.get(res.rows[0].birthplace) : undefined,
           res.rows[0].birthnation ? await Nation.get(res.rows[0].birthnation) : undefined,
-          res.rows[0].deathlocation ? await Location.get(res.rows[0].deathlocation) : undefined,
+          res.rows[0].deathplace ? await Location.get(res.rows[0].deathplace) : undefined,
           res.rows[0].deathnation ? await Nation.get(res.rows[0].deathnation) : undefined,
         );
       }
