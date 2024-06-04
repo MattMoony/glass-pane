@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import Event from '@/models/Event';
 import { ref, watch, type Ref } from 'vue';
+
+import Event from '@/models/Event';
+
+import EventBanner from '@/components/events/EventBanner.vue';
 
 const props = defineProps<{
   events: Event[];
@@ -36,52 +39,49 @@ watch(
 
 <template>
   <section class="event-wrap">
-    <div class="event-spacing">
-      <div></div>
-    </div>
-    <template v-for="[_, info] in months">
-      <div class="event-tl-heading">
-        {{ info.date.toLocaleString('default', { month: 'long', year: 'numeric' }) }}
-      </div>
-      <template v-for="[_, events] in info.events">
-        <div class="event new-date">
-          <div>
-            <div class="event-box">
-              <h3>{{ events[0].name }}</h3>
-              <div>
-                {{ events[0].location?.name }}
-              </div>
-            </div>
+    <v-timeline 
+      align="center"
+      line-color="var(--color-border)"
+    >
+      <template
+        v-for="([_, info], key) in months"
+        :key="key"
+      >
+        <v-timeline-item
+          dot-color="var(--color-background)"
+          hide-dot
+        >
+          <div class="event-tl-heading">
+            {{ info.date.toLocaleString('default', { month: 'long', year: 'numeric' }) }}
           </div>
-          <div class="event-spacing">
-            <div></div>
-          </div>
-          <div>
-            {{ events[0].date?.toLocaleString('default', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', }) }}
-          </div>
-        </div>
-        <template v-for="event in events.slice(1)">
-          <div class="event">
-            <div>
-              <div class="event-box">
-                <h3>{{ event.name }}</h3>
-                <div>
-                  {{ event.location?.name }}
-                </div>
-              </div>
-            </div>
-            <div class="event-spacing">
-              <div></div>
-            </div>
-            <div>
-            </div>
-          </div>
+        </v-timeline-item>
+        <template
+          v-for="([_, events], key) in info.events"
+          :key="key"
+        >
+          <v-timeline-item      
+            dot-color="var(--color-background-soft)"
+            icon-color="var(--color-text)"
+            size="small"
+          >
+            <EventBanner
+              :event="events[0]"
+            />
+          </v-timeline-item>
+          <v-timeline-item
+            v-for="event in events.slice(1)"
+            :key="event.id"      
+            dot-color="var(--color-background-soft)"
+            icon-color="var(--color-text)"
+            size="small"
+          >
+            <EventBanner
+              :event="event"
+            />
+          </v-timeline-item>
         </template>
       </template>
-    </template>
-    <div class="event-spacing">
-      <div></div>
-    </div>
+    </v-timeline>
   </section>
 </template>
 
@@ -94,57 +94,12 @@ watch(
   gap: 0;
 }
 
-.event-spacing {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-
-.event-spacing > div {
-  width: 2px;
-  min-height: 1rem;
-  height: 100%;
-  background-color: var(--color-border);
-}
-
 .event-tl-heading {
   font-weight: bold;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   margin: 2rem 0;
-}
-
-.event {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr .3fr 1fr;
-}
-
-.event > div:first-child {
-  padding-top: .6rem;
-}
-
-.event.new-date > div:first-child,
-.event.new-date > div:last-child {
-  padding-top: 3rem;
-}
-
-.event .event-box {
-  padding: 1rem;
-  background-color: var(--color-background-soft);
-}
-
-.event .event-box h3 {
-  margin: 0;
-  border-bottom: 1px solid var(--color-border);
   padding-bottom: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.event > div:last-child {
-  font-style: italic;
-  letter-spacing: 0.1em;
-  font-size: .9em;
+  border-bottom: 2px solid var(--color-border);
 }
 </style>

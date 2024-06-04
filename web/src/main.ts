@@ -4,6 +4,11 @@ import VueDOMPurifyHTML from 'vue-dompurify-html'
 import { basicSetup } from 'codemirror'
 import VueCodeMirror from 'vue-codemirror'
 
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { 
@@ -71,6 +76,10 @@ app.use(VueCodeMirror, {
   tabSize: 2,
   lineWrapping: true,
 })
+app.use(createVuetify({
+  components,
+  directives,
+}))
 
 library.add(
   faGithub, 

@@ -71,6 +71,11 @@
   position: relative;
 }
 
+html {
+  /* necessary because of vuetify I think */
+  overflow-y: auto;
+}
+
 body {
   min-height: 100vh;
   color: var(--color-text);
