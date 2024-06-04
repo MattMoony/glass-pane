@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import RoutesNavBar from '@/components/RoutesNavBar.vue';
 import BaseMap from '@/components/map/BaseMap.vue';
+import ComingSoon from '@/components/ComingSoon.vue';
 
 </script>
 
@@ -9,6 +10,7 @@ import BaseMap from '@/components/map/BaseMap.vue';
     <RoutesNavBar />
     <article>
       <BaseMap />
+      <ComingSoon />
     </article>
   </main>
 </template>

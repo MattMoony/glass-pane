@@ -5,6 +5,7 @@ import Event from '@/models/Event';
 
 import RoutesNavBar from '@/components/RoutesNavBar.vue';
 import EventsView from '@/components/events/EventsView.vue';
+import ComingSoon from '@/components/ComingSoon.vue';
 
 const BATCH_SIZE: number = 5;
 const events: Ref<Event[]> = ref([]);
@@ -41,6 +42,7 @@ onMounted(async () => {
           :events="events"
         />
       </section>
+      <ComingSoon />
     </article>
   </main>
 </template>
