@@ -64,6 +64,11 @@ watch(
             icon-color="var(--color-text)"
             size="small"
           >
+            <template
+              v-slot:opposite
+            >
+              {{ events[0].date!.toLocaleString('default', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', }) }}
+            </template>
             <EventBanner
               :event="events[0]"
             />
