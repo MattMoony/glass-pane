@@ -42,7 +42,6 @@ onMounted(async () => {
           :events="events"
         />
       </section>
-      <ComingSoon />
     </article>
   </main>
 </template>

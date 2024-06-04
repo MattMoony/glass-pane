@@ -12,7 +12,7 @@ import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 const router: Router = useRouter();
 const route: RouteLocationNormalized = useRoute();
 const pid: ComputedRef<number> = computed(() => +route.params.pid);
-const person: Ref<Person | null> = shallowRef(null);
+const person: Ref<Person | null> = ref(null);
 const editing: ComputedRef<boolean> = computed(() => Object.keys(route.query).includes('edit'));
 
 watch(pid, async (newPid: number) => {

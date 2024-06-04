@@ -209,18 +209,16 @@ watch(
           v-if="organ instanceof Person" 
           class="name-edit"
         >
-          <input 
-            type="text" 
-            v-model="organ.firstname" 
-            placeholder="First name" 
+          <v-text-field
+            v-model="organ.firstname"
+            placeholder="Middle name"
             maxlength="128"
             required
             @change="() => organ && $emit('change', organ)"
           />
-          <input 
-            type="text" 
-            v-model="organ.lastname" 
-            placeholder="Last name" 
+          <v-text-field
+            v-model="organ.lastname"
+            placeholder="Last name"
             maxlength="128"
             required
             @change="() => organ && $emit('change', organ)"
@@ -230,14 +228,13 @@ watch(
           v-else-if="organ instanceof Organization" 
           class="name-edit"
         >
-          <input 
-            type="text" 
-            v-model="organ.name" 
-            placeholder="Organization name" 
+          <v-text-field
+            v-model="organ.name"
+            placeholder="Organization name"
             maxlength="128"
             required
             @change="() => organ && $emit('change', organ)"
-          />  
+          />
         </div>
       </template>
       <div class="banner-birth-death">

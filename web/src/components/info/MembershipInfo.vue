@@ -189,7 +189,7 @@ const emits = defineEmits<{
   gap: .5em;
 }
 
-.role {
+.membership-info:not(.edit) .role {
   display: inline-block;
   background-color: var(--color-background-soft);
   padding: .3em .5em;

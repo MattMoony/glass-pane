@@ -79,6 +79,30 @@ app.use(VueCodeMirror, {
 app.use(createVuetify({
   components,
   directives,
+  theme: {
+    defaultTheme: 'dark',
+    themes: {
+      dark: {
+        dark: true,
+        colors: {
+          background: '#181818',
+          surface: '#181818',
+          'surface-bright': '#222222',
+          'surface-variant': '#282828',
+          primary: '#1EABFF',
+          secondary: '#2c3e50',
+          error: 'rgb(189,65,61)',
+          info: 'rgb(54,114,192)',
+          success: 'rgb(35,134,54)',
+          warning: 'rgb(186,136,33)',
+        },
+        variables: {
+          'border-color': 'rgba(84, 84, 84, 0.48)',
+          'border-color-hover': 'rgba(84, 84, 84, 0.65)',
+        }
+      }
+    }
+  }
 }))
 
 library.add(

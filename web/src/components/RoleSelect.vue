@@ -22,15 +22,16 @@ const emits = defineEmits<{
   (e: 'select', role: Role): void;
 }>();
 
+const loading: Ref<boolean> = ref(false);
 const qry: Ref<string> = ref('');
 const selectedRole: Ref<Role|null> = ref(props.initRole || null);
 const suggestions: Ref<Role[]> = ref([]);
 
-const queryRoles = async (query: string, cb: (hasSuggestions: boolean) => void): Promise<void> => {
-  if (!query.trim()) cb(false);
+const queryRoles = async (query: string): Promise<void> => {
+  loading.value = true;
+  if (!query.trim()) return;
   suggestions.value = await Role.search(query);
-  qry.value = query.trim();
-  cb(true);
+  loading.value = false;
 };
 
 const createRole = async () => {
@@ -44,7 +45,7 @@ const createRole = async () => {
 </script>
 
 <template>
-  <Select
+  <!-- <Select
     placeholder="Role ..."
     :initResultPlain="selectedRole ? selectedRole.name : ''"
     stretchedResult
@@ -78,7 +79,21 @@ const createRole = async () => {
         </button>
       </section>
     </template>
-  </Select>
+  </Select> -->
+  <v-autocomplete
+    v-model="selectedRole"
+    item-title="name"
+    :items="suggestions"
+    chips
+    :loading="loading"
+    return-object
+    @update:search="queryRoles"
+    @update:model-value="() => {
+      console.log(selectedRole);
+      if (!selectedRole) return;
+      $emit('select', selectedRole)
+    }"
+  />
 </template>
 
 <style scoped>
