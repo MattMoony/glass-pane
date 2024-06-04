@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { type Ref, ref } from 'vue';
+import { type Ref, ref, type ShallowRef } from 'vue';
 
 import Nation from '@/models/Nation';
 
 import Select from './Select.vue';
+import { shallowRef } from 'vue';
 
 const props = defineProps<{
   /**
@@ -23,7 +24,7 @@ const emits = defineEmits<{
 }>();
 
 const qry: Ref<string> = ref('');
-const selectedNation: Ref<Nation|null> = ref(props.initNation || null);
+const selectedNation: ShallowRef<Nation|null> = shallowRef(props.initNation || null);
 const suggestions: Ref<Nation[]> = ref([]);
 
 const queryNations = async (query: string, cb: (hasSuggestions: boolean) => void): Promise<void> => {
@@ -54,7 +55,7 @@ const createNation = async () => {
           v-for="nation in suggestions" 
           :key="nation.id"
           class="nation-suggestion"
-          @click="() => { selectedNation.value = nation; emits('select', nation); }"
+          @click="() => { selectedNation = nation; emits('select', nation); }"
         >
           {{ nation.name }}
         </div>
