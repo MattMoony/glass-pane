@@ -199,9 +199,9 @@ class Membership {
       const memberships = [];
       for (const row of res.rows) {
         let organ: Organ|null = await Person.get(row.organ) as Organ|null;
-        if (!organ || !(organ instanceof Person))
+        if (!organ)
           organ = await Organization.get(row.organ) as Organ|null;
-        if (!organ || !(organ instanceof Organization))
+        if (!organ)
           continue;
         const role = await Role.get(row.role);
         if (!organ || !role) continue;
