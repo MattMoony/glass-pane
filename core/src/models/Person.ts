@@ -421,21 +421,20 @@ class Person extends Organ {
         [id],
       );
       client.release();
-      if (res.rows.length === 0) {
-      } else {
-        return new Person(
-          organ.id,
-          organ.bio,
-          res.rows[0].firstname,
-          res.rows[0].lastname,
-          res.rows[0].birthdate,
-          res.rows[0].deathdate,
-          res.rows[0].birthplace ? await Location.get(res.rows[0].birthplace) : undefined,
-          res.rows[0].birthnation ? await Nation.get(res.rows[0].birthnation) : undefined,
-          res.rows[0].deathplace ? await Location.get(res.rows[0].deathplace) : undefined,
-          res.rows[0].deathnation ? await Nation.get(res.rows[0].deathnation) : undefined,
-        );
-      }
+      if (res.rows.length === 0)
+        return null;
+      return new Person(
+        organ.id,
+        organ.bio,
+        res.rows[0].firstname,
+        res.rows[0].lastname,
+        res.rows[0].birthdate,
+        res.rows[0].deathdate,
+        res.rows[0].birthplace ? await Location.get(res.rows[0].birthplace) : undefined,
+        res.rows[0].birthnation ? await Nation.get(res.rows[0].birthnation) : undefined,
+        res.rows[0].deathplace ? await Location.get(res.rows[0].deathplace) : undefined,
+        res.rows[0].deathnation ? await Nation.get(res.rows[0].deathnation) : undefined,
+      );
     }
     log.debug(`Hit person cache ${ORGAN_CACHE.get(id)}`);
     return (ORGAN_CACHE.get(id) as Person)||null;
