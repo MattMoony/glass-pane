@@ -5,7 +5,7 @@ import L from 'leaflet';
 import { onMounted } from 'vue';
 
 const props = defineProps<{
-  center: [number, number];
+  center?: [number, number];
 }>();
 
 var map;

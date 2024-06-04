@@ -40,6 +40,11 @@ const router = createRouter({
       component: () => import('../views/Login.vue'),
     },
     {
+      path: '/map',
+      name: 'map',
+      component: () => import('../views/Map.vue'),
+    },
+    {
       path: '/events',
       name: 'events',
       component: () => import('../views/Events.vue'),

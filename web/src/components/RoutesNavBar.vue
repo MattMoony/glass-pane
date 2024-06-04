@@ -30,8 +30,7 @@ import NavBar from '@/components/NavBar.vue';
 .nav-links a {
   text-decoration: none;
   color: var(--color-text);
-  background-color: var(--color-background-mute);
-  padding: .5rem 1rem;
-  border-radius: .5rem;
+  border-bottom: 2px solid var(--color-border);
+  padding: .2rem .5rem;
 }
 </style>

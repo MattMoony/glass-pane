@@ -35,7 +35,7 @@ onMounted(async () => {
     <article>
       <section 
         class="gp-scroll"
-        @scroll="checkFetch"
+        @scroll="e => checkFetch(e as MouseEvent)"
       >
         <EventsView
           :events="events"
