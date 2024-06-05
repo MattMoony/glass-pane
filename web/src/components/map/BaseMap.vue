@@ -8,7 +8,11 @@ const props = defineProps<{
   center?: [number, number];
 }>();
 
-var map;
+const emits = defineEmits<{
+  (e: 'change', bounds: GeoJSON.BBox): void;
+}>();
+
+var map: L.Map|undefined = undefined;
 
 onMounted(() => {
   map = L.map('map').setView([48.210033, 16.363449,], 13);
@@ -17,6 +21,8 @@ onMounted(() => {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
   map.on('click', e => console.log(e.latlng));
+  map.on('dragend', e => emits('change', map!.getBounds().toBBoxString().split(',').map(parseFloat) as GeoJSON.BBox));
+  map.on('zoomend', e => emits('change', map!.getBounds().toBBoxString().split(',').map(parseFloat) as GeoJSON.BBox));
 });
 </script>
 

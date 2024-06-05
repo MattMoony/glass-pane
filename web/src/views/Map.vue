@@ -9,8 +9,9 @@ import ComingSoon from '@/components/ComingSoon.vue';
   <main>
     <RoutesNavBar />
     <article>
-      <BaseMap />
-      <ComingSoon />
+      <BaseMap 
+        @change="bounds => console.log(bounds)"
+      />
     </article>
   </main>
 </template>
