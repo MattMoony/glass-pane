@@ -290,8 +290,9 @@ watch(
               />
               <NationSelect 
                 v-if="(organ instanceof Person)"
+                label="Nation of birth"
                 :init-nation="organ.birthnation"
-                @change="(nation: Nation) => {
+                @select="(nation: Nation) => {
                   (organ as Person).birthnation = nation;
                   organ && $emit('change', organ);
                 }"
@@ -319,10 +320,11 @@ watch(
                   organ && $emit('change', organ);
                 }"
               />
-              <NationSelect 
+              <NationSelect
                 v-if="(organ instanceof Person)"
+                label="Nation of death"
                 :init-nation="organ.deathnation"
-                @change="(nation: Nation) => {
+                @select="(nation: Nation) => {
                   (organ as Person).deathnation = nation;
                   organ && $emit('change', organ);
                 }"
@@ -460,7 +462,7 @@ watch(
 <style scoped>
 .banner {
   display: flex;
-  justify-content: stretch;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 1em;
@@ -577,10 +579,10 @@ watch(
 }
 
 .birth-death-edit > div {
-  display: flex;
-  justify-content: stretch;
-  align-items: center;
-  gap: .5em;
+  display: grid;
+  min-width: 25vw;
+  grid-template-columns: 4em 1fr;
+  padding: .5em 0;
 }
 
 .birth-death-edit svg {

@@ -35,18 +35,20 @@ watch(pid, async (newPid: number) => {
     switchable
   >
     <template #left>
-      <PersonBanner 
-        :person="person" 
-        :edit="editing"
-        show-socials
-        extended
-        @change="async (newPerson) => await newPerson.update()"
-      />
-      <div class="person-details gp-scroll">
-        <PersonDetails 
-          :person="person"
+      <div :class="['info-wrapper', editing ? 'gp-scroll' : '',]">
+        <PersonBanner 
+          :person="person" 
           :edit="editing"
+          show-socials
+          extended
+          @change="async (newPerson) => await newPerson.update()"
         />
+        <div class="person-details gp-scroll">
+          <PersonDetails 
+            :person="person"
+            :edit="editing"
+          />
+        </div>
       </div>
     </template>
     <template #right>
@@ -65,6 +67,21 @@ watch(pid, async (newPid: number) => {
   flex-basis: 0;
   overflow-y: auto;
   padding: 1.5em;
+}
+
+.info-wrapper {
+  flex-grow: 1;
+  flex-basis: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 1em;
+}
+
+.edit .info-wrapper {
+  display: block;
 }
 
 @media only screen and (max-width: 800px) {

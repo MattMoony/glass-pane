@@ -9,11 +9,13 @@ const show = ref(false);
 </script>
 
 <template>
-  <button
+  <v-btn
+    icon="fas fa-map-marker-alt"
+    variant="tonal"
+    size="small"
     @click="show = true"
   >
-    <font-awesome-icon icon="map-marker-alt" />
-  </button>
+  </v-btn>
   <FullScreenModal
     :show="show"
     @close="show = false"
@@ -30,14 +32,6 @@ const show = ref(false);
 </template>
 
 <style scoped>
-button {
-  background-color: var(--color-background);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5em;
-  padding: 0.5em;
-}
-
 .map-wrapper {
   width: 80vw;
   height: 40vh;

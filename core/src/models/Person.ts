@@ -361,10 +361,10 @@ class Person extends Organ {
     birthdate?: Date, 
     deathdate?: Date, 
     bio?: string,
-    birthlocation?: Location,
-    birthnation?: Nation,
-    deathlocation?: Location,
-    deathnation?: Nation,
+    birthlocation?: Location|null,
+    birthnation?: Nation|null,
+    deathlocation?: Location|null,
+    deathnation?: Nation|null,
   ): Promise<Person>;
   public static async create (
     v?: string, 
@@ -372,10 +372,10 @@ class Person extends Organ {
     v3?: Date, 
     v4?: Date, 
     v5?: string,
-    v6?: Location,
-    v7?: Nation,
-    v8?: Location,
-    v9?: Nation,
+    v6?: Location|null,
+    v7?: Nation|null,
+    v8?: Location|null,
+    v9?: Nation|null,
   ): Promise<Person|Organ> {
     if (v === undefined) return await super.create();
     if (typeof v === 'string' && v2 === undefined) return await super.create(v);

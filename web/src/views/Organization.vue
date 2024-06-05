@@ -38,18 +38,20 @@ watch(oid, async (newOid: number) => {
     switchable
   >
     <template #left>
-      <OrganizationBanner
-        :organization="organization"
-        :edit="editing"
-        show-socials
-        extended
-        @change="async (newOrganization) => await newOrganization.update()"
-      />
-      <div class="organization-details gp-scroll">
-        <OrganizationDetails 
+      <div :class="['info-wrapper', editing ? 'gp-scroll' : '',]">
+        <OrganizationBanner
           :organization="organization"
           :edit="editing"
+          show-socials
+          extended
+          @change="async (newOrganization) => await newOrganization.update()"
         />
+        <div class="organization-details gp-scroll">
+          <OrganizationDetails 
+            :organization="organization"
+            :edit="editing"
+          />
+        </div>
       </div>
     </template>
     <template #right>
@@ -67,6 +69,21 @@ watch(oid, async (newOid: number) => {
   flex-basis: 0;
   overflow-y: auto;
   padding: 1.5em;
+}
+
+.info-wrapper {
+  flex-grow: 1;
+  flex-basis: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 1em;
+}
+
+.edit .info-wrapper {
+  display: block;
 }
 
 @media only screen and (max-width: 800px) {

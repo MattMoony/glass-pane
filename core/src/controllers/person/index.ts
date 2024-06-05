@@ -9,6 +9,8 @@ import { Request, Response } from 'express';
 import Person from '../../models/Person';
 
 import { CheckTemplate } from '../../middleware';
+import Nation from '../../models/Nation';
+import Location from '../../models/Location';
 
 export * as relations from './relations';
 
@@ -67,6 +69,10 @@ BODIES.CREATE = {
   bio: { type: 'string', optional: true, },
   birthdate: { type: 'string', optional: true, nullable: true, },
   deathdate: { type: 'string', optional: true, nullable: true, },
+  birthplace: { type: 'number', optional: true, nullable: true, },
+  birthnation: { type: 'number', optional: true, nullable: true, },
+  deathplace: { type: 'number', optional: true, nullable: true, },
+  deathnation: { type: 'number', optional: true, nullable: true, },
 };
 
 /**
@@ -77,7 +83,17 @@ BODIES.CREATE = {
 export const create = async (req: Request, res: Response): Promise<void> => {
   const birthdate = req.body.birthdate ? new Date(req.body.birthdate) : undefined;
   const deathdate = req.body.deathdate ? new Date(req.body.deathdate) : undefined;
-  const person = await Person.create(req.body.firstname, req.body.lastname, birthdate, deathdate, req.body.bio);
+  const person = await Person.create(
+    req.body.firstname, 
+    req.body.lastname, 
+    birthdate, 
+    deathdate, 
+    req.body.bio,
+    req.body.birthplace ? await Location.get(req.body.birthplace) : undefined,
+    req.body.birthnation ? await Nation.get(req.body.birthnation) : undefined,
+    req.body.deathplace ? await Location.get(req.body.deathplace) : undefined,
+    req.body.deathnation ? await Nation.get(req.body.deathnation) : undefined,
+  );
   res.send({ 'success': true, 'person': person.json() });
 };
 
@@ -100,6 +116,10 @@ BODIES.UPDATE = {
   bio: { type: 'string', optional: true, },
   birthdate: { type: 'string', optional: true, nullable: true, },
   deathdate: { type: 'string', optional: true, nullable: true, },
+  birthplace: { type: 'number', optional: true, nullable: true, },
+  birthnation: { type: 'number', optional: true, nullable: true, },
+  deathplace: { type: 'number', optional: true, nullable: true, },
+  deathnation: { type: 'number', optional: true, nullable: true, },
 };
 
 /**
@@ -115,6 +135,10 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   if (req.body.lastname) person.lastname = req.body.lastname;
   if (req.body.birthdate !== undefined) person.birthdate = req.body.birthdate ? new Date(req.body.birthdate) : null;
   if (req.body.deathdate !== undefined) person.deathdate = req.body.deathdate ? new Date(req.body.deathdate) : null;
+  if (req.body.birthplace !== undefined) person.birthlocation = req.body.birthplace ? await Location.get(req.body.birthplace) : null;
+  if (req.body.birthnation !== undefined) person.birthnation = req.body.birthnation ? await Nation.get(req.body.birthnation) : null;
+  if (req.body.deathplace !== undefined) person.deathlocation = req.body.deathplace ? await Location.get(req.body.deathplace) : null;
+  if (req.body.deathnation !== undefined) person.deathnation = req.body.deathnation ? await Nation.get(req.body.deathnation) : null;
 
   await person.update();
   res.send({ 'success': true, 'person': person.json() });
