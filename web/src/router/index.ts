@@ -30,6 +30,11 @@ const router = createRouter({
       component: () => import('../views/Organization.vue'),
     },
     {
+      path: '/e',
+      name: 'create event',
+      component: () => import('../views/CreateEvent.vue'),
+    },
+    {
       path: '/playground',
       name: 'playground',
       component: () => import('../views/Playground.vue'),

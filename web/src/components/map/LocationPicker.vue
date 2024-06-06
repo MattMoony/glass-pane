@@ -5,6 +5,13 @@ import FullScreenModal from '@/components/FullScreenModal.vue';
 import BaseMap from '@/components/map/BaseMap.vue';
 import CollapseableSection from '@/components/CollapseableSection.vue';
 
+const emits = defineEmits<{
+  /**
+   * Emitted when the user picks a location.
+   */
+  ( e: 'picked', location: Location): void;
+}>();
+
 const show = ref(false);
 </script>
 

@@ -51,6 +51,12 @@ onMounted(async () => {
               Organization
             </button>
           </router-link>
+          <router-link to="/e">
+            <button>
+              <font-awesome-icon :icon="['fas', 'plus']" />
+              Event
+            </button>
+          </router-link>
         </div>
         <div class="about">
           <h2>About</h2>
