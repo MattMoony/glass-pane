@@ -13,10 +13,12 @@ const user = useUserStore();
       <slot></slot>
     </div>
     <div class="social">
-      <div v-if="user.user" class="user">
-        <font-awesome-icon icon="fa-solid fa-user" />
-        <span>{{ user.user.username }}</span>
-      </div>
+      <RouterLink v-if="user.user" to="/dashboard">
+        <div v-if="user.user" class="user">
+          <font-awesome-icon icon="fa-solid fa-user" />
+          <span>{{ user.user.username }}</span>
+        </div>
+      </RouterLink>
       <RouterLink v-else to="/login">
         <div class="user">
           <font-awesome-icon icon="fa-solid fa-sign-in-alt" />
