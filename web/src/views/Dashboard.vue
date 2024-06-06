@@ -26,12 +26,30 @@ const user = useUserStore();
     <v-navigation-drawer
       v-model="drawer"
       permanent
+      :style="{
+        'border-right': '4px solid var(--color-border)',
+      }"
     >
+      <v-divider></v-divider>
       <v-list nav>
-        <v-list-item>
-          asdf
+        <v-list-item
+          prepend-icon="fas fa-person"
+        >
+          New person
+        </v-list-item>
+        <v-list-item
+          prepend-icon="fas fa-building"
+        >
+          New organization
+        </v-list-item>
+        <v-list-item
+          prepend-icon="fas fa-calendar"
+        >
+          New event
         </v-list-item>
       </v-list>
+
+      <v-divider></v-divider>
     </v-navigation-drawer>
   </v-layout>
 </template>
