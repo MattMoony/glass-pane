@@ -17,49 +17,42 @@ const location: Ref<Location|null> = ref(null);
 </script>
 
 <template>
-  <main>
-    <RoutesNavBar />
-    <article>
-      <section class="gp-scroll">
-        <h1>New event</h1>
-        <v-form 
-          v-model="valid"
-          class="create-form"
-        >
-          <v-text-field
-            v-model="name"
-            label="Name"
-            required
-            :rules="[
-              (v: string) => !!v || 'Name is required',
-              (v: string) => v.length <= 128 || 'Name must be at most 128 characters'
-            ]"
-          />
-          <MarkdownView
-            edit
-            :content="desc"
-            @save="(content: string) => desc = content"
-            @upload-image="async (img: Blob) => `${API}${(await api.upload(img)).url}`"
-          />
-          <div class="event-location">
-            <label>Location</label>
-            <LocationPicker
-              id="location"
-              @picked="(l: Location) => location = l"
-            />
-          </div>
-          <v-btn
-            :disabled="!valid"
-            size="large"
-            block
-            prepend-icon="fas fa-plus"
-            @click="() => console.log('submit', name, desc, location)"
-            variant="tonal"
-          >Create</v-btn>
-        </v-form>
-      </section>
-    </article>
-  </main>
+  <h1>New event</h1>
+  <v-form 
+    v-model="valid"
+    class="create-form"
+  >
+    <v-text-field
+      v-model="name"
+      label="Name"
+      required
+      :rules="[
+        (v: string) => !!v || 'Name is required',
+        (v: string) => v.length <= 128 || 'Name must be at most 128 characters'
+      ]"
+    />
+    <MarkdownView
+      edit
+      :content="desc"
+      @save="(content: string) => desc = content"
+      @upload-image="async (img: Blob) => `${API}${(await api.upload(img)).url}`"
+    />
+    <div class="event-location">
+      <label>Location</label>
+      <LocationPicker
+        id="location"
+        @picked="(l: Location) => location = l"
+      />
+    </div>
+    <v-btn
+      :disabled="!valid"
+      size="large"
+      block
+      prepend-icon="fas fa-plus"
+      @click="() => console.log('submit', name, desc, location)"
+      variant="tonal"
+    >Create</v-btn>
+  </v-form>
 </template>
 
 <style scoped>

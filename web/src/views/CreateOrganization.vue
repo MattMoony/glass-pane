@@ -36,38 +36,32 @@ const createOrganization = async () => {
 </script>
 
 <template>
-  <main>
-    <RoutesNavBar />
-    <article>
-      <section class="gp-scroll">
-        <OrganizationBanner
-          :organization="organization"
-          edit
-          :updated="bannerUpdated"
-        />
-        <OrganizationDetails
-          :organization="organization"
-          edit
-          hide-memberships
-          hide-members
-          hide-sources
-          hide-socials
-        />
-        <div>
-          <h2>Sources</h2>
-          <OrganSources
-            :organ="organization"
-            edit
-            :updatedSources="sources"
-          />
-        </div>
-        <button @click="createOrganization">
-          <font-awesome-icon icon="save" />
-          Save
-        </button>
-      </section>
-    </article>
-  </main>
+  <h1>New organization</h1>
+  <OrganizationBanner
+    :organization="organization"
+    edit
+    :updated="bannerUpdated"
+  />
+  <OrganizationDetails
+    :organization="organization"
+    edit
+    hide-memberships
+    hide-members
+    hide-sources
+    hide-socials
+  />
+  <div>
+    <h2>Sources</h2>
+    <OrganSources
+      :organ="organization"
+      edit
+      :updatedSources="sources"
+    />
+  </div>
+  <button @click="createOrganization">
+    <font-awesome-icon icon="save" />
+    Save
+  </button>
 </template>
 
 <style scoped>
@@ -102,7 +96,7 @@ section {
   gap: 1em;
 }
 
-section button {
+button {
   width: 100%;
   padding: .8em;
   margin-bottom: 1em;
@@ -115,7 +109,7 @@ section button {
   transition: .2s ease;
 }
 
-section button:hover {
+button:hover {
   background-position: 100% 0;
 }
 

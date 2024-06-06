@@ -10,29 +10,14 @@ const router = createRouter({
       component: Landing
     },
     {
-      path: '/p',
-      name: 'create person',
-      component: () => import('../views/CreatePerson.vue'),
-    },
-    {
       path: '/p/:pid',
       name: 'person',
       component: () => import('../views/Person.vue'),
     },
     {
-      path: '/o',
-      name: 'create organization',
-      component: () => import('../views/CreateOrganization.vue'),
-    },
-    {
       path: '/o/:oid',
       name: 'organization',
       component: () => import('../views/Organization.vue'),
-    },
-    {
-      path: '/e',
-      name: 'create event',
-      component: () => import('../views/CreateEvent.vue'),
     },
     {
       path: '/playground',
@@ -48,6 +33,28 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/Dashboard.vue'),
+      children: [
+        {
+          path: '',
+          name: 'dashboard home',
+          component: () => import('../views/DashboardHome.vue'),
+        },
+        {
+          path: 'new-person',
+          name: 'new person',
+          component: () => import('../views/CreatePerson.vue'),
+        },
+        {
+          path: 'new-organization',
+          name: 'new organization',
+          component: () => import('../views/CreateOrganization.vue'),
+        },
+        {
+          path: 'new-event',
+          name: 'new event',
+          component: () => import('../views/CreateEvent.vue'),
+        },
+      ],
     },
     {
       path: '/map',

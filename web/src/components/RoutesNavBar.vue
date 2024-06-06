@@ -1,10 +1,18 @@
 <script setup lang="ts">
+import { useUserStore } from '@/stores/user';
+
 import NavBar from '@/components/NavBar.vue';
+
+const user = useUserStore();
 </script>
 
 <template>
   <NavBar>
     <div class="nav-links">
+      <RouterLink to="/dashboard" v-if="user.user">
+        <font-awesome-icon :icon="['fas', 'home']" />
+        Dashboard
+      </RouterLink>
       <RouterLink to="/map">
         <font-awesome-icon :icon="['fas', 'map-location']" />
         Map

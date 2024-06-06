@@ -53,6 +53,7 @@ import {
   faMapLocation,
   faMapMarkerAlt,
   faFlushed,
+  faHome,
 } from '@fortawesome/free-solid-svg-icons'
 
 import VNetworkGraph from 'v-network-graph'
@@ -145,6 +146,7 @@ library.add(
   faMapLocation,
   faMapMarkerAlt,
   faFlushed,
+  faHome,
 )
 app.component('font-awesome-icon', FontAwesomeIcon)
 

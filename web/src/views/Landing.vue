@@ -35,7 +35,7 @@ onMounted(async () => {
         <DataStats 
           :stats="['people', 'organizations', 'relations', 'memberships',]"
         />
-        <div 
+        <!-- <div 
           v-if="user.user"
           class="tools"
         >
@@ -57,7 +57,7 @@ onMounted(async () => {
               Event
             </button>
           </router-link>
-        </div>
+        </div> -->
         <div class="about">
           <h2>About</h2>
           <p>
