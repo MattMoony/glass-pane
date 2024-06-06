@@ -9,6 +9,7 @@ import SearchNavBar from '@/components/SearchNavBar.vue';
 import PersonBanner from '@/components/info/person/PersonBanner.vue';
 import PersonDetails from '@/components/info/details/person/PersonDetails.vue';
 import OrganSources from '@/components/info/details/OrganSources.vue';
+import RoutesNavBar from '@/components/RoutesNavBar.vue';
 
 const router: Router = useRouter();
 // @ts-ignore
@@ -37,7 +38,7 @@ const createPerson = async () => {
 
 <template>
   <main>
-    <SearchNavBar />
+    <RoutesNavBar />
     <article>
       <section class="gp-scroll">
         <PersonBanner

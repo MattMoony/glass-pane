@@ -9,6 +9,7 @@ import SearchNavBar from '@/components/SearchNavBar.vue';
 import OrganizationBanner from '@/components/info/organization/OrganizationBanner.vue';
 import OrganizationDetails from '@/components/info/details/organization/OrganizationDetails.vue';
 import OrganSources from '@/components/info/details/OrganSources.vue';
+import RoutesNavBar from '@/components/RoutesNavBar.vue';
 
 const router: Router = useRouter();
 // @ts-ignore
@@ -36,7 +37,7 @@ const createOrganization = async () => {
 
 <template>
   <main>
-    <SearchNavBar />
+    <RoutesNavBar />
     <article>
       <section class="gp-scroll">
         <OrganizationBanner
