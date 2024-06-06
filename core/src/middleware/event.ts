@@ -21,7 +21,7 @@ export const eid2event = async (req: Request, res: Response, next: () => void): 
     res.send({ 'success': false, 'msg': 'bad eventID' });
     return;
   }
-  const event = await Event.get(parseInt(req.params.oid));
+  const event = await Event.get(parseInt(req.params.eid));
   if (event === null) {
     res.send({ 'success': false, 'msg': 'event not found' });
     return;

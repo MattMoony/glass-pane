@@ -62,6 +62,26 @@ class Event {
   }
 
   /**
+   * Gets the participants for the event.
+   * @returns A promise that resolves with the participants.
+   */
+  public async participants (): Promise<Organ[]> {
+    const Organ = (await import('./Organ')).default;
+    const Person = (await import('./Person')).default;
+    const Organization = (await import('./Organization')).default;
+    const { rows } = await pool.query(
+      'SELECT organ FROM event_participant WHERE event = $1', 
+      [this.id,]
+    );
+    return Promise.all(rows.map(async (row: { organ: number }) => {
+      let organ: Organ|null = null;
+      organ = await Person.get(row.organ);
+      if (organ === null) organ = await Organization.get(row.organ);
+      return organ;
+    })) as Promise<Organ[]>;
+  }
+
+  /**
    * Updates the event in the database.
    * @returns A promise that resolves when the event has been updated.
    */

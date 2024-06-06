@@ -44,6 +44,13 @@ export interface EventsResponse extends APIResponse {
 }
 
 /**
+ * A response containing the participants of an event.
+ */
+export interface ParticipantsResponse extends APIResponse {
+  participants?: Organ[];
+}
+
+/**
  * Create a new event.
  * @param name The name of the event.
  * @param desc The description of the event.
@@ -149,4 +156,15 @@ export const remove = async (id: number): Promise<APIResponse> => {
     method: 'DELETE',
     credentials: 'include',
   }) as APIResponse;
+};
+
+/**
+ * Get all participants for an event.
+ * @param id The ID of the event to get participants for.
+ * @returns A promise that resolves with the participants.
+ */
+export const participants = async (id: number): Promise<ParticipantsResponse> => {
+  return await jreq(`${API}/event/${id}/participants`, {
+    method: 'GET',
+  }) as ParticipantsResponse;
 };

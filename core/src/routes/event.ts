@@ -16,5 +16,6 @@ const router: Router = Router();
 router.get('/', requireQuery(controller.QUERIES.SEARCH), controller.search);
 router.post('/', requireAuth, requireBody(controller.BODIES.CREATE), controller.create);
 router.get('/:eid', eid2event, controller.get);
+router.get('/:eid/participants', eid2event, controller.participants);
 
 export default router;

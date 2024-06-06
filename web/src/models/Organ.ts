@@ -341,6 +341,15 @@ class Organ implements organ.Organ {
   }
 
   /**
+   * Parses an organ from JSON.
+   * @param json The JSON to parse.
+   * @returns The parsed organ.
+   */
+  public static parse (json: organ.Organ): Organ {
+    return new Organ(json.id, json.bio);
+  }
+
+  /**
    * Converts the organ to a string.
    * @returns The organ as a string.
    */

@@ -2,6 +2,8 @@ import * as event from '@/api/event';
 
 import Location from '@/models/Location';
 import type Organ from '@/models/Organ';
+import type Person from '@/models/Person';
+import type Organization from '@/models/Organization';
 
 class Event implements event.Event {
   public id: number;
@@ -54,6 +56,35 @@ class Event implements event.Event {
    */
   public async remove (): Promise<void> {
     await event.remove(this.id);
+  }
+
+  /**
+   * Gets the participants for the event.
+   * @returns A promise that resolves with the participants.
+   */
+  public async participants (): Promise<(Person|Organization)[]> {
+    const Organ = (await import('./Organ')).default;
+    const Person = (await import('./Person')).default;
+    const Organization = (await import('./Organization')).default;
+    const res = await event.participants(this.id);
+    if (!res.participants) return [];
+    return res.participants.map(p => {
+      if ((p as Person).firstname) {
+        return new Person(
+          (p as Person).id, 
+          (p as Person).bio,
+          (p as Person).firstname, 
+          (p as Person).lastname,
+        );
+      } else if ((p as Organization).name) {
+        return new Organization(
+          (p as Organization).id, 
+          (p as Organization).bio,
+          (p as Organization).name,
+        );
+      }
+      return null;
+    }).filter(p => p !== null) as (Person|Organization)[];
   }
 
   /**

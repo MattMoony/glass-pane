@@ -109,3 +109,12 @@ export const create = async (req: Request, res: Response): Promise<void> => {
 export const get = async (req: Request, res: Response): Promise<void> => {
   res.send({ 'success': true, 'event': res.locals.event as Event });
 };
+
+/**
+ * Gets all participants of an event.
+ * @param req The request object.
+ * @param res The response object (with `res.locals.event`).
+ */
+export const participants = async (req: Request, res: Response): Promise<void> => {
+  res.send({ 'success': true, 'participants': await (res.locals.event as Event).participants(), });
+};
