@@ -11,6 +11,8 @@ import Organ from '../../models/Organ';
 
 import { CheckTemplate } from '../../middleware';
 
+export * as sources from './sources';
+
 /**
  * The required query formats for the endpoints defined here.
  */

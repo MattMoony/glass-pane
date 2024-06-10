@@ -18,4 +18,10 @@ router.post('/', requireAuth, requireBody(controller.BODIES.CREATE), controller.
 router.get('/:eid', eid2event, controller.get);
 router.get('/:eid/participants', eid2event, controller.participants);
 
+// EVENT SOURCE OPERATIONS
+router.get('/:eid/source', eid2event, controller.sources.get);
+router.post('/:eid/source', requireAuth, eid2event, requireBody(controller.sources.BODIES.CREATE), controller.sources.add);
+router.patch('/:eid/source/:sid', requireAuth, eid2event, requireBody(controller.sources.BODIES.UPDATE), controller.sources.update);
+router.delete('/:eid/source/:sid', requireAuth, eid2event, controller.sources.remove);
+
 export default router;

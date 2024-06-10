@@ -1,14 +1,30 @@
 import { pool } from '../db';
 import { baseLogger } from '../log';
-import EVENT_CACHE from '../cache/event';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 
 import Location from './Location';
 import type Organ from './Organ';
+import EventSource from './EventSource';
+
+import EVENT_CACHE from '../cache/event';
 
 
 const log = baseLogger('location');
+
+/**
+ * Primitive cache object.
+ */
+interface Cache {
+  [key: string]: any;
+}
+
+/**
+ * Cache of an event.
+ */
+export interface EventCache extends Cache {
+  sources?: EventSource[];
+}
 
 class Event {
   public id: number;
@@ -16,6 +32,8 @@ class Event {
   public desc: string;
   public date?: Date|null;
   public location?: Location|null;
+
+  protected _cache: EventCache = {};
 
   public constructor(id: number, name: string, desc?: string, date?: Date|null, location?: Location|null) {
     this.id = id;
@@ -26,7 +44,11 @@ class Event {
     this.cache();
   }
 
-  protected cache (): void {
+  protected cache (key?: string, value?: any): void {
+    if (key !== undefined && value !== undefined) {
+      this._cache[key] = value;
+      return;
+    }
     const cached = EVENT_CACHE.get(this.id);
     if (cached === undefined 
         || !(cached instanceof Event) 
@@ -37,6 +59,16 @@ class Event {
       log.debug(`Caching event ${this}`);
       EVENT_CACHE.set(this.id, this);
     }
+  }
+
+  protected async cached (key: string, fallback?: () => Promise<any>): Promise<any> {
+    if (this._cache[key] === undefined) {
+      log.info(`Missed ${key} cache ${this}`);
+      if (fallback)
+        this._cache[key] = await fallback();
+    }
+    log.debug(`Hit ${key} cache ${this}`);
+    return this._cache[key];
   }
 
   /**
@@ -82,10 +114,38 @@ class Event {
   }
 
   /**
+   * Adds a source to the event.
+   * @param source The source to add.
+   * @returns A promise that resolves with the added source.
+   */
+  public async add (source: string): Promise<EventSource>;
+  public async add (v: string): Promise<EventSource> {
+    if (typeof v === 'string') {
+      const source = await EventSource.create(this, v);
+      const sources = await this.cached('sources') as EventSource[]|undefined;
+      if (sources) sources.push(source);
+      return source;
+    }
+    throw new Error('Invalid addition type');
+  } 
+
+  /**
    * Updates the event in the database.
    * @returns A promise that resolves when the event has been updated.
    */
-  public async update (): Promise<void> {
+  public async update (): Promise<void>;
+  /**
+   * Updates a source of the event.
+   * @param source The source to update.
+   * @returns A promise that resolves when the source has been updated.
+   */
+  public async update (source: EventSource): Promise<void>;
+  public async update (v?: EventSource): Promise<void> {
+    if (v instanceof EventSource) {
+      const sources = await this.cached('sources') as EventSource[]|undefined;
+      if (sources) this.cache('sources', (sources as EventSource[]).map((source: EventSource) => source.id === v.id ? v : source));
+      return v.update();
+    }
     await pool.query(
       'UPDATE event SET name = $1, date = $2, location = $3 WHERE eid = $4', 
       [this.name, this.date, this.location?.id, this.id,]
@@ -99,10 +159,32 @@ class Event {
    * Deletes the event from the database.
    * @returns A promise that resolves when the event has been deleted.
    */
-  public async remove (): Promise<void> {
+  public async remove (): Promise<void>;
+  /**
+   * Removes a source from the event.
+   * @param source The source to remove.
+   * @returns A promise that resolves when the source has been removed.
+   */
+  public async remove (source: EventSource): Promise<void>;
+  public async remove (v?: EventSource): Promise<void> {
+    if (v instanceof EventSource) {
+      const sources = await this.cached('sources') as EventSource[]|undefined;
+      if (sources) this.cache('sources', (sources as EventSource[]).filter((source: EventSource) => source.id !== v.id));
+      return v.remove();
+    }
     await pool.query('DELETE FROM event WHERE eid = $1', [this.id]);
     log.debug(`Deleted event ${this}`);
     EVENT_CACHE.delete(this.id);
+  }
+
+  public async sources (): Promise<EventSource[]> {
+    return this.cached('sources', async () => {
+      const { rows } = await pool.query(
+        'SELECT sid, url FROM event_source WHERE eid = $1', 
+        [this.id,]
+      );
+      return Promise.all(rows.map((row: { sid: number, url: string, }) => new EventSource(+row.sid, row.url))) as Promise<EventSource[]>;  
+    });
   }
 
   /**
