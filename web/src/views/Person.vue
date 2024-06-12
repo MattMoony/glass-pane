@@ -47,6 +47,7 @@ watch(pid, async (newPid: number) => {
           <PersonDetails 
             :person="person"
             :edit="editing"
+            hide-network
           />
         </div>
       </div>
