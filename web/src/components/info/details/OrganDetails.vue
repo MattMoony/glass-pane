@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref, useSlots, watch } from 'vue';
+import wtf from 'wtf_wikipedia';
+// @ts-ignore
+import wtfhtml from 'wtf-plugin-html';
 
 import Organ from '@/models/Organ';
 
 import OrganBio from '@/components/info/details/OrganBio.vue';
 import OrganMemberships from '@/components/info/details/OrganMemberships.vue';
 import OrganSources from '@/components/info/details/OrganSources.vue';
-import OrganSocials from '@/components/info/details/OrganSocials.vue'
+import OrganSocials from '@/components/info/details/OrganSocials.vue';
+
+wtf.extend(wtfhtml);
 
 const props = defineProps<{
   /**
@@ -21,6 +26,10 @@ const props = defineProps<{
    * Hide the bio?
    */
   hideBio?: boolean;
+  /**
+   * Hide external bios?
+   */
+  hideExternalBios?: boolean;
   /**
    * Hide the memberships?
    */
@@ -37,7 +46,30 @@ const props = defineProps<{
 
 const slots = useSlots();
 const bioSaving = ref(false);
+const extBioTab = ref(0);
+const extBios = ref<{ [name: string]: string, }>({});
 
+watch(
+  () => props.organ,
+  async () => {
+    if (!props.organ) return;
+    extBios.value = {};
+    extBioTab.value = 0;
+    const sources = await props.organ.sources.get();
+    sources.forEach(s => {
+      if (s.url.match(/https:\/\/(?:\w*\.)wikipedia\.org\//)) {
+        const u = new URL(s.url);
+        wtf.fetch(s.url, {}, (err, doc) => {
+          if (err) return;
+          // @ts-ignore
+          const bio = doc?.sections()[0].text();
+          if (bio) extBios.value[u.hostname] = bio;
+        });
+      }
+    });
+  },
+  { immediate: true, },
+);
 </script>
 
 <template>
@@ -56,6 +88,41 @@ const bioSaving = ref(false);
         @start-saving="bioSaving = true"
         @end-saving="bioSaving = false"
       />
+    </div>
+    <div v-if="!hideExternalBios && Object.keys(extBios).length">
+      <h2>External Bios</h2>
+      <div class="details-ext-bio-wrapper gp-scroll">
+        <v-card
+          variant="flat"
+        >
+          <v-tabs
+            v-model="extBioTab"
+            align-tabs="start"
+            mandatory
+          >
+            <v-tab 
+              v-for="(bio, name, i) in extBios" 
+              :value="i"
+            >
+              {{ name }}
+            </v-tab>
+          </v-tabs>
+          <v-tabs-window
+            v-model="extBioTab"
+          >
+            <v-tabs-window-item 
+              v-for="(bio, name, i) in extBios" 
+              :value="i"
+            >
+              <v-container fluid>
+                <div class="details-ext-bio-content">
+                  {{ bio }}
+                </div>
+              </v-container>
+            </v-tabs-window-item>
+          </v-tabs-window>
+        </v-card>
+      </div>
     </div>
     <div v-if="!hideMemberships">
       <h2>Memberships</h2>
@@ -121,5 +188,13 @@ h2 + div {
   border: 2px solid var(--color-border);
   border-top: none;
   border-radius: 0 0 5px 5px;
+}
+
+.details-ext-bio-wrapper {
+  max-height: 80vh;
+}
+
+.details-ext-bio-content {
+  color: var(--color-text);
 }
 </style>

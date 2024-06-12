@@ -508,7 +508,7 @@ watch(
   object-fit: cover;
   width: 12em;
   height: 12em;
-  border-radius: 5px;
+  border-radius: 50%;
 }
 
 .extended .banner-birth-death {

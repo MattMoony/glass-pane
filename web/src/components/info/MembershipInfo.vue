@@ -211,6 +211,7 @@ const emits = defineEmits<{
   object-fit: cover;
   width: 4em;
   height: 4em;
+  border-radius: 50%;
 }
 
 .edit input {

@@ -3,6 +3,7 @@ import type Person from '@/models/Person';
 
 import OrganDetails from '@/components/info/details/OrganDetails.vue';
 import PersonRelations from './PersonRelations.vue';
+import PersonNetwork from '@/components/net/person/PersonNetwork.vue';
 
 const props = defineProps<{
   /**
@@ -17,6 +18,10 @@ const props = defineProps<{
    * Hide the bio?
    */
   hideBio?: boolean;
+  /**
+   * Hide the network?
+   */
+  hideNetwork?: boolean;
   /**
    * Hide the memberships?
    */
@@ -55,6 +60,19 @@ const props = defineProps<{
         />
       </div>
     </template>
+    <template #network v-if="!hideNetwork">
+      <div class="details-netw-wrapper">
+        <h2>Network</h2>
+        <div>
+          <PersonNetwork
+            :person="person"
+            :edit="edit"
+            show-memberships
+            cytoscape
+          />
+        </div>
+      </div>
+    </template>
   </OrganDetails>
 </template>
 
@@ -83,5 +101,20 @@ h2 + div {
   border: 2px solid var(--color-border);
   border-top: none;
   border-radius: 0 0 5px 5px;
+}
+
+.details-netw-wrapper {
+  height: 80vh;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+.details-netw-wrapper > div {
+  flex-grow: 1;
+  flex-basis: 0;
+  overflow: hidden;
 }
 </style>
