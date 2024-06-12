@@ -120,6 +120,14 @@ watch(() => props.edit, () => {
 }, { immediate: true });
 
 watch(
+  () => props.content,
+  () => {
+    cuContent.value = props.content;
+  },
+  { immediate: true }
+);
+
+watch(
   () => cuContent.value, 
   async () => {
     renderedContent.value = await marked(cuContent.value);
