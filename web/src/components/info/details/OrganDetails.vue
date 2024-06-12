@@ -61,6 +61,7 @@ watch(
         const u = new URL(s.url);
         wtf.fetch(s.url, {}, (err, doc) => {
           if (err) return;
+          if (extBios.value[u.hostname]) return;
           // @ts-ignore
           const bio = doc?.sections()[0].text();
           if (bio) extBios.value[u.hostname] = bio;
