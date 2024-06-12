@@ -292,7 +292,8 @@ watch(
                 v-if="(organ instanceof Person)"
                 label="Nation of birth"
                 :init-nation="organ.birthnation"
-                @select="(nation: Nation) => {
+                @select="(nation: Nation|null) => {
+                  if (!nation) return;
                   (organ as Person).birthnation = nation;
                   organ && $emit('change', organ);
                 }"
@@ -324,7 +325,8 @@ watch(
                 v-if="(organ instanceof Person)"
                 label="Nation of death"
                 :init-nation="organ.deathnation"
-                @select="(nation: Nation) => {
+                @select="(nation: Nation|null) => {
+                  if (!nation) return;
                   (organ as Person).deathnation = nation;
                   organ && $emit('change', organ);
                 }"
