@@ -37,6 +37,14 @@ Also, here is the *Entity Relationship Diagram* of the database behind this proj
 
 For more info, check the [Wiki](https://github.com/MattMoony/glass-pane/wiki).
 
+## Vision
+
+The general idea of this project is to make politics and the social networks of people with influence more accessible to the public. It should grant people a better insight on what shapes policy decisions and actions.
+
+At the core of this lies people in the public interest and their connections to other people and memberships in organizations. This is what *glass pane* started out as. As the project progresses, it would be amazing to expand the areas it covers - extending it to bills passed in parliaments, people involved in those bills and working on some sort of querying mechanism to automatically determine possible beneficiaries of those bills, etc. This is just an example.
+
+So yeah, you get the idea I hope. I'm always open for help and new ideas, since this is just something I'm working on in my free time as well, so feel free to contribute if you feel like you have the time and want to support this. <3
+
 ## Feature Ideas
 
 Here a collection of ideas that would be really nice to have in a somewhat finished version of this project.
