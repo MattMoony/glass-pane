@@ -12,7 +12,7 @@ const router = createRouter({
     {
       path: '/p/:pid',
       name: 'person',
-      component: () => import('../views/PersonCV.vue'),
+      component: () => import('../views/Person.vue'),
     },
     {
       path: '/o/:oid',
