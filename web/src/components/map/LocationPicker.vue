@@ -28,19 +28,15 @@ const show = ref(false);
     @close="show = false"
   >
     <h2>Pick a location</h2>
-    <CollapseableSection
-      title="New location"
-    >
-      <div class="map-wrapper">      
-        <BaseMap />
-      </div>
-    </CollapseableSection>
+    <div class="map-wrapper">      
+      <BaseMap />
+    </div>
   </FullScreenModal>
 </template>
 
 <style scoped>
 .map-wrapper {
   width: 80vw;
-  height: 40vh;
+  height: 60vh;
 }
 </style>
