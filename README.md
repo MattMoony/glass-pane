@@ -58,3 +58,5 @@ Here a collection of ideas that would be really nice to have in a somewhat finis
 | ❌      | Timelines            | Instead of just writing everything in a entity's bio, actually split information up a bit - i.e. have a timeline of releveant events for this person/organization, etc.                                                                                      |
 | ❌      | Embeddable           | Provide an endpoint that can be used for embedding graphs with selected entitys and connections - could be used e.g. if you wanted to write a blog post about a certain person's connections or something.                                                   |
 | ❌      | RSS-Feeds            | Integrate RSS feeds from newspapers to automatically add new sources to people as news are published about them.                                                   |
+| ❌      | Link data to sources            | Link data to different news sources (eg Wikipedia, derstandart etc) with creditability and political orientation (maybe sponsors etc) |
+| ❌      | User-submitted data            | Let users add connections between nodes |
